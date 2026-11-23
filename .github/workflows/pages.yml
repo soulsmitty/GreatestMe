@@ -20,7 +20,7 @@ jobs:
         run: |
           ./build.sh
           mkdir -p _site
-          cp index.html manifest.webmanifest icon.svg _site/
+          cp index.html manifest.webmanifest icon.svg icon-*.png _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

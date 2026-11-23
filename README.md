@@ -21,6 +21,13 @@ opt-in "Duo" board for accountability.
 | Journeys | Unlimited consecutive 13-week journeys; habits carry over. |
 | Backup | Export / import JSON. |
 
+## Look and devices
+
+- **Theme:** Protocol / Pocketbook suite (cool canvas, white cards, hairlines, Plus Jakarta Sans + JetBrains Mono, slashed-zero figures). Auto / Light / Dark per device; each person picks their own accent.
+- **iPhone:** bottom tabs, 16px inputs (no iOS zoom), safe areas, tab bar hides while the keyboard is up, Home Screen badge shows habits left today.
+- **iPad + Apple Pencil:** an Ink tab with college-ruled, wide-ruled, dot, graph or blank paper per day. Pencil writes with pressure, fingers scroll (palm rejection), optional finger drawing, highlighter, eraser, undo/redo, multiple pages. It only appears on iPad or when a stylus is used. Every text field also accepts Scribble.
+- **Siri & Shortcuts:** deep links (`#today`, `#morning`, `#evening`, `#habits`, `#week`, `#ink`, `#progress`, `#duo`) for "Open URLs" shortcuts and time-of-day automations. Settings lists them with Copy buttons.
+
 ## Files
 
 - `app.html` — the app (single file, no build step). This is what is published as the Claude artifact.

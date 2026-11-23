@@ -2,42 +2,50 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: a 13-week journal as an app. Left rail (desktop) / bottom tabs (phone); one working column of "pages". */
+/* Protocol / Pocketbook theme suite: cool canvas, white cards, hairlines, mono eyebrows, slashed-zero figures.
+   Layout: left rail on iPad/Mac, bottom tabs on iPhone; one working column. Accent is per person (--acc / --acc2). */
 :root{
-  --bg:#F6F4FB; --paper:#FFFFFF; --ink:#1E1736; --muted:#6B6485; --line:#E3DFEE;
-  --violet:#4B2E9A; --violet-soft:#ECE6FA; --ember:#E5532F; --ember-soft:#FDE9E2;
-  --good:#1F8A5B; --good-soft:#E2F4EB; --warn:#B7791F;
-  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --f-body:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
-  --r:14px; --shadow:0 1px 2px rgba(30,23,54,.06),0 6px 24px rgba(30,23,54,.06);
+  --canvas:#F2F4F7; --surface:#FFFFFF; --raised:#F8F9FB; --line:#E8EBF0; --ink:#0F1420; --muted:#6C7688; --faint:#949EB0;
+  --acc:#8B5CF6; --acc2:#F59E0B; --good:#10B981; --bad:#F43F5E;
+  --acc-soft:color-mix(in srgb,var(--acc) 12%,var(--surface)); --acc2-soft:color-mix(in srgb,var(--acc2) 14%,var(--surface)); --good-soft:color-mix(in srgb,var(--good) 14%,var(--surface));
+  --on-acc:#FFFFFF;
+  --shadow-card:0 1px 2px rgb(16 24 40 / .04),0 1px 3px rgb(16 24 40 / .06); --shadow-lift:0 4px 12px rgb(16 24 40 / .08),0 2px 4px rgb(16 24 40 / .04);
+  --paper:#FFFFFF; --rule:#A9C6E8; --margin:#E8868B;
+  --bg:var(--canvas); --violet:var(--acc); --violet-soft:var(--acc-soft); --ember:var(--acc2); --ember-soft:var(--acc2-soft); --warn:#F59E0B;
+  --f-display:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --f-body:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --r:14px; --shadow:var(--shadow-lift);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#110D1F; --paper:#1A1530; --ink:#F1EEFA; --muted:#A49DBF; --line:#2E2748;
-  --violet:#A98BFF; --violet-soft:#2A2148; --ember:#FF7A57; --ember-soft:#3A1E1A;
-  --good:#4CC38A; --good-soft:#163428; --warn:#E0A84A; --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}}
+  --canvas:#0B0E14; --surface:#141922; --raised:#1B212C; --line:#232A36; --ink:#E8ECF3; --muted:#8F9AAD; --faint:#6E798C;
+  --shadow-card:0 1px 2px rgb(0 0 0 / .3),0 1px 3px rgb(0 0 0 / .2); --shadow-lift:0 4px 14px rgb(0 0 0 / .4),0 2px 6px rgb(0 0 0 / .25);
+  --paper:#F7F5EF; --rule:#9DB8DA; --margin:#E07A80; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#110D1F; --paper:#1A1530; --ink:#F1EEFA; --muted:#A49DBF; --line:#2E2748;
-  --violet:#A98BFF; --violet-soft:#2A2148; --ember:#FF7A57; --ember-soft:#3A1E1A;
-  --good:#4CC38A; --good-soft:#163428; --warn:#E0A84A; --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}
+  --canvas:#0B0E14; --surface:#141922; --raised:#1B212C; --line:#232A36; --ink:#E8ECF3; --muted:#8F9AAD; --faint:#6E798C;
+  --shadow-card:0 1px 2px rgb(0 0 0 / .3),0 1px 3px rgb(0 0 0 / .2); --shadow-lift:0 4px 14px rgb(0 0 0 / .4),0 2px 6px rgb(0 0 0 / .25);
+  --paper:#F7F5EF; --rule:#9DB8DA; --margin:#E07A80; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
-h1{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800}
-h2{font-size:1.2rem;font-weight:700}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{background:var(--canvas);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(1.55rem,4vw,1.85rem);font-weight:800}
+h2{font-size:1.08rem;font-weight:700}
 h3{font-size:1rem;font-weight:700}
 p{margin:0}
 button,input,textarea,select{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
-.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+input,textarea,select{font-size:16px} /* 16px stops iOS Safari from zooming the page on focus */
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+::selection{background:color-mix(in srgb,var(--ink) 12%,transparent)}
+.mono{font-family:var(--f-mono);font-variant-numeric:slashed-zero tabular-nums}
+.label{font-family:var(--f-mono);font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--faint);font-weight:500;line-height:1.4}
 .muted{color:var(--muted)}
 
 /* shell */
 .app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
-.rail{position:sticky;top:0;height:100vh;padding:24px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:20px;background:var(--paper)}
+.rail{position:sticky;top:0;height:100vh;height:100dvh;padding:24px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:20px;background:var(--surface)}
 .brand{font-family:var(--f-display);font-weight:800;font-size:1.35rem;padding:0 10px;letter-spacing:-.02em}
 .brand b{color:var(--ember)}
 .nav{display:flex;flex-direction:column;gap:2px}
@@ -53,7 +61,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 @media (max-width:820px){
   .app{grid-template-columns:1fr}
   .rail{display:none}
-  .tabs{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);
+  .tabs{display:grid;grid-template-columns:repeat(var(--tabs,6),1fr);position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
     padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
   .tabs button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.66rem;color:var(--muted);padding:4px 0;border-radius:8px}
   .tabs button svg{width:20px;height:20px}
@@ -72,7 +80,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .chip.good{background:var(--good-soft);color:var(--good)}
 
 /* cards */
-.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--surface);box-shadow:var(--shadow-card);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .card-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -86,39 +94,37 @@ button,input,textarea,select{font:inherit;color:inherit}
 .in:focus{border-bottom-color:var(--violet)}
 textarea.in{resize:vertical;min-height:72px;border:1px solid var(--line);border-radius:10px;padding:10px}
 textarea.in:focus{border-color:var(--violet)}
-select.in{border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:var(--paper)}
+select.in{border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:var(--surface)}
 .box{border:1px solid var(--line)!important;border-radius:10px!important;padding:10px 12px!important}
 .num-rows{display:flex;flex-direction:column;gap:2px}
 .num-row{display:grid;grid-template-columns:22px 1fr;align-items:center;gap:8px}
 .num-row .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
 .target{display:grid;grid-template-columns:26px 1fr minmax(0,150px);gap:8px;align-items:center}
 @media (max-width:520px){.target{grid-template-columns:26px 1fr}.target select{grid-column:2}}
-.check{appearance:none;width:22px;height:22px;border:2px solid var(--line);border-radius:7px;cursor:pointer;display:grid;place-items:center;margin:0;background:var(--paper)}
+.check{appearance:none;width:22px;height:22px;border:2px solid var(--line);border-radius:7px;cursor:pointer;display:grid;place-items:center;margin:0;background:var(--surface)}
 .check:checked{background:var(--good);border-color:var(--good)}
 .check:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
 .done-text{text-decoration:line-through;color:var(--muted)}
 
-.btn{cursor:pointer;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;justify-content:center}
 .btn:hover{border-color:var(--violet)}
-.btn.primary{background:var(--violet);border-color:var(--violet);color:#fff}
-:root[data-theme="dark"] .btn.primary{color:#140F26}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#140F26}}
-.btn.ember{background:var(--ember);border-color:var(--ember);color:#fff}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+.btn.ember{background:var(--acc2);border-color:var(--acc2);color:#fff}
 .btn.ghost{border-color:transparent;background:transparent}
 .btn.sm{padding:5px 10px;font-size:.84rem}
 .btn.icon{padding:6px;width:34px;height:34px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .scale{display:flex;gap:6px;flex-wrap:wrap}
-.scale button{cursor:pointer;min-width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font-family:var(--f-mono);font-weight:600}
-.scale button[aria-pressed="true"]{background:var(--violet);color:var(--paper);border-color:var(--violet)}
+.scale button{cursor:pointer;min-width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-mono);font-weight:600}
+.scale button[aria-pressed="true"]{background:var(--violet);color:var(--surface);border-color:var(--violet)}
 
 /* meters */
 .bar{height:8px;background:var(--violet-soft);border-radius:99px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--violet);border-radius:99px;transition:width .3s}
 .bar.ember i{background:var(--ember)}
 .bar.good i{background:var(--good)}
-.stat{display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);min-width:0}
+.stat{display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);min-width:0}
 .stat .v{font-family:var(--f-display);font-weight:800;font-size:1.9rem;line-height:1}
 .stat .v small{font-size:.9rem;color:var(--muted);font-weight:600}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -136,7 +142,7 @@ select.in{border:1px solid var(--line);border-radius:10px;padding:7px 8px;backgr
 .hgrid th{font-size:.72rem;color:var(--muted);font-weight:600;text-align:center;padding:0 2px}
 .hgrid th.hn{text-align:left;font-size:.88rem;color:var(--ink);font-weight:500;min-width:120px}
 .hgrid td{text-align:center}
-.cell{cursor:pointer;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--paper)}
+.cell{cursor:pointer;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
 .cell[aria-pressed="true"]{background:var(--good);border-color:var(--good)}
 .cell:disabled{opacity:.35;cursor:default}
 .heat{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;max-width:420px}
@@ -164,22 +170,52 @@ details.sched summary::-webkit-details-marker{display:none}
 
 /* auth / onboarding */
 .gate{min-height:100vh;display:grid;place-items:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.gate-card{width:100%;max-width:520px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow)}
+.gate-card{width:100%;max-width:520px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow)}
 .gate-brand{font-family:var(--f-display);font-weight:800;font-size:2.4rem;letter-spacing:-.03em;line-height:1}
 .gate-brand b{color:var(--ember)}
 .seg{display:flex;background:var(--violet-soft);border-radius:10px;padding:3px}
 .seg button{flex:1;all:unset;text-align:center;cursor:pointer;padding:7px;border-radius:8px;font-weight:600;color:var(--muted)}
-.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
 .err{color:var(--ember);font-size:.88rem}
 .steps{display:flex;gap:6px}
 .steps i{flex:1;height:4px;border-radius:4px;background:var(--line)}
 .steps i.on{background:var(--violet)}
 .presets{display:flex;flex-wrap:wrap;gap:6px}
-.presets button{cursor:pointer;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:.85rem}
-.presets button[aria-pressed="true"]{background:var(--violet);color:var(--paper);border-color:var(--violet)}
+.presets button{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.85rem}
+.presets button[aria-pressed="true"]{background:var(--violet);color:var(--surface);border-color:var(--violet)}
 .sheet-bg{position:fixed;inset:0;background:rgba(10,6,20,.5);z-index:40;display:grid;place-items:center;padding:16px}
-.sheet{background:var(--paper);border-radius:18px;max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--line)}
+.sheet{background:var(--surface);border-radius:18px;max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--line)}
 .loading{min-height:100vh;display:grid;place-items:center;color:var(--muted)}
+/* Protocol / Pocketbook details */
+.card{border-radius:var(--r)}
+.chip{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.stat .v,.mono,.v small{font-variant-numeric:slashed-zero tabular-nums}
+.stat .v{font-family:var(--f-mono);font-weight:600;letter-spacing:-.02em}
+.title-bar{display:flex;align-items:center;gap:10px}
+.title-bar::before{content:"";width:6px;height:24px;border-radius:999px;background:var(--acc);flex:none}
+.save{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.toggle3{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface);box-shadow:var(--shadow-card)}
+.toggle3 button{all:unset;cursor:pointer;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:6px 12px;border-radius:999px;color:var(--muted)}
+.toggle3 button[aria-pressed="true"]{background:var(--ink);color:var(--canvas)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatches button{width:34px;height:34px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.swatches button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.linkrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}
+.linkrow code{font-family:var(--f-mono);font-size:.78rem;overflow-wrap:anywhere;color:var(--muted)}
+body.kb .tabs{display:none}
+/* Ink (iPad + Apple Pencil) */
+.ink-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-card)}
+.ink-bar .grp{display:flex;gap:4px;align-items:center;padding-right:8px;border-right:1px solid var(--line)}
+.ink-bar .grp:last-child{border-right:0}
+.ink-bar button.t{cursor:pointer;min-width:44px;height:44px;border-radius:10px;border:1px solid transparent;background:transparent;display:grid;place-items:center;color:var(--muted)}
+.ink-bar button.t[aria-pressed="true"]{background:var(--acc-soft);color:var(--acc);border-color:color-mix(in srgb,var(--acc) 30%,transparent)}
+.ink-bar .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+.ink-bar button.t[aria-pressed="true"] .dot{box-shadow:0 0 0 2px var(--ink)}
+.ink-pages{display:flex;flex-direction:column;gap:18px}
+.ink-page{position:relative;background:var(--paper);border-radius:6px;box-shadow:var(--shadow-lift);overflow:hidden;max-width:100%}
+.ink-page canvas{display:block;width:100%;touch-action:pan-y pinch-zoom;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.ink-page.finger canvas{touch-action:none}
+.ink-page .pg{position:absolute;right:12px;bottom:8px;font-family:var(--f-mono);font-size:10px;color:#8A8F99}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -207,6 +243,12 @@ const ls = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch {
 const TOTAL_DAYS = 91, WEEKS = 13;
 
 const ICON = {
+  ink:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>',
+  hl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l-4 4h5l2-2M9 15l7-7 3 3-7 7z"/></svg>',
+  eraser:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H9l-5-5 10-10 7 7-7 7"/></svg>',
+  undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>',
+  redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg>',
+  hand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V6a1.5 1.5 0 0 1 3 0v8a7 7 0 0 1-7 7c-2.5 0-4-1-5.5-3L3 15a1.5 1.5 0 0 1 2.5-1.6L8 16"/></svg>',
   today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   week:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
   goals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
@@ -285,7 +327,7 @@ const Store = {
     Duo.publishSoon();
   },
   remove(key){ delete this.docs[key]; if (this.mode === "cloud") { this.dirty.set(key, true); this.touch(key); } else this.touch(key); },
-  setStatus(s, code){ this.status = s; const el = $("#savestate"); if (el) el.textContent = s === "saving" ? "Saving…" : s === "error" ? (code === "not_granted" ? "Read-only: ask the owner for Contributor access" : "Not saved, retrying") : (this.mode === "cloud" ? "Saved to your account" : "Saved on this device"); },
+  setStatus(s, code){ this.status = s; const el = $("#savestate"); if (el) el.textContent = s === "saving" ? "Saving…" : s === "error" ? (code === "not_granted" ? "Read-only: ask the owner for Contributor access" : "Not saved, retrying") : (this.mode === "cloud" ? "Saved to your account" : "Saved on this device"); if (s === "saved") updateBadge(); },
 };
 
 /* local accounts */
@@ -401,9 +443,197 @@ const Duo = {
   },
 };
 
+/* ============================ appearance, devices, Apple integrations ============================ */
+const ACCENTS = {
+  violet:  { a: "#8B5CF6", b: "#F59E0B", on: "#FFFFFF", name: "Violet" },
+  emerald: { a: "#10B981", b: "#06B6D4", on: "#0F1420", name: "Emerald" },
+  cyan:    { a: "#06B6D4", b: "#8B5CF6", on: "#0F1420", name: "Cyan" },
+  blue:    { a: "#3B82F6", b: "#10B981", on: "#FFFFFF", name: "Blue" },
+  pink:    { a: "#EC4899", b: "#8B5CF6", on: "#FFFFFF", name: "Pink" },
+  rose:    { a: "#F43F5E", b: "#F59E0B", on: "#FFFFFF", name: "Rose" },
+  amber:   { a: "#F59E0B", b: "#F43F5E", on: "#0F1420", name: "Amber" },
+};
+function applyAccent(){
+  const p = profile(); const ac = ACCENTS[(p && p.accent) || "violet"] || ACCENTS.violet; const r = document.documentElement.style;
+  r.setProperty("--acc", ac.a); r.setProperty("--acc2", ac.b); r.setProperty("--on-acc", ac.on);
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", ac.a);
+}
+const Theme = {
+  orig: null,
+  get(){ try { return localStorage.getItem("gm-theme") || "auto"; } catch { return "auto"; } },
+  apply(){ const r = document.documentElement; if (this.orig === null) this.orig = r.getAttribute("data-theme") || ""; const t = this.get();
+    if (t === "auto") { if (this.orig) r.setAttribute("data-theme", this.orig); else r.removeAttribute("data-theme"); } else r.setAttribute("data-theme", t); },
+  set(t){ try { t === "auto" ? localStorage.removeItem("gm-theme") : localStorage.setItem("gm-theme", t); } catch {} this.apply(); },
+};
+const UA = navigator.userAgent;
+const Device = {
+  iPad: /iPad/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1),
+  iOS: /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1),
+  standalone: (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true,
+  penSeen: false,
+};
+window.addEventListener("pointerdown", e => { if (e.pointerType === "pen") Device.penSeen = true; }, { capture: true, passive: true });
+function canInk(){ const p = profile(); if (p && p.ink === "off") return false; if (p && p.ink === "on") return true; return Device.iPad || Device.penSeen; }
+const ARTIFACT_URL = "https://claude.ai/artifact/RJPQtHABp9CxhXiWbFcWZn";
+const baseUrl = () => window.claude ? ARTIFACT_URL : location.href.split("#")[0];
+const DEEP = [["today","Today's page"],["morning","Morning: gratitude and targets"],["evening","Evening: wins and lessons"],["habits","Habits"],["week","This week and weekly review"],["ink","Handwriting page (iPad)"],["progress","Progress"],["duo","Duo board"]];
+function routeHash(){
+  let h = ""; try { h = (location.hash || "").slice(1).toLowerCase(); } catch {}
+  if (!h || !profile() || !J()) return;
+  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", duo:"duo" };
+  if (!map[h]) return;
+  S.view = map[h]; if (S.view === "today" || S.view === "ink") S.date = today(); if (S.view === "week") S.week = null; S.sheet = null;
+  render();
+  const focus = { morning: "g0", evening: "w0", win: "w0" }[h];
+  if (focus) setTimeout(() => { const el = document.getElementById(focus); if (el) { el.scrollIntoView({ block: "center" }); if (h !== "morning") el.focus({ preventScroll: true }); } }, 60);
+  else if (h === "review") setTimeout(() => { const el = document.getElementById("wr1"); el && el.scrollIntoView({ block: "center" }); }, 60);
+}
+function updateBadge(){
+  try {
+    if (!("setAppBadge" in navigator) || !J()) return;
+    const j = J(), dd = Store.get(dayKey(today())); const left = j.habits.filter(h => !(dd && dd.habits[h.id])).length;
+    left ? navigator.setAppBadge(left).catch(() => {}) : navigator.clearAppBadge().catch(() => {});
+  } catch {}
+}
+if (window.visualViewport) {
+  const kb = () => { const open = window.innerHeight - visualViewport.height > 140; document.body.classList.toggle("kb", open); };
+  visualViewport.addEventListener("resize", kb);
+}
+
+/* ---------- Ink storage: one record per page (keeps every write small) ---------- */
+const IDB = {
+  db: null,
+  open(){ return this.db || (this.db = new Promise((res, rej) => { try { const r = indexedDB.open("greatestme", 1); r.onupgradeneeded = () => r.result.createObjectStore("ink"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } })); },
+  async get(k){ const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction("ink").objectStore("ink").get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
+  async put(k, v){ const db = await this.open(); return new Promise((res, rej) => { const t = db.transaction("ink", "readwrite"); t.objectStore("ink").put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); },
+};
+const InkStore = {
+  col(dk){ return Store.db.collection(`data/users/${Store.uid}/ink/${dk}`); },
+  async load(dk){
+    if (Store.mode === "cloud") {
+      const snap = await this.col(dk).limit(60).get(); const out = { meta: null, pages: [] };
+      snap.docs.forEach(d => { if (!d.exists) return; const v = d.data(); if (d.id === "meta") out.meta = v; else if (/^p\d+$/.test(d.id)) out.pages[+d.id.slice(1)] = v.s || []; });
+      return out;
+    }
+    const meta = await IDB.get(`${Store.uid}|${dk}|meta`).catch(() => null); const out = { meta, pages: [] };
+    for (let i = 0; i < ((meta && meta.n) || 0); i++) out.pages[i] = (await IDB.get(`${Store.uid}|${dk}|p${i}`).catch(() => null)) || [];
+    return out;
+  },
+  async save(dk, key, val){
+    if (Store.mode === "cloud") return this.col(dk).doc(key).set(val);
+    return IDB.put(`${Store.uid}|${dk}|${key}`, key === "meta" ? val : val.s);
+  },
+};
+
+/* ---------- Ink engine ---------- */
+const PW = 816, PH = 1056; /* US Letter at 96 dpi */
+const TEMPLATES = { college: "College ruled", wide: "Wide ruled", dots: "Dot grid", grid: "Graph", blank: "Blank" };
+const INK_COLORS = ["#1B1F2A", "#1D4ED8", "#B91C1C", "#047857"];
+const Ink = {
+  dk: null, data: null, loading: false, tool: "pen", color: INK_COLORS[0], size: 2, finger: false, undo: [], redo: [], live: null, timers: {}, status: "",
+  key(d){ return `${J().id}-${d}`; },
+  async open(d){
+    const dk = this.key(d); if (this.dk === dk && (this.data || this.loading)) return;
+    this.dk = dk; this.data = null; this.undo = []; this.redo = []; this.loading = true;
+    try { const r = await InkStore.load(dk); if (this.dk !== dk) { return; }
+      const meta = r.meta || { tpl: profile().inkTpl || "college", n: 1 };
+      const pages = Array.from({ length: Math.max(1, meta.n || 1) }, (_, i) => r.pages[i] || []);
+      this.data = { meta: { tpl: meta.tpl || "college", n: pages.length }, pages };
+    } catch { this.data = { meta: { tpl: profile().inkTpl || "college", n: 1 }, pages: [[]] }; this.status = "Couldn't load saved ink"; }
+    this.loading = false; if (S.view === "ink") render();
+  },
+  mount(){
+    if (!this.data) { this.open(S.date); return; }
+    document.querySelectorAll("canvas[data-page]").forEach(cv => this.setup(cv));
+  },
+  setup(cv){
+    const i = +cv.dataset.page; const page = cv.parentElement;
+    const fit = () => { const w = page.clientWidth || 600; const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      cv.style.height = (w * PH / PW) + "px"; cv.width = Math.round(w * dpr); cv.height = Math.round(w * PH / PW * dpr); this.draw(cv, i); };
+    fit(); if (window.ResizeObserver) { const ro = new ResizeObserver(() => { if (Math.abs(cv.width - page.clientWidth * Math.min(devicePixelRatio || 1, 3)) > 4) fit(); }); ro.observe(page); }
+    const pt = e => { const r = cv.getBoundingClientRect(); return [ (e.clientX - r.left) * PW / r.width, (e.clientY - r.top) * PH / r.height, e.pointerType === "pen" ? (e.pressure || .5) : .5 ]; };
+    const accepts = e => e.pointerType === "pen" || e.pointerType === "mouse" || (e.pointerType === "touch" && this.finger);
+    const block = e => { const stylus = [...(e.touches || [])].some(t => t.touchType === "stylus"); if (stylus || this.finger) e.preventDefault(); };
+    cv.addEventListener("touchstart", block, { passive: false }); cv.addEventListener("touchmove", block, { passive: false });
+    cv.addEventListener("pointerdown", e => {
+      if (!accepts(e) || this.live) return; e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch {}
+      this.snapshot(i);
+      if (this.tool === "eraser") { this.live = { id: e.pointerId, erase: true }; this.erase(cv, i, pt(e)); return; }
+      const [x, y, p] = pt(e); this.live = { id: e.pointerId, s: { t: this.tool, c: this.tool === "hl" ? "#F5D90A" : this.color, w: this.size, p: [[x, y, p]] } };
+    });
+    cv.addEventListener("pointermove", e => {
+      if (!this.live || e.pointerId !== this.live.id) return; e.preventDefault();
+      const co = e.getCoalescedEvents ? e.getCoalescedEvents() : []; const evs = co.length ? co : [e];
+      for (const ev of evs) { const q = pt(ev);
+        if (this.live.erase) { this.erase(cv, i, q); continue; }
+        const P = this.live.s.p, last = P[P.length - 1]; if (Math.hypot(q[0] - last[0], q[1] - last[1]) < .8) continue;
+        P.push(q); this.seg(cv, this.live.s, P.length - 2); }
+    });
+    const end = e => { if (!this.live || e.pointerId !== this.live.id) return;
+      if (!this.live.erase) { const s = this.live.s; if (s.p.length === 1) { s.p.push([s.p[0][0] + .1, s.p[0][1] + .1, s.p[0][2]]); this.seg(cv, s, 0); } this.data.pages[i].push(this.encode(s)); }
+      this.live = null; this.redo = []; this.queue(i); this.bar(); };
+    cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end); cv.addEventListener("lostpointercapture", end);
+  },
+  encode(s){ let px = 0, py = 0; const out = [];
+    for (const [x, y, p] of s.p) { const X = Math.round(x * 2), Y = Math.round(y * 2); out.push((X - px).toString(36) + "," + (Y - py).toString(36) + "," + Math.round(Math.min(1, p) * 9)); px = X; py = Y; }
+    return { t: s.t, c: s.c, w: s.w, p: out.join(" ") }; },
+  decode(e){ if (e._d) return e._d; let x = 0, y = 0; const pts = e.p.split(" ").map(tok => { const [a, b, c] = tok.split(","); x += parseInt(a, 36); y += parseInt(b, 36); return [x / 2, y / 2, (+c) / 9]; }); Object.defineProperty(e, "_d", { value: pts, enumerable: false }); return pts; },
+  width(s, p){ return s.t === "hl" ? s.w * 7 : s.w * (.45 + p * 1.25); },
+  ctx(cv){ const c = cv.getContext("2d"); const k = cv.width / PW; c.setTransform(k, 0, 0, k, 0, 0); c.lineCap = "round"; c.lineJoin = "round"; return c; },
+  seg(cv, s, a){ const c = this.ctx(cv), P = s.p, p0 = P[a], p1 = P[a + 1]; c.save(); if (s.t === "hl") { c.globalAlpha = .28; c.globalCompositeOperation = "multiply"; }
+    c.strokeStyle = s.c; c.lineWidth = this.width(s, (p0[2] + p1[2]) / 2); c.beginPath(); c.moveTo(p0[0], p0[1]); c.lineTo(p1[0], p1[1]); c.stroke(); c.restore(); },
+  paper(c, tpl){
+    c.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--paper").trim() || "#fff"; c.fillRect(0, 0, PW, PH);
+    const rule = "#A9C6E8", margin = "#E8868B"; c.lineWidth = 1;
+    if (tpl === "college" || tpl === "wide") { const gap = tpl === "college" ? 27 : 33; c.strokeStyle = rule; c.beginPath(); for (let y = 96; y < PH - 24; y += gap) { c.moveTo(0, y + .5); c.lineTo(PW, y + .5); } c.stroke();
+      c.strokeStyle = margin; c.beginPath(); c.moveTo(120.5, 0); c.lineTo(120.5, PH); c.stroke(); }
+    else if (tpl === "dots") { c.fillStyle = "#B8BEC9"; for (let y = 24; y < PH; y += 24) for (let x = 24; x < PW; x += 24) { c.beginPath(); c.arc(x, y, 1.1, 0, 7); c.fill(); } }
+    else if (tpl === "grid") { c.strokeStyle = "#D5DCE6"; c.beginPath(); for (let v = 24; v < PW; v += 24) { c.moveTo(v + .5, 0); c.lineTo(v + .5, PH); } for (let v = 24; v < PH; v += 24) { c.moveTo(0, v + .5); c.lineTo(PW, v + .5); } c.stroke(); }
+  },
+  draw(cv, i){ const c = this.ctx(cv); this.paper(c, this.data.meta.tpl);
+    for (const e of this.data.pages[i]) { const s = { t: e.t, c: e.c, w: e.w, p: this.decode(e) }; for (let a = 0; a < s.p.length - 1; a++) this.seg(cv, s, a); } },
+  erase(cv, i, [x, y]){ const pg = this.data.pages[i]; const r = 9 + this.size * 2; let hit = false;
+    for (let k = pg.length - 1; k >= 0; k--) if (this.decode(pg[k]).some(([a, b]) => Math.abs(a - x) < r && Math.abs(b - y) < r)) { pg.splice(k, 1); hit = true; }
+    if (hit) this.draw(cv, i); },
+  snapshot(i){ this.undo.push({ i, s: this.data.pages[i].slice() }); if (this.undo.length > 60) this.undo.shift(); },
+  step(from, to){ const h = from.pop(); if (!h) return; to.push({ i: h.i, s: this.data.pages[h.i].slice() }); this.data.pages[h.i] = h.s; const cv = document.querySelector(`canvas[data-page="${h.i}"]`); if (cv) this.draw(cv, h.i); this.queue(h.i); this.bar(); },
+  queue(i){ const dk = this.dk; Store.setStatus("saving"); clearTimeout(this.timers[i]); this.timers[i] = setTimeout(() => this.persist(dk, i), 700); },
+  async persist(dk, i){ if (dk !== this.dk) return; const val = { s: this.data.pages[i] };
+    const size = JSON.stringify(val).length;
+    if (size > 240000) { this.status = "This page is full. Add a page to keep writing."; this.bar(); }
+    try { await InkStore.save(dk, "p" + i, val); await InkStore.save(dk, "meta", { tpl: this.data.meta.tpl, n: this.data.pages.length }); Store.setStatus("saved"); }
+    catch (e) { Store.setStatus("error", e && e.code); } },
+  bar(){ const u = $("#inkUndo"), r = $("#inkRedo"), st = $("#inkStatus"); if (u) u.disabled = !this.undo.length; if (r) r.disabled = !this.redo.length; if (st) st.textContent = this.status; },
+};
+function inkView(){
+  const d = S.date, n = dayNum(d);
+  if (!Ink.data || Ink.dk !== Ink.key(d)) { Ink.open(d); }
+  const data = Ink.data && Ink.dk === Ink.key(d) ? Ink.data : null;
+  const tbtn = (act, v, on, label, inner) => `<button class="t" data-act="${act}" data-v="${v}" aria-pressed="${on}" aria-label="${esc(label)}" title="${esc(label)}">${inner}</button>`;
+  return `
+  <div class="head"><div><div class="row"><span class="chip">${n >= 1 && n <= TOTAL_DAYS ? `Day ${n} of ${TOTAL_DAYS}` : "Outside journey"}</span><span class="chip ember">Handwriting</span></div><h1 class="title-bar" style="margin-top:8px">${esc(fmtDate(d))}</h1></div>
+    <div class="daynav"><button class="btn icon" aria-label="Previous day" data-act="day" data-n="-1">${ICON.left}</button>
+    <button class="btn sm" data-act="day" data-n="0" ${d === today() ? "disabled" : ""}>Today</button>
+    <button class="btn icon" aria-label="Next day" data-act="day" data-n="1">${ICON.right}</button></div></div>
+  <div class="ink-bar" role="toolbar" aria-label="Handwriting tools">
+    <div class="grp">${tbtn("inkTool", "pen", Ink.tool === "pen", "Pen", ICON.ink)}${tbtn("inkTool", "hl", Ink.tool === "hl", "Highlighter", ICON.hl)}${tbtn("inkTool", "eraser", Ink.tool === "eraser", "Eraser", ICON.eraser)}</div>
+    <div class="grp">${INK_COLORS.map((c, k) => tbtn("inkColor", c, Ink.color === c && Ink.tool === "pen", ["Black ink", "Blue ink", "Red ink", "Green ink"][k], `<span class="dot" style="background:${c}"></span>`)).join("")}</div>
+    <div class="grp">${[1.4, 2, 3].map((w, k) => tbtn("inkSize", w, Ink.size === w, ["Fine", "Medium", "Bold"][k], `<span style="width:${8 + k * 5}px;height:${8 + k * 5}px;border-radius:50%;background:currentColor;display:block"></span>`)).join("")}</div>
+    <div class="grp"><button class="t" id="inkUndo" data-act="inkUndo" aria-label="Undo" title="Undo" ${Ink.undo.length ? "" : "disabled"}>${ICON.undo}</button><button class="t" id="inkRedo" data-act="inkRedo" aria-label="Redo" title="Redo" ${Ink.redo.length ? "" : "disabled"}>${ICON.redo}</button>
+      ${tbtn("inkFinger", "1", Ink.finger, "Draw with finger", ICON.hand)}</div>
+    <div class="grp"><select class="in" id="inkTpl" aria-label="Paper" style="width:auto">${Object.entries(TEMPLATES).map(([k, l]) => `<option value="${k}" ${data && data.meta.tpl === k ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+  </div>
+  <p class="muted" style="font-size:.82rem">Write with Apple Pencil; your fingers still scroll. Turn on the hand to draw with a finger. Typed fields on every other page also accept Scribble handwriting.</p>
+  <p id="inkStatus" class="err" role="status">${esc(Ink.status)}</p>
+  ${data ? `<div class="ink-pages">${data.pages.map((_, i) => `<div class="ink-page ${Ink.finger ? "finger" : ""}"><canvas data-page="${i}" aria-label="Handwriting page ${i + 1}"></canvas><span class="pg">${i + 1}</span></div>`).join("")}</div>
+  <div class="row"><button class="btn" data-act="inkAddPage">+ Add a page</button><button class="btn ghost sm" data-act="inkClear">Clear last page</button></div>`
+  : `<div class="empty">Opening your page…</div>`}`;
+}
+
 /* ============================ rendering ============================ */
 let User = null;
 const NAV = [["today","Today"],["week","Week"],["goals","Goals"],["habits","Habits"],["progress","Progress"],["duo","Duo"]];
+const navItems = () => canInk() ? NAV.slice(0, 1).concat([["ink","Ink"]], NAV.slice(1)) : NAV;
 
 function render(){
   const root = $("#root");
@@ -411,8 +641,10 @@ function render(){
   const active = document.activeElement && document.activeElement.id;
   if (S.gate) { root.innerHTML = gateView(); return; }
   if (!profile() || !J()) { root.innerHTML = onboardView(); return; }
-  const v = { today: todayView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, duo: duoView }[S.view]();
-  const nav = (cls) => NAV.map(([k, l]) => `<button data-act="nav" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
+  if (S.view === "ink" && !canInk()) S.view = "today";
+  applyAccent();
+  const v = { today: todayView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, duo: duoView }[S.view]();
+  const items = navItems(); const nav = () => items.map(([k, l]) => `<button data-act="nav" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
   const p = profile();
   root.innerHTML = `<div class="app">
     <aside class="rail"><div class="brand">Greatest<b>Me</b></div><nav class="nav">${nav()}</nav>
@@ -422,9 +654,10 @@ function render(){
       <div class="mtop"><div class="brand" style="padding:0">Greatest<b>Me</b></div><button class="btn icon ghost" aria-label="Account and journeys" data-act="sheet" data-v="settings">${ICON.gear}</button></div>
       ${v}
     </div></main>
-    <nav class="tabs">${nav()}</nav>
+    <nav class="tabs" style="--tabs:${items.length}">${nav()}</nav>
   </div>${S.sheet ? sheetView() : ""}${S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : ""}`;
   Store.setStatus(Store.status);
+  if (S.view === "ink") Ink.mount();
   if (active) { const el = document.getElementById(active); if (el) el.focus({ preventScroll: true }); }
   window.scrollTo(0, scrollY);
 }
@@ -470,7 +703,8 @@ function todayView(){
     <div class="grid2" style="gap:10px">${habits}</div></section>
   <section class="card"><details class="sched" ${Object.values(dd.schedule || {}).some(Boolean) ? "open" : ""}><summary><h2>Schedule</h2><span class="label">Time-block the day ▾</span></summary>
     <div class="sched-grid">${hours.map(h => `<span class="t">${h > 12 ? h - 12 : h}:00 ${h >= 12 ? "pm" : "am"}</span>${inp(`s${h}`, key, `schedule.h${h}`, (dd.schedule || {})["h" + h] || "", "")}`).join("")}</div></details></section>
-  <section class="card"><div class="card-h"><h2>Evening</h2><span class="label">Close the loop</span></div>
+  ${canInk() ? `<section class="card"><div class="row" style="justify-content:space-between"><div><h2>Handwriting page</h2><p class="muted" style="font-size:.85rem">A ruled page for this date, made for Apple Pencil.</p></div><button class="btn primary" data-act="nav" data-v="ink" data-keepdate="1">${ICON.ink.replace("<svg", '<svg width="16" height="16"')} Write by hand</button></div></section>` : ""}
+  <section class="card" id="eveningCard"><div class="card-h"><h2>Evening</h2><span class="label">Close the loop</span></div>
     <div class="grid2">
       <div class="field"><span class="label">Wins today</span><div class="num-rows">${dd.wins.map((w, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`w${i}`, key, `wins.${i}`, w, i === 0 ? "Small counts. Name it." : "")}</div>`).join("")}</div></div>
       <div class="field"><label class="label" for="les">What I learned</label>${ta("les", key, "lessons", dd.lessons, "What would you tell yourself this morning?")}</div>
@@ -525,7 +759,7 @@ function weekView(){
 function goalsView(){
   const j = J(); const key = "journey-" + j.id;
   return `
-  <div class="head"><div><span class="label">13-week roadmap</span><h1 style="margin-top:4px">Goals</h1><p class="sub">Up to three goals. Make each specific, measurable, and due by ${esc(fmtDate(endDate(j), { month: "long", day: "numeric" }))}. Then break it into weekly milestones.</p></div>
+  <div class="head"><div><span class="label">13-week roadmap</span><h1 class="title-bar" style="margin-top:4px">Goals</h1><p class="sub">Up to three goals. Make each specific, measurable, and due by ${esc(fmtDate(endDate(j), { month: "long", day: "numeric" }))}. Then break it into weekly milestones.</p></div>
     ${j.goals.length < 3 ? `<button class="btn primary" data-act="addGoal">+ Add goal</button>` : ""}</div>
   ${j.goals.length ? "" : `<div class="empty">No goals yet. Add your first 13-week goal.</div>`}
   ${j.goals.map((g, gi) => { const done = g.milestones.filter(m => m.done).length, pct = g.milestones.length ? Math.round(done / g.milestones.length * 100) : 0; return `
@@ -552,7 +786,7 @@ function goalsView(){
 function habitsView(){
   const j = J(); const key = "journey-" + j.id; const n = clamp(dayNum(today()), 0, TOTAL_DAYS);
   return `
-  <div class="head"><div><span class="label">Daily non-negotiables</span><h1 style="margin-top:4px">Habits</h1><p class="sub">Keep it to the handful that move everything else. Check them off on Today or in the weekly tracker.</p></div></div>
+  <div class="head"><div><span class="label">Daily non-negotiables</span><h1 class="title-bar" style="margin-top:4px">Habits</h1><p class="sub">Keep it to the handful that move everything else. Check them off on Today or in the weekly tracker.</p></div></div>
   <section class="card"><div class="card-h"><h2>Your habits</h2><span class="label">${j.habits.length} / 8</span></div>
     ${j.habits.map((h, i) => `<div class="row" style="flex-wrap:nowrap">${inp(`hn${i}`, key, `habits.${i}.name`, h.name, "Habit", "in")}<button class="btn icon ghost" aria-label="Remove habit" data-act="delHabit" data-h="${esc(h.id)}">${ICON.x}</button></div>`).join("")}
     ${j.habits.length < 8 ? `<div class="row" style="flex-wrap:nowrap"><input id="newHabit" class="in" placeholder="Add a habit, then press Enter" autocomplete="off"><button class="btn sm" data-act="addHabit">Add</button></div>
@@ -578,7 +812,7 @@ function progressView(){
   const weeks = Array.from({ length: WEEKS }, (_, i) => { const wd = Store.get(weekKey(i + 1)); return wd && wd.score ? wd.score : 0; });
   const anyMood = st.moods.some(Boolean);
   return `
-  <div class="head"><div><span class="label">${esc(j.title)} · ${esc(fmtDate(j.start, { month: "short", day: "numeric" }))} to ${esc(fmtDate(endDate(j), { month: "short", day: "numeric", year: "numeric" }))}</span><h1 style="margin-top:4px">Progress</h1></div></div>
+  <div class="head"><div><span class="label">${esc(j.title)} · ${esc(fmtDate(j.start, { month: "short", day: "numeric" }))} to ${esc(fmtDate(endDate(j), { month: "short", day: "numeric", year: "numeric" }))}</span><h1 class="title-bar" style="margin-top:4px">Progress</h1></div></div>
   <div class="card">${strip(j)}<div class="row" style="justify-content:space-between"><span class="label">Journey</span><span class="mono">${st.day} / ${TOTAL_DAYS} days</span></div>${bar(Math.round(st.day / TOTAL_DAYS * 100))}</div>
   <div class="stats">
     <div class="stat"><span class="label">Journal streak</span><span class="v">${st.streak}<small> days</small></span><span class="muted" style="font-size:.8rem">Best ${st.best}</span></div>
@@ -623,7 +857,7 @@ function duoView(){
       ${me ? `<button class="btn ${iCheered ? "" : "ember"}" style="align-self:flex-start" data-act="cheer" data-id="${esc(pt.id)}" ${iCheered ? "disabled" : ""}>${iCheered ? "Cheer sent" : "Send a cheer"}</button>` : ""}
     </section>`; }).join("") : `<div class="empty">${Store.mode === "cloud" ? "When your partner opens GreatestMe and turns on sharing, their progress shows up here." : "On this device, partners appear here once a second account turns on sharing."}</div>`;
   return `
-  <div class="head"><div><span class="label">Accountability, not access</span><h1 style="margin-top:4px">Duo</h1><p class="sub">Your journal stays private. If you turn sharing on, your partner sees only your streak, habit and target rates, goal titles with progress, and the one win you choose to share.</p></div></div>
+  <div class="head"><div><span class="label">Accountability, not access</span><h1 class="title-bar" style="margin-top:4px">Duo</h1><p class="sub">Your journal stays private. If you turn sharing on, your partner sees only your streak, habit and target rates, goal titles with progress, and the one win you choose to share.</p></div></div>
   <section class="card"><div class="row" style="justify-content:space-between"><div><h2>Share my progress</h2><p class="muted" style="font-size:.88rem">${p.share ? "Sharing is on." : "Sharing is off. Nothing leaves your journal."}</p></div>
     <button class="btn ${p.share ? "" : "primary"}" data-act="toggleShare">${p.share ? "Turn off" : "Turn on"}</button></div>
     ${p.share ? `<div class="field"><label class="label" for="swin">Win to share</label><input id="swin" class="in box" data-doc="profile" data-f="sharedWin" value="${esc(p.sharedWin || "")}" placeholder="Something you want them to see" maxlength="200" autocomplete="off"></div>` : ""}
@@ -641,6 +875,13 @@ function sheetView(){
       <p class="muted" style="font-size:.85rem">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you, even from the app's owner." : `Signed in on this device as <b>${esc(Store.accountName)}</b>. Entries are stored in this browser only; export a backup regularly.`}</p>
       <div class="field"><span class="label">Journeys</span>${journeys.map(x => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0"><div><b>${esc(x.title)}</b><div class="muted mono" style="font-size:.78rem">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
       <button class="btn sm" style="align-self:flex-start" data-act="sheet" data-v="newJourney">+ New 13-week journey</button></div>
+      <div class="field"><span class="label">Appearance on this device</span><div class="toggle3" role="group" aria-label="Theme">${["auto","light","dark"].map(t => `<button data-act="theme" data-v="${t}" aria-pressed="${Theme.get() === t}">${t === "auto" ? "◐ Auto" : t === "light" ? "☀ Light" : "☾ Dark"}</button>`).join("")}</div></div>
+      <div class="field"><span class="label">Your accent</span><div class="swatches">${Object.entries(ACCENTS).map(([k, a]) => `<button data-act="accent" data-v="${k}" aria-pressed="${(p.accent || "violet") === k}" aria-label="${a.name}" title="${a.name}" style="background:${a.a}"></button>`).join("")}</div><span class="muted" style="font-size:.8rem">Your accent follows your account. Your partner keeps their own.</span></div>
+      ${Device.iPad || Device.penSeen || window.innerWidth >= 700 ? `<div class="field"><span class="label">Handwriting pages</span><div class="toggle3" role="group" aria-label="Handwriting pages">${[["auto","Auto"],["on","On"],["off","Off"]].map(([k, l]) => `<button data-act="inkPref" data-v="${k}" aria-pressed="${(p.ink || "auto") === k}">${l}</button>`).join("")}</div><span class="muted" style="font-size:.8rem">Auto shows the Ink tab on iPad and wherever a stylus is used. It never appears on iPhone unless you turn it on.</span></div>` : ""}
+      <div class="field"><span class="label">Siri, Shortcuts & reminders</span>
+        <p class="muted" style="font-size:.85rem">In the Shortcuts app, make a shortcut with one action, <b>Open URLs</b>, and paste a link below. Name it what you'll say, like "Morning pages", and Siri runs it. For reminders, go to Automation, then Time of Day, and set it to open your Morning link at 7:00 and your Evening link at 9:00.</p>
+        ${DEEP.map(([h, l]) => `<div class="linkrow"><div><b style="font-size:.9rem">${esc(l)}</b><br><code>${esc(baseUrl() + "#" + h)}</code></div><button class="btn sm" data-act="copy" data-v="${esc(baseUrl() + "#" + h)}">Copy</button></div>`).join("")}
+      </div>
       <div class="field"><span class="label">Journey start date</span><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"><span class="muted" style="font-size:.8rem">Changing this shifts which entries land on which day.</span></div>
       <div class="field"><span class="label">Backup</span><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></div>
       ${Store.mode === "local" ? `<div class="row"><button class="btn sm" data-act="signout">Sign out</button></div>` : ""}`;
@@ -709,7 +950,7 @@ async function onClick(e){
   const a = t.dataset.act; const j = J();
   if (a === "closebg" && e.target !== t) return;
   switch (a) {
-    case "nav": S.view = t.dataset.v; if (S.view === "today") S.date = today(); if (S.view === "week") S.week = null; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); break;
+    case "nav": S.view = t.dataset.v; if ((S.view === "today" || S.view === "ink") && !t.dataset.keepdate) S.date = today(); try { history.replaceState(null, "", "#" + S.view); } catch {} if (S.view === "week") S.week = null; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); break;
     case "day": { const n = +t.dataset.n; S.date = n === 0 ? today() : addDays(S.date, n); render(); break; }
     case "week": { const n = +t.dataset.n; S.week = n === 0 ? weekOf(today()) : clamp((S.week || weekOf(today())) + n, 1, WEEKS); render(); break; }
     case "scale": { const doc = Store.get(t.dataset.doc); const n = +t.dataset.n; setPath(doc, t.dataset.f, getPath(doc, t.dataset.f) === n ? 0 : n); Store.touch(t.dataset.doc); render(); break; }
@@ -731,6 +972,18 @@ async function onClick(e){
     case "switchJ": profile().active = t.dataset.id; Store.touch("profile"); S.sheet = null; S.date = today(); S.week = null; render(); break;
     case "createJourney": { const start = $("#njs").value || nextMonday(); const nj = createJourney({ title: $("#njt").value.trim() || "Journey", start, goals: [], habits: j.habits.map(h => h.name) }); profile().active = nj.id; Store.touch("profile"); S.sheet = null; S.view = "goals"; render(); toast("New journey created. Set your goals."); break; }
     case "export": doExport(); break;
+    case "theme": Theme.set(t.dataset.v); render(); break;
+    case "accent": profile().accent = t.dataset.v; Store.touch("profile"); render(); break;
+    case "inkPref": profile().ink = t.dataset.v === "auto" ? undefined : t.dataset.v; if (t.dataset.v === "auto") delete profile().ink; Store.touch("profile"); render(); break;
+    case "copy": { const v = t.dataset.v; try { await navigator.clipboard.writeText(v); toast("Link copied"); } catch { const r = document.createRange(); const code = t.parentElement.querySelector("code"); if (code) { r.selectNodeContents(code); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); } toast("Link selected. Tap Copy."); } break; }
+    case "inkTool": Ink.tool = t.dataset.v; render(); break;
+    case "inkColor": Ink.color = t.dataset.v; Ink.tool = "pen"; render(); break;
+    case "inkSize": Ink.size = +t.dataset.v; render(); break;
+    case "inkFinger": Ink.finger = !Ink.finger; render(); break;
+    case "inkUndo": Ink.step(Ink.undo, Ink.redo); break;
+    case "inkRedo": Ink.step(Ink.redo, Ink.undo); break;
+    case "inkAddPage": if (Ink.data) { Ink.data.pages.push([]); Ink.status = ""; Ink.queue(Ink.data.pages.length - 1); render(); setTimeout(() => { const pg = document.querySelectorAll(".ink-page"); pg[pg.length - 1]?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); } break;
+    case "inkClear": if (Ink.data) { if (t.dataset.confirm === "1") { const i = Ink.data.pages.length - 1; Ink.snapshot(i); Ink.data.pages[i] = []; Ink.queue(i); render(); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to clear"; t.classList.add("ember"); } } break;
     case "signout": await Store.flush(); ls.del("gm:session"); location.reload(); break;
     case "gmode": S.gate.mode = t.dataset.v; S.gate.err = ""; render(); break;
     case "pickAcct": S.gate.name = t.dataset.v; render(); $("#gpass").focus(); break;
@@ -773,7 +1026,7 @@ async function doImport(file){
 }
 
 document.addEventListener("input", onInput);
-document.addEventListener("change", e => { if (e.target.id === "importFile" && e.target.files[0]) doImport(e.target.files[0]); else if (e.target.type === "checkbox" || e.target.tagName === "SELECT" || e.target.type === "date") { /* handled by input */ } });
+document.addEventListener("change", e => { if (e.target.id === "inkTpl" && Ink.data) { Ink.data.meta.tpl = e.target.value; profile().inkTpl = e.target.value; Store.touch("profile"); Ink.queue(0); render(); return; } if (e.target.id === "importFile" && e.target.files[0]) doImport(e.target.files[0]); else if (e.target.type === "checkbox" || e.target.tagName === "SELECT" || e.target.type === "date") { /* handled by input */ } });
 document.addEventListener("click", onClick);
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "newHabit") { e.preventDefault(); addHabit(e.target.value); }
@@ -796,14 +1049,17 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && Sto
 /* ============================ boot ============================ */
 async function startLocal(acct){
   Store.mode = "local"; Store.uid = acct.id; Store.accountName = acct.name; S.gate = null;
-  await Store.loadAll(); Duo.start(); render();
+  await Store.loadAll(); Duo.start(); render(); routeHash(); updateBadge();
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
 }
 function showGate(){ const accts = Accounts.list(); S.gate = { mode: accts.length ? "signin" : "create", name: accts.length === 1 ? accts[0].name : "", err: "" }; render(); }
 async function bootLocal(){
   const sess = ls.get("gm:session"); const acct = sess && Accounts.list().find(a => a.id === sess.id);
   if (acct) await startLocal(acct); else showGate();
 }
+window.addEventListener("hashchange", routeHash);
 async function boot(){
+  Theme.apply();
   if (!(window.claude && typeof window.claude.use === "function")) return bootLocal();
   try {
     const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
@@ -813,7 +1069,7 @@ async function boot(){
     try { const me = await user.me(); Store.accountName = (me && me.name) || ""; } catch {}
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 10000));
     await Promise.race([Store.loadAll(), timeout]);
-    Duo.start(); render();
+    Duo.start(); render(); routeHash();
   } catch (e) {
     $("#root").innerHTML = `<div class="gate"><div class="gate-card"><div class="gate-brand">Greatest<b>Me</b></div><p>Your journal didn't load. Check your connection, then reopen this page.</p><button class="btn" id="useLocal">Use an on-device journal instead</button></div></div>`;
     $("#useLocal").onclick = () => bootLocal();
