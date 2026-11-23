@@ -1,0 +1,824 @@
+<title>GreatestMe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a 13-week journal as an app. Left rail (desktop) / bottom tabs (phone); one working column of "pages". */
+:root{
+  --bg:#F6F4FB; --paper:#FFFFFF; --ink:#1E1736; --muted:#6B6485; --line:#E3DFEE;
+  --violet:#4B2E9A; --violet-soft:#ECE6FA; --ember:#E5532F; --ember-soft:#FDE9E2;
+  --good:#1F8A5B; --good-soft:#E2F4EB; --warn:#B7791F;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:14px; --shadow:0 1px 2px rgba(30,23,54,.06),0 6px 24px rgba(30,23,54,.06);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#110D1F; --paper:#1A1530; --ink:#F1EEFA; --muted:#A49DBF; --line:#2E2748;
+  --violet:#A98BFF; --violet-soft:#2A2148; --ember:#FF7A57; --ember-soft:#3A1E1A;
+  --good:#4CC38A; --good-soft:#163428; --warn:#E0A84A; --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#110D1F; --paper:#1A1530; --ink:#F1EEFA; --muted:#A49DBF; --line:#2E2748;
+  --violet:#A98BFF; --violet-soft:#2A2148; --ember:#FF7A57; --ember-soft:#3A1E1A;
+  --good:#4CC38A; --good-soft:#163428; --warn:#E0A84A; --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800}
+h2{font-size:1.2rem;font-weight:700}
+h3{font-size:1rem;font-weight:700}
+p{margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+
+/* shell */
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;padding:24px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:20px;background:var(--paper)}
+.brand{font-family:var(--f-display);font-weight:800;font-size:1.35rem;padding:0 10px;letter-spacing:-.02em}
+.brand b{color:var(--ember)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-weight:500;color:var(--muted)}
+.nav button svg{width:18px;height:18px;flex:none}
+.nav button:hover{background:var(--violet-soft);color:var(--ink)}
+.nav button[aria-current="page"]{background:var(--violet-soft);color:var(--violet);font-weight:600}
+.nav button:focus-visible{outline:2px solid var(--violet)}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:0 6px}
+.main{min-width:0;padding-block:28px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.col{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.tabs{display:none}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  .rail{display:none}
+  .tabs{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);
+    padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+  .tabs button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.66rem;color:var(--muted);padding:4px 0;border-radius:8px}
+  .tabs button svg{width:20px;height:20px}
+  .tabs button[aria-current="page"]{color:var(--violet);font-weight:600}
+  .main{padding-block:16px 110px}
+  .mtop{display:flex!important}
+}
+.mtop{display:none;justify-content:space-between;align-items:center}
+
+/* page head */
+.head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+.head .sub{color:var(--muted);margin-top:4px}
+.daynav{display:flex;align-items:center;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--violet-soft);color:var(--violet);font-size:.78rem;font-weight:600}
+.chip.ember{background:var(--ember-soft);color:var(--ember)}
+.chip.good{background:var(--good-soft);color:var(--good)}
+
+/* cards */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+.quote{border-left:3px solid var(--ember);padding:4px 0 4px 14px;font-family:var(--f-display);font-weight:500;font-size:1.05rem}
+.quote cite{display:block;font-family:var(--f-body);font-style:normal;font-size:.8rem;color:var(--muted);margin-top:4px}
+
+/* inputs */
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.in,textarea.in,select.in{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:8px 2px;border-radius:0;outline:none}
+.in:focus{border-bottom-color:var(--violet)}
+textarea.in{resize:vertical;min-height:72px;border:1px solid var(--line);border-radius:10px;padding:10px}
+textarea.in:focus{border-color:var(--violet)}
+select.in{border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:var(--paper)}
+.box{border:1px solid var(--line)!important;border-radius:10px!important;padding:10px 12px!important}
+.num-rows{display:flex;flex-direction:column;gap:2px}
+.num-row{display:grid;grid-template-columns:22px 1fr;align-items:center;gap:8px}
+.num-row .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.target{display:grid;grid-template-columns:26px 1fr minmax(0,150px);gap:8px;align-items:center}
+@media (max-width:520px){.target{grid-template-columns:26px 1fr}.target select{grid-column:2}}
+.check{appearance:none;width:22px;height:22px;border:2px solid var(--line);border-radius:7px;cursor:pointer;display:grid;place-items:center;margin:0;background:var(--paper)}
+.check:checked{background:var(--good);border-color:var(--good)}
+.check:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.done-text{text-decoration:line-through;color:var(--muted)}
+
+.btn{cursor:pointer;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{border-color:var(--violet)}
+.btn.primary{background:var(--violet);border-color:var(--violet);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#140F26}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#140F26}}
+.btn.ember{background:var(--ember);border-color:var(--ember);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:5px 10px;font-size:.84rem}
+.btn.icon{padding:6px;width:34px;height:34px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.scale{display:flex;gap:6px;flex-wrap:wrap}
+.scale button{cursor:pointer;min-width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font-family:var(--f-mono);font-weight:600}
+.scale button[aria-pressed="true"]{background:var(--violet);color:var(--paper);border-color:var(--violet)}
+
+/* meters */
+.bar{height:8px;background:var(--violet-soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--violet);border-radius:99px;transition:width .3s}
+.bar.ember i{background:var(--ember)}
+.bar.good i{background:var(--good)}
+.stat{display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);min-width:0}
+.stat .v{font-family:var(--f-display);font-weight:800;font-size:1.9rem;line-height:1}
+.stat .v small{font-size:.9rem;color:var(--muted);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* journey strip: 13 weeks */
+.strip{display:grid;grid-template-columns:repeat(13,1fr);gap:4px}
+.strip span{height:10px;border-radius:3px;background:var(--line)}
+.strip span.past{background:var(--violet)}
+.strip span.now{background:var(--ember)}
+
+/* habit grids */
+.hgrid{overflow-x:auto}
+.hgrid table{border-collapse:separate;border-spacing:4px;min-width:100%}
+.hgrid th{font-size:.72rem;color:var(--muted);font-weight:600;text-align:center;padding:0 2px}
+.hgrid th.hn{text-align:left;font-size:.88rem;color:var(--ink);font-weight:500;min-width:120px}
+.hgrid td{text-align:center}
+.cell{cursor:pointer;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--paper)}
+.cell[aria-pressed="true"]{background:var(--good);border-color:var(--good)}
+.cell:disabled{opacity:.35;cursor:default}
+.heat{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;max-width:420px}
+.heat .wk{display:grid;grid-template-rows:repeat(7,1fr);gap:3px}
+.heat i{aspect-ratio:1;border-radius:3px;background:var(--line);max-width:100%}
+.heat i.on{background:var(--good)}
+.heat i.future{background:transparent;border:1px dashed var(--line)}
+
+.goal{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.goal-n{font-family:var(--f-mono);font-size:.75rem;color:var(--ember);font-weight:600}
+.ms{display:grid;grid-template-columns:26px 1fr 92px 34px;gap:8px;align-items:center}
+@media (max-width:520px){.ms{grid-template-columns:26px 1fr 80px 34px}}
+
+details.sched summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between}
+details.sched summary::-webkit-details-marker{display:none}
+.sched-grid{display:grid;grid-template-columns:62px 1fr;gap:0 10px;margin-top:10px}
+.sched-grid .t{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);padding-top:9px}
+
+.spark{width:100%;height:120px;display:block}
+.empty{padding:22px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);text-align:center}
+.partner{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;background:var(--ember-soft);color:var(--ember);font-size:1.2rem}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-weight:600;z-index:50;font-size:.9rem}
+.save{font-size:.75rem;color:var(--muted)}
+
+/* auth / onboarding */
+.gate{min-height:100vh;display:grid;place-items:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.gate-card{width:100%;max-width:520px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow)}
+.gate-brand{font-family:var(--f-display);font-weight:800;font-size:2.4rem;letter-spacing:-.03em;line-height:1}
+.gate-brand b{color:var(--ember)}
+.seg{display:flex;background:var(--violet-soft);border-radius:10px;padding:3px}
+.seg button{flex:1;all:unset;text-align:center;cursor:pointer;padding:7px;border-radius:8px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+.err{color:var(--ember);font-size:.88rem}
+.steps{display:flex;gap:6px}
+.steps i{flex:1;height:4px;border-radius:4px;background:var(--line)}
+.steps i.on{background:var(--violet)}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{cursor:pointer;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:.85rem}
+.presets button[aria-pressed="true"]{background:var(--violet);color:var(--paper);border-color:var(--violet)}
+.sheet-bg{position:fixed;inset:0;background:rgba(10,6,20,.5);z-index:40;display:grid;place-items:center;padding:16px}
+.sheet{background:var(--paper);border-radius:18px;max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--line)}
+.loading{min-height:100vh;display:grid;place-items:center;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="root"><div class="loading"><div style="text-align:center"><div class="gate-brand">Greatest<b>Me</b></div><p style="margin-top:10px">Opening your journal…</p></div></div></div>
+
+<script>
+(() => {
+"use strict";
+/* ============================ utilities ============================ */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const diffDays = (a, b) => Math.round((Date.UTC(...ymd(b)) - Date.UTC(...ymd(a))) / 864e5);
+function ymd(s){ const [y, m, d] = s.split("-").map(Number); return [y, m - 1, d]; }
+const today = () => iso(new Date());
+const fmtDate = (s, o = {weekday:"long", month:"long", day:"numeric"}) => parse(s).toLocaleDateString(undefined, o);
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+const getPath = (o, p) => p.split(".").reduce((a, k) => a == null ? a : a[k], o);
+const setPath = (o, p, v) => { const ks = p.split("."); let a = o; ks.slice(0, -1).forEach((k, i) => { if (a[k] == null || typeof a[k] !== "object") a[k] = /^\d+$/.test(ks[i + 1]) ? [] : {}; a = a[k]; }); a[ks.at(-1)] = v; };
+const ls = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }, del(k){ try { localStorage.removeItem(k); } catch {} } };
+const TOTAL_DAYS = 91, WEEKS = 13;
+
+const ICON = {
+  today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  week:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+  goals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+  habits:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>',
+  progress:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 20h18M6 16V10M11 16V5M16 16v-4M21 16V8"/></svg>',
+  duo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="3.5"/><circle cx="16.5" cy="9.5" r="3"/><path d="M2 20c.8-3.5 3.3-5 6-5s5.2 1.5 6 5M14 15.2c.8-.2 1.6-.2 2.5-.2 2.4 0 4.6 1.3 5.5 4.5"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  left:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  right:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>',
+  x:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+};
+
+const QUOTES = [
+  ["We are what we repeatedly do. Excellence, then, is not an act, but a habit.","Will Durant, on Aristotle"],
+  ["The secret of getting ahead is getting started.","Mark Twain (attributed)"],
+  ["It does not matter how slowly you go as long as you do not stop.","Confucius"],
+  ["Well begun is half done.","Aristotle"],
+  ["You have power over your mind, not outside events. Realize this, and you will find strength.","Marcus Aurelius"],
+  ["Luck is what happens when preparation meets opportunity.","Seneca"],
+  ["A journey of a thousand miles begins with a single step.","Lao Tzu"],
+  ["Discipline is the bridge between goals and accomplishment.","Jim Rohn"],
+  ["What gets measured gets managed.","Peter Drucker (attributed)"],
+  ["The best time to plant a tree was 20 years ago. The second best time is now.","Proverb"],
+  ["Do what you can, with what you have, where you are.","Theodore Roosevelt"],
+  ["Energy and persistence conquer all things.","Benjamin Franklin"],
+  ["He who has a why to live can bear almost any how.","Friedrich Nietzsche"],
+  ["Waste no more time arguing what a good man should be. Be one.","Marcus Aurelius"],
+  ["The man who moves a mountain begins by carrying away small stones.","Confucius"],
+  ["Little by little, one travels far.","J.R.R. Tolkien"],
+  ["Small deeds done are better than great deeds planned.","Peter Marshall"],
+  ["Either you run the day or the day runs you.","Jim Rohn"],
+  ["First say to yourself what you would be; then do what you have to do.","Epictetus"],
+  ["Nothing will work unless you do.","Maya Angelou"],
+  ["The future depends on what you do today.","Mahatma Gandhi"],
+  ["Order your soul; reduce your wants.","Augustine of Hippo"],
+  ["Act as if what you do makes a difference. It does.","William James"],
+  ["Knowing is not enough; we must apply. Willing is not enough; we must do.","Johann Wolfgang von Goethe"],
+  ["Begin at once to live.","Seneca"],
+  ["Plans are nothing; planning is everything.","Dwight D. Eisenhower"],
+];
+const HABIT_PRESETS = ["Morning routine","Drink 3L water","Move 30 min","Read 20 pages","Meditate 10 min","No social before noon","In bed by 10:30","Track spending","Journal AM + PM","Quality time with family","No weed / tobacco","Deep work block"];
+
+/* ============================ storage ============================ */
+/* Two backends with one interface:
+   cloud  -> claude.ai artifact db; each person's journal lives in data/users/<id>/ (private to that signed-in account)
+   local  -> on-device accounts (name + passcode), for the standalone build */
+const Store = {
+  mode: "local", uid: null, docs: {}, col: null, db: null, accountName: "", dirty: new Map(), writing: new Set(), timer: null, status: "saved",
+  async loadAll(){
+    if (this.mode === "cloud") {
+      const snap = await this.col.limit(1000).get();
+      const out = {}; snap.docs.forEach(d => { if (d.exists) out[d.id] = d.data(); });
+      this.docs = out;
+    } else {
+      this.docs = ls.get("gm:data:" + this.uid) || {};
+    }
+  },
+  get(key){ return this.docs[key]; },
+  ensure(key, def){ if (!this.docs[key]) this.docs[key] = typeof def === "function" ? def() : def; return this.docs[key]; },
+  touch(key){ this.dirty.set(key, true); this.setStatus("saving"); clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 650); },
+  async flush(){
+    if (this.mode === "local") {
+      this.dirty.clear();
+      const ok = ls.set("gm:data:" + this.uid, this.docs);
+      this.setStatus(ok ? "saved" : "error"); Duo.publishSoon(); return;
+    }
+    const keys = [...this.dirty.keys()].filter(k => !this.writing.has(k));
+    await Promise.all(keys.map(async k => {
+      this.dirty.delete(k); this.writing.add(k);
+      try { const d = this.docs[k]; if (d) await this.col.doc(k).set(JSON.parse(JSON.stringify(d))); else await this.col.doc(k).delete(); }
+      catch (e) { this.dirty.set(k, true); this.setStatus("error", e && e.code); }
+      finally { this.writing.delete(k); }
+    }));
+    if (this.dirty.size) { clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 1500); }
+    else if (this.status !== "error") this.setStatus("saved");
+    Duo.publishSoon();
+  },
+  remove(key){ delete this.docs[key]; if (this.mode === "cloud") { this.dirty.set(key, true); this.touch(key); } else this.touch(key); },
+  setStatus(s, code){ this.status = s; const el = $("#savestate"); if (el) el.textContent = s === "saving" ? "Saving…" : s === "error" ? (code === "not_granted" ? "Read-only: ask the owner for Contributor access" : "Not saved, retrying") : (this.mode === "cloud" ? "Saved to your account" : "Saved on this device"); },
+};
+
+/* local accounts */
+async function hashPass(salt, pass){
+  try {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salt + "|" + pass));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch {
+    let h = 2166136261; for (const c of salt + "|" + pass) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return "f" + (h >>> 0).toString(16);
+  }
+}
+const Accounts = {
+  list(){ return ls.get("gm:accounts") || []; },
+  save(a){ ls.set("gm:accounts", a); },
+  async create(name, pass){
+    name = name.trim(); if (name.length < 2) throw new Error("Use at least 2 characters for your name.");
+    if (pass.length < 4) throw new Error("Use a passcode of at least 4 characters.");
+    const all = this.list(); if (all.some(a => a.name.toLowerCase() === name.toLowerCase())) throw new Error("That name already has an account on this device. Sign in instead.");
+    const salt = uid(); const acct = { id: "u" + uid(), name, salt, hash: await hashPass(salt, pass), created: Date.now() };
+    all.push(acct); if (!this.save(all) && !ls.get("gm:accounts")) throw new Error("This browser is blocking storage, so an account can't be saved here.");
+    return acct;
+  },
+  async signIn(name, pass){
+    const a = this.list().find(x => x.name.toLowerCase() === name.trim().toLowerCase());
+    if (!a || a.hash !== await hashPass(a.salt, pass)) throw new Error("Name or passcode doesn't match.");
+    return a;
+  },
+};
+
+/* ============================ domain ============================ */
+const S = { view: "today", date: today(), week: null, sheet: null, onboard: null, toast: null, partners: [], profiles: {} };
+const profile = () => Store.get("profile");
+const J = () => { const p = profile(); return p && Store.get("journey-" + p.active); };
+const dayKey = (d, j = J()) => `day-${j.id}-${d}`;
+const weekKey = (n, j = J()) => `week-${j.id}-${n}`;
+const dayNum = (d, j = J()) => diffDays(j.start, d) + 1;
+const weekOf = (d, j = J()) => clamp(Math.ceil(dayNum(d, j) / 7), 1, WEEKS);
+const inJourney = (d, j = J()) => { const n = dayNum(d, j); return n >= 1 && n <= TOTAL_DAYS; };
+const endDate = (j = J()) => addDays(j.start, TOTAL_DAYS - 1);
+const newDay = () => ({ gratitude:["","",""], intention:"", targets:[{t:"",g:"",done:false},{t:"",g:"",done:false},{t:"",g:"",done:false}], schedule:{}, habits:{}, wins:["","",""], lessons:"", improve:"", gratitudePM:"", mood:0, energy:0 });
+const newWeek = () => ({ focus:{}, priorities:["","",""], wins:"", lessons:"", hard:"", adjust:"", score:0 });
+const dayDoc = d => Store.get(dayKey(d));
+const quoteFor = d => QUOTES[(diffDays("2026-01-01", d) % QUOTES.length + QUOTES.length) % QUOTES.length];
+
+function journalled(dd){ if (!dd) return false; return [...dd.gratitude, ...dd.wins, dd.intention, dd.lessons, dd.improve].some(x => (x || "").trim()) || dd.targets.some(t => (t.t || "").trim()); }
+function dayScore(dd){
+  if (!dd) return 0; const j = J(); let have = 0, need = 0;
+  const parts = [dd.gratitude.some(x=>x.trim()), !!dd.intention.trim(), dd.targets.some(t=>t.t.trim()), dd.wins.some(x=>x.trim()), !!(dd.lessons||"").trim(), dd.mood > 0];
+  parts.forEach(p => { need++; if (p) have++; });
+  return Math.round(have / need * 100);
+}
+function stats(j = J()){
+  const t = today(); const upto = clamp(dayNum(t, j), 0, TOTAL_DAYS);
+  let journal = 0, hDone = 0, hPoss = 0, tDone = 0, tSet = 0; const moods = [], energy = [];
+  for (let i = 0; i < upto; i++) {
+    const d = addDays(j.start, i), dd = Store.get(dayKey(d, j));
+    if (journalled(dd)) journal++;
+    j.habits.forEach(h => { hPoss++; if (dd && dd.habits[h.id]) hDone++; });
+    if (dd) { dd.targets.forEach(x => { if (x.t.trim()) { tSet++; if (x.done) tDone++; } }); }
+    moods.push(dd && dd.mood ? dd.mood : null); energy.push(dd && dd.energy ? dd.energy : null);
+  }
+  let streak = 0; for (let i = upto - 1; i >= 0; i--) { const dd = Store.get(dayKey(addDays(j.start, i), j)); if (journalled(dd)) streak++; else if (i === upto - 1) continue; else break; }
+  let best = 0, run = 0; for (let i = 0; i < upto; i++) { if (journalled(Store.get(dayKey(addDays(j.start, i), j)))) { run++; best = Math.max(best, run); } else run = 0; }
+  const ms = j.goals.flatMap(g => g.milestones); const msDone = ms.filter(m => m.done).length;
+  return { day: upto, journal, streak, best, habitPct: hPoss ? Math.round(hDone / hPoss * 100) : 0, targetPct: tSet ? Math.round(tDone / tSet * 100) : 0, tDone, tSet, msDone, msTotal: ms.length, moods, energy };
+}
+function habitStreak(h, j = J()){
+  const upto = clamp(dayNum(today(), j), 0, TOTAL_DAYS); let s = 0, best = 0, run = 0;
+  for (let i = 0; i < upto; i++) { const dd = Store.get(dayKey(addDays(j.start, i), j)); if (dd && dd.habits[h.id]) { run++; best = Math.max(best, run); } else run = 0; }
+  for (let i = upto - 1; i >= 0; i--) { const dd = Store.get(dayKey(addDays(j.start, i), j)); if (dd && dd.habits[h.id]) s++; else if (i === upto - 1) continue; else break; }
+  return { s, best };
+}
+function createJourney({ title, start, goals, habits }){
+  const j = { id: "j" + uid().slice(0, 6), title: title || "Journey", start, created: Date.now(), status: "active",
+    goals: goals.filter(g => g.title.trim()).slice(0, 3).map(g => ({ id: uid(), title: g.title.trim(), why: g.why || "", measure: g.measure || "", reward: "", milestones: [] })),
+    habits: habits.slice(0, 8).map(n => ({ id: uid(), name: n })), review: {} };
+  Store.docs["journey-" + j.id] = j; Store.touch("journey-" + j.id);
+  return j;
+}
+
+/* ============================ Duo (opt-in sharing) ============================ */
+const Duo = {
+  t: null, unsub: null,
+  publishSoon(){ clearTimeout(this.t); this.t = setTimeout(() => this.publish(), 2500); },
+  summary(){
+    const p = profile(), j = J(); if (!p || !j || !p.share) return null;
+    const st = stats(j), dd = dayDoc(today());
+    return { nick: p.nick || "", day: st.day, streak: st.streak, habitPct: st.habitPct, targetPct: st.targetPct,
+      todayScore: dayScore(dd), habitsToday: dd ? j.habits.filter(h => dd.habits[h.id]).length : 0, habitsTotal: j.habits.length,
+      win: (p.sharedWin || "").slice(0, 200), goals: j.goals.map(g => ({ title: g.title.slice(0, 80), pct: g.milestones.length ? Math.round(g.milestones.filter(m => m.done).length / g.milestones.length * 100) : 0 })),
+      cheers: p.cheers || {}, updated: Date.now() };
+  },
+  async publish(){
+    const s = this.summary(); const p = profile(); if (!p) return;
+    try {
+      if (Store.mode === "cloud") { const ref = Store.db.doc("duo/" + Store.uid); if (s) await ref.set(s); else if (p.wasSharing) await ref.delete(); }
+      else { const all = ls.get("gm:duo") || {}; if (s) all[Store.uid] = s; else delete all[Store.uid]; ls.set("gm:duo", all); this.readLocal(); }
+      p.wasSharing = !!s;
+    } catch {}
+  },
+  readLocal(){ const all = ls.get("gm:duo") || {}; S.partners = Object.entries(all).filter(([id]) => id !== Store.uid).map(([id, v]) => ({ id, ...v })); },
+  async start(){
+    if (Store.mode === "cloud") {
+      try {
+        this.unsub = Store.db.collection("duo").limit(50).onSnapshot(async snap => {
+          S.partners = snap.docs.filter(d => d.exists && d.id !== Store.uid).map(d => ({ id: d.id, ...d.data() }));
+          const ids = S.partners.map(p => p.id);
+          if (ids.length && User) { try { S.profiles = await User.profiles(ids) || {}; } catch {} }
+          if (S.view === "duo" && !S.sheet) render();
+        }, () => {});
+      } catch {}
+    } else this.readLocal();
+  },
+};
+
+/* ============================ rendering ============================ */
+let User = null;
+const NAV = [["today","Today"],["week","Week"],["goals","Goals"],["habits","Habits"],["progress","Progress"],["duo","Duo"]];
+
+function render(){
+  const root = $("#root");
+  const scrollY = window.scrollY;
+  const active = document.activeElement && document.activeElement.id;
+  if (S.gate) { root.innerHTML = gateView(); return; }
+  if (!profile() || !J()) { root.innerHTML = onboardView(); return; }
+  const v = { today: todayView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, duo: duoView }[S.view]();
+  const nav = (cls) => NAV.map(([k, l]) => `<button data-act="nav" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
+  const p = profile();
+  root.innerHTML = `<div class="app">
+    <aside class="rail"><div class="brand">Greatest<b>Me</b></div><nav class="nav">${nav()}</nav>
+      <div class="rail-foot"><div class="label">${esc(p.nick || "")}</div><div id="savestate" class="save"></div>
+      <button class="btn sm" data-act="sheet" data-v="settings">${ICON.gear.replace("<svg", '<svg width="16" height="16"')} Account & journeys</button></div></aside>
+    <main class="main"><div class="col">
+      <div class="mtop"><div class="brand" style="padding:0">Greatest<b>Me</b></div><button class="btn icon ghost" aria-label="Account and journeys" data-act="sheet" data-v="settings">${ICON.gear}</button></div>
+      ${v}
+    </div></main>
+    <nav class="tabs">${nav()}</nav>
+  </div>${S.sheet ? sheetView() : ""}${S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : ""}`;
+  Store.setStatus(Store.status);
+  if (active) { const el = document.getElementById(active); if (el) el.focus({ preventScroll: true }); }
+  window.scrollTo(0, scrollY);
+}
+function toast(msg){ S.toast = msg; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 2200); }
+
+const bind = (key, path, extra = "") => `data-doc="${esc(key)}" data-f="${esc(path)}" ${extra}`;
+const inp = (id, key, path, val, ph, cls = "in") => `<input id="${id}" class="${cls}" ${bind(key, path)} value="${esc(val)}" placeholder="${esc(ph)}" autocomplete="off">`;
+const ta = (id, key, path, val, ph) => `<textarea id="${id}" class="in" ${bind(key, path)} placeholder="${esc(ph)}">${esc(val)}</textarea>`;
+const goalOpts = (sel) => `<option value="">No goal</option>` + J().goals.map((g, i) => `<option value="${esc(g.id)}" ${sel === g.id ? "selected" : ""}>Goal ${i + 1}: ${esc(g.title.slice(0, 28))}</option>`).join("");
+const scaleBtns = (key, path, val, n, labels) => `<div class="scale" role="group">${Array.from({ length: n }, (_, i) => `<button data-act="scale" data-doc="${esc(key)}" data-f="${esc(path)}" data-n="${i + 1}" aria-pressed="${val === i + 1}" title="${esc(labels ? labels[i] : i + 1)}">${i + 1}</button>`).join("")}</div>`;
+const bar = (pct, cls = "") => `<div class="bar ${cls}" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${clamp(pct, 0, 100)}%"></i></div>`;
+
+function strip(j){ const w = weekOf(today(), j); const started = dayNum(today(), j) >= 1; return `<div class="strip" aria-label="13-week journey">${Array.from({ length: WEEKS }, (_, i) => `<span class="${started && i + 1 < w ? "past" : started && i + 1 === w ? "now" : ""}" title="Week ${i + 1}"></span>`).join("")}</div>`; }
+
+/* ---------- Today ---------- */
+function todayView(){
+  const j = J(), d = S.date, key = dayKey(d), dd = Store.ensure(key, newDay);
+  const n = dayNum(d), inJ = inJourney(d), [q, who] = quoteFor(d), sc = dayScore(dd);
+  const status = n < 1 ? `<span class="chip">Starts in ${1 - n} day${n === 0 ? "" : "s"}</span>` : n > TOTAL_DAYS ? `<span class="chip ember">Journey complete</span>` : `<span class="chip">Day ${n} of ${TOTAL_DAYS}</span><span class="chip ember">Week ${weekOf(d)}</span>`;
+  const habits = j.habits.length ? j.habits.map(h => `<label class="row" style="gap:10px"><input type="checkbox" class="check" id="h-${esc(h.id)}" ${bind(key, "habits." + h.id)} ${dd.habits[h.id] ? "checked" : ""}><span class="${dd.habits[h.id] ? "done-text" : ""}">${esc(h.name)}</span></label>`).join("") : `<p class="muted">No habits yet. Add up to 8 in Habits.</p>`;
+  const hours = Array.from({ length: 17 }, (_, i) => i + 6);
+  return `
+  <div class="head"><div><div class="row">${status}</div><h1 style="margin-top:8px">${esc(fmtDate(d))}</h1></div>
+    <div class="daynav"><button class="btn icon" aria-label="Previous day" data-act="day" data-n="-1">${ICON.left}</button>
+    <button class="btn sm" data-act="day" data-n="0" ${d === today() ? "disabled" : ""}>Today</button>
+    <button class="btn icon" aria-label="Next day" data-act="day" data-n="1">${ICON.right}</button></div></div>
+  <div class="card"><div class="quote">${esc(q)}<cite>${esc(who)}</cite></div>
+    <div class="row" style="justify-content:space-between"><span class="label">Page complete</span><span class="mono">${sc}%</span></div>${bar(sc, "ember")}</div>
+  ${!inJ && n >= 1 ? `<div class="card"><p>This date is outside your current 13-week journey. Start a new journey from <b>Account & journeys</b> when you're ready for the next one.</p></div>` : ""}
+  <div class="grid2">
+    <section class="card"><div class="card-h"><h2>Morning</h2><span class="label">Set the day</span></div>
+      <div class="field"><span class="label">I'm grateful for</span><div class="num-rows">${dd.gratitude.map((g, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`g${i}`, key, `gratitude.${i}`, g, i === 0 ? "Someone who showed up for me…" : "")}</div>`).join("")}</div></div>
+      <div class="field"><label class="label" for="intent">Today I will be</label>${inp("intent", key, "intention", dd.intention, "Focused, patient, present…", "in box")}</div>
+    </section>
+    <section class="card"><div class="card-h"><h2>Today's targets</h2><span class="label">3 moves on your goals</span></div>
+      ${dd.targets.map((t, i) => `<div class="target"><input type="checkbox" class="check" aria-label="Target ${i + 1} done" id="tc${i}" ${bind(key, `targets.${i}.done`)} ${t.done ? "checked" : ""}>
+        ${inp(`tt${i}`, key, `targets.${i}.t`, t.t, ["The one that matters most","Second target","Third target"][i], "in" + (t.done ? " done-text" : ""))}
+        <select class="in" id="tg${i}" aria-label="Linked goal" ${bind(key, `targets.${i}.g`)}>${goalOpts(t.g)}</select></div>`).join("")}
+      <button class="btn sm ghost" style="align-self:flex-start" data-act="addTarget" data-doc="${esc(key)}">+ Add target</button>
+    </section>
+  </div>
+  <section class="card"><div class="card-h"><h2>Habits</h2><span class="label">${j.habits.filter(h => dd.habits[h.id]).length} / ${j.habits.length} done</span></div>
+    <div class="grid2" style="gap:10px">${habits}</div></section>
+  <section class="card"><details class="sched" ${Object.values(dd.schedule || {}).some(Boolean) ? "open" : ""}><summary><h2>Schedule</h2><span class="label">Time-block the day ▾</span></summary>
+    <div class="sched-grid">${hours.map(h => `<span class="t">${h > 12 ? h - 12 : h}:00 ${h >= 12 ? "pm" : "am"}</span>${inp(`s${h}`, key, `schedule.h${h}`, (dd.schedule || {})["h" + h] || "", "")}`).join("")}</div></details></section>
+  <section class="card"><div class="card-h"><h2>Evening</h2><span class="label">Close the loop</span></div>
+    <div class="grid2">
+      <div class="field"><span class="label">Wins today</span><div class="num-rows">${dd.wins.map((w, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`w${i}`, key, `wins.${i}`, w, i === 0 ? "Small counts. Name it." : "")}</div>`).join("")}</div></div>
+      <div class="field"><label class="label" for="les">What I learned</label>${ta("les", key, "lessons", dd.lessons, "What would you tell yourself this morning?")}</div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label class="label" for="imp">Tomorrow I'll improve by</label>${inp("imp", key, "improve", dd.improve, "One adjustment", "in box")}</div>
+      <div class="field"><label class="label" for="gpm">Tonight I'm grateful for</label>${inp("gpm", key, "gratitudePM", dd.gratitudePM, "", "in box")}</div>
+    </div>
+    <div class="grid2">
+      <div class="field"><span class="label">Mood</span>${scaleBtns(key, "mood", dd.mood, 5, ["Rough","Low","Steady","Good","Great"])}</div>
+      <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained","Low","Okay","Strong","Charged"])}</div>
+    </div>
+  </section>`;
+}
+
+/* ---------- Week ---------- */
+function weekView(){
+  const j = J(); const w = S.week || weekOf(today()); const key = weekKey(w), wd = Store.ensure(key, newWeek);
+  const start = addDays(j.start, (w - 1) * 7); const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  const due = j.goals.flatMap((g, gi) => g.milestones.filter(m => +m.week === w).map(m => ({ g, gi, m })));
+  const t = today();
+  return `
+  <div class="head"><div><span class="chip ember">Week ${w} of ${WEEKS}</span><h1 style="margin-top:8px">${esc(fmtDate(days[0], { month: "short", day: "numeric" }))} – ${esc(fmtDate(days[6], { month: "short", day: "numeric" }))}</h1></div>
+    <div class="daynav"><button class="btn icon" aria-label="Previous week" data-act="week" data-n="-1" ${w <= 1 ? "disabled" : ""}>${ICON.left}</button>
+    <button class="btn sm" data-act="week" data-n="0">This week</button>
+    <button class="btn icon" aria-label="Next week" data-act="week" data-n="1" ${w >= WEEKS ? "disabled" : ""}>${ICON.right}</button></div></div>
+  ${strip(j)}
+  <section class="card"><div class="card-h"><h2>Weekly plan</h2><span class="label">Plan Sunday, execute daily</span></div>
+    ${j.goals.length ? j.goals.map((g, i) => `<div class="field"><label class="label" for="wf${i}">Goal ${i + 1} · ${esc(g.title)}: this week's target</label>${inp(`wf${i}`, key, `focus.${g.id}`, wd.focus[g.id] || "", "What gets done this week to move this goal?", "in box")}</div>`).join("") : `<p class="muted">Add goals to plan weekly targets against them.</p>`}
+    <div class="field"><span class="label">Top priorities</span><div class="num-rows">${wd.priorities.map((p, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`wp${i}`, key, `priorities.${i}`, p, "")}</div>`).join("")}</div></div>
+  </section>
+  <section class="card"><div class="card-h"><h2>Milestones due this week</h2><span class="label">From your roadmap</span></div>
+    ${due.length ? due.map(({ g, gi, m }) => `<label class="row" style="gap:10px"><input type="checkbox" class="check" id="wm-${esc(m.id)}" data-act="ms" data-g="${esc(g.id)}" data-m="${esc(m.id)}" ${m.done ? "checked" : ""}><span class="${m.done ? "done-text" : ""}">${esc(m.text)}</span><span class="chip">Goal ${gi + 1}</span></label>`).join("") : `<p class="muted">Nothing scheduled for week ${w}. Assign milestones to weeks in Goals.</p>`}
+  </section>
+  <section class="card"><div class="card-h"><h2>Habit tracker</h2><span class="label">Tap to check off</span></div>
+    ${j.habits.length ? `<div class="hgrid"><table><thead><tr><th class="hn">Habit</th>${days.map(d => `<th>${esc(fmtDate(d, { weekday: "narrow" }))}<br><span class="mono">${parse(d).getDate()}</span></th>`).join("")}<th>Total</th></tr></thead><tbody>
+    ${j.habits.map(h => { let c = 0; const cells = days.map(d => { const dd = Store.get(dayKey(d)); const on = !!(dd && dd.habits[h.id]); if (on) c++; return `<td><button class="cell" data-act="habit" data-d="${d}" data-h="${esc(h.id)}" aria-pressed="${on}" aria-label="${esc(h.name)} on ${esc(fmtDate(d))}" ${d > t ? "disabled" : ""}></button></td>`; }).join(""); return `<tr><th class="hn">${esc(h.name)}</th>${cells}<td class="mono">${c}/7</td></tr>`; }).join("")}
+    </tbody></table></div>` : `<p class="muted">No habits yet.</p>`}
+  </section>
+  <section class="card"><div class="card-h"><h2>Weekly review</h2><span class="label">Be honest. Then adjust.</span></div>
+    <div class="grid2">
+      <div class="field"><label class="label" for="wr1">Biggest wins</label>${ta("wr1", key, "wins", wd.wins, "")}</div>
+      <div class="field"><label class="label" for="wr2">Lessons learned</label>${ta("wr2", key, "lessons", wd.lessons, "")}</div>
+      <div class="field"><label class="label" for="wr3">What got in the way</label>${ta("wr3", key, "hard", wd.hard, "")}</div>
+      <div class="field"><label class="label" for="wr4">Next week I'll change</label>${ta("wr4", key, "adjust", wd.adjust, "")}</div>
+    </div>
+    <div class="field"><span class="label">Rate the week</span>${scaleBtns(key, "score", wd.score, 10)}</div>
+  </section>`;
+}
+
+/* ---------- Goals ---------- */
+function goalsView(){
+  const j = J(); const key = "journey-" + j.id;
+  return `
+  <div class="head"><div><span class="label">13-week roadmap</span><h1 style="margin-top:4px">Goals</h1><p class="sub">Up to three goals. Make each specific, measurable, and due by ${esc(fmtDate(endDate(j), { month: "long", day: "numeric" }))}. Then break it into weekly milestones.</p></div>
+    ${j.goals.length < 3 ? `<button class="btn primary" data-act="addGoal">+ Add goal</button>` : ""}</div>
+  ${j.goals.length ? "" : `<div class="empty">No goals yet. Add your first 13-week goal.</div>`}
+  ${j.goals.map((g, gi) => { const done = g.milestones.filter(m => m.done).length, pct = g.milestones.length ? Math.round(done / g.milestones.length * 100) : 0; return `
+  <section class="card goal">
+    <div class="card-h"><span class="goal-n">GOAL ${gi + 1}</span><div class="row"><span class="mono muted" style="font-size:.85rem">${done}/${g.milestones.length} milestones</span><button class="btn sm ghost" data-act="delGoal" data-g="${esc(g.id)}">Remove</button></div></div>
+    ${inp(`gt${gi}`, key, `goals.${gi}.title`, g.title, "Run a sub-25 5K by March 1", "in")}
+    ${bar(pct, "good")}
+    <div class="grid3">
+      <div class="field"><label class="label" for="gw${gi}">Why it matters</label>${ta(`gw${gi}`, key, `goals.${gi}.why`, g.why, "Who benefits when you hit this?")}</div>
+      <div class="field"><label class="label" for="gm${gi}">How I'll measure it</label>${ta(`gm${gi}`, key, `goals.${gi}.measure`, g.measure, "The number or proof that says done")}</div>
+      <div class="field"><label class="label" for="gr${gi}">My reward</label>${ta(`gr${gi}`, key, `goals.${gi}.reward`, g.reward, "How you'll celebrate")}</div>
+    </div>
+    <div class="field"><span class="label">Milestones</span>
+      ${g.milestones.map((m, mi) => `<div class="ms"><input type="checkbox" class="check" aria-label="Milestone done" id="mc-${esc(m.id)}" data-act="ms" data-g="${esc(g.id)}" data-m="${esc(m.id)}" ${m.done ? "checked" : ""}>
+        ${inp(`mt-${m.id}`, key, `goals.${gi}.milestones.${mi}.text`, m.text, "Milestone", "in" + (m.done ? " done-text" : ""))}
+        <select class="in" id="mw-${esc(m.id)}" aria-label="Due week" ${bind(key, `goals.${gi}.milestones.${mi}.week`, 'data-num="1"')}>${Array.from({ length: WEEKS }, (_, i) => `<option value="${i + 1}" ${+m.week === i + 1 ? "selected" : ""}>Wk ${i + 1}</option>`).join("")}</select>
+        <button class="btn icon ghost" aria-label="Remove milestone" data-act="delMs" data-g="${esc(g.id)}" data-m="${esc(m.id)}">${ICON.x}</button></div>`).join("")}
+      <div class="row"><button class="btn sm" data-act="addMs" data-g="${esc(g.id)}">+ Milestone</button>${g.milestones.length ? "" : `<button class="btn sm ghost" data-act="seedMs" data-g="${esc(g.id)}">Add a checkpoint every 2 weeks</button>`}</div>
+    </div>
+  </section>`; }).join("")}`;
+}
+
+/* ---------- Habits ---------- */
+function habitsView(){
+  const j = J(); const key = "journey-" + j.id; const n = clamp(dayNum(today()), 0, TOTAL_DAYS);
+  return `
+  <div class="head"><div><span class="label">Daily non-negotiables</span><h1 style="margin-top:4px">Habits</h1><p class="sub">Keep it to the handful that move everything else. Check them off on Today or in the weekly tracker.</p></div></div>
+  <section class="card"><div class="card-h"><h2>Your habits</h2><span class="label">${j.habits.length} / 8</span></div>
+    ${j.habits.map((h, i) => `<div class="row" style="flex-wrap:nowrap">${inp(`hn${i}`, key, `habits.${i}.name`, h.name, "Habit", "in")}<button class="btn icon ghost" aria-label="Remove habit" data-act="delHabit" data-h="${esc(h.id)}">${ICON.x}</button></div>`).join("")}
+    ${j.habits.length < 8 ? `<div class="row" style="flex-wrap:nowrap"><input id="newHabit" class="in" placeholder="Add a habit, then press Enter" autocomplete="off"><button class="btn sm" data-act="addHabit">Add</button></div>
+    <div class="presets">${HABIT_PRESETS.filter(p => !j.habits.some(h => h.name === p)).slice(0, 8).map(p => `<button data-act="presetHabit" data-v="${esc(p)}">+ ${esc(p)}</button>`).join("")}</div>` : ""}
+  </section>
+  ${j.habits.map(h => { const st = habitStreak(h); let c = 0; const weeks = Array.from({ length: WEEKS }, (_, w) => `<div class="wk">${Array.from({ length: 7 }, (_, d) => { const i = w * 7 + d; const day = addDays(j.start, i); const dd = Store.get(dayKey(day)); const on = dd && dd.habits[h.id]; if (on) c++; return `<i class="${i >= n ? "future" : on ? "on" : ""}" title="${esc(fmtDate(day, { month: "short", day: "numeric" }))}"></i>`; }).join("")}</div>`).join(""); return `
+  <section class="card"><div class="card-h"><h3>${esc(h.name)}</h3><div class="row"><span class="chip good">${st.s} day streak</span><span class="chip">Best ${st.best}</span><span class="mono muted" style="font-size:.85rem">${c}/${n || 0} days</span></div></div>
+    <div class="heat" aria-label="13-week history, one column per week">${weeks}</div></section>`; }).join("")}`;
+}
+
+/* ---------- Progress ---------- */
+function spark(vals, color){
+  const W = 600, H = 120, P = 12; const n = Math.max(vals.length, 2);
+  const x = i => P + i * (W - 2 * P) / (TOTAL_DAYS - 1), y = v => H - P - (v - 1) * (H - 2 * P) / 4;
+  let path = "", started = false; const dots = [];
+  vals.forEach((v, i) => { if (v == null) { started = false; return; } path += `${started ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)} `; started = true; dots.push([x(i), y(v)]); });
+  const grid = [1, 3, 5].map(v => `<line x1="${P}" x2="${W - P}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${P}" y="${y(v) - 3}" font-size="10" fill="var(--muted)" font-family="var(--f-mono)">${v}</text>`).join("");
+  const last = dots.at(-1);
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Daily rating over the journey">${grid}<path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>${last ? `<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="${color}"/>` : ""}</svg>`;
+}
+function progressView(){
+  const j = J(), st = stats(j), rk = "journey-" + j.id, rv = j.review || {};
+  const weeks = Array.from({ length: WEEKS }, (_, i) => { const wd = Store.get(weekKey(i + 1)); return wd && wd.score ? wd.score : 0; });
+  const anyMood = st.moods.some(Boolean);
+  return `
+  <div class="head"><div><span class="label">${esc(j.title)} · ${esc(fmtDate(j.start, { month: "short", day: "numeric" }))} to ${esc(fmtDate(endDate(j), { month: "short", day: "numeric", year: "numeric" }))}</span><h1 style="margin-top:4px">Progress</h1></div></div>
+  <div class="card">${strip(j)}<div class="row" style="justify-content:space-between"><span class="label">Journey</span><span class="mono">${st.day} / ${TOTAL_DAYS} days</span></div>${bar(Math.round(st.day / TOTAL_DAYS * 100))}</div>
+  <div class="stats">
+    <div class="stat"><span class="label">Journal streak</span><span class="v">${st.streak}<small> days</small></span><span class="muted" style="font-size:.8rem">Best ${st.best}</span></div>
+    <div class="stat"><span class="label">Days journaled</span><span class="v">${st.journal}<small> / ${st.day}</small></span><span class="muted" style="font-size:.8rem">${st.day ? Math.round(st.journal / st.day * 100) : 0}% consistency</span></div>
+    <div class="stat"><span class="label">Habit hit rate</span><span class="v">${st.habitPct}<small>%</small></span><span class="muted" style="font-size:.8rem">${j.habits.length} habits tracked</span></div>
+    <div class="stat"><span class="label">Targets hit</span><span class="v">${st.targetPct}<small>%</small></span><span class="muted" style="font-size:.8rem">${st.tDone} of ${st.tSet} set</span></div>
+  </div>
+  <section class="card"><div class="card-h"><h2>Goals</h2><span class="label">${st.msDone}/${st.msTotal} milestones</span></div>
+    ${j.goals.length ? j.goals.map((g, i) => { const d = g.milestones.filter(m => m.done).length, p = g.milestones.length ? Math.round(d / g.milestones.length * 100) : 0; return `<div class="field"><div class="row" style="justify-content:space-between"><span><span class="goal-n">GOAL ${i + 1}</span> ${esc(g.title)}</span><span class="mono">${p}%</span></div>${bar(p, "good")}</div>`; }).join("") : `<p class="muted">No goals yet.</p>`}
+  </section>
+  <div class="grid2">
+    <section class="card"><div class="card-h"><h2>Mood</h2><span class="label">1–5, by day</span></div>${anyMood ? spark(st.moods, "var(--violet)") : `<div class="empty">Rate your mood each evening to see the trend.</div>`}</section>
+    <section class="card"><div class="card-h"><h2>Energy</h2><span class="label">1–5, by day</span></div>${st.energy.some(Boolean) ? spark(st.energy, "var(--ember)") : `<div class="empty">Rate your energy each evening to see the trend.</div>`}</section>
+  </div>
+  <section class="card"><div class="card-h"><h2>Weekly scores</h2><span class="label">From weekly reviews</span></div>
+    <div style="display:grid;grid-template-columns:repeat(13,1fr);gap:6px;align-items:end;height:120px">${weeks.map((s, i) => `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end"><span class="mono" style="font-size:.7rem">${s || ""}</span><div style="width:100%;border-radius:4px 4px 0 0;background:${s ? "var(--violet)" : "var(--line)"};height:${s ? s * 8 : 3}px"></div><span class="mono muted" style="font-size:.65rem">${i + 1}</span></div>`).join("")}</div>
+  </section>
+  <section class="card"><div class="card-h"><h2>Quarterly review</h2><span class="label">${weekOf(today()) >= 12 ? "It's time" : "Unlocks fully in week 13"}</span></div>
+    <p class="muted">At the end of 13 weeks, look back before you plan the next journey.</p>
+    ${j.goals.map((g, i) => `<div class="field"><span class="label">How did "${esc(g.title)}" land? (1–10)</span>${scaleBtns(rk, `review.g_${g.id}`, rv["g_" + g.id] || 0, 10)}</div>`).join("")}
+    <div class="grid2">
+      <div class="field"><label class="label" for="qr1">Proudest moments</label>${ta("qr1", rk, "review.proud", rv.proud || "", "")}</div>
+      <div class="field"><label class="label" for="qr2">What I learned about myself</label>${ta("qr2", rk, "review.learned", rv.learned || "", "")}</div>
+      <div class="field"><label class="label" for="qr3">Keep / stop / start</label>${ta("qr3", rk, "review.ksc", rv.ksc || "", "")}</div>
+      <div class="field"><label class="label" for="qr4">Next 13 weeks I'll focus on</label>${ta("qr4", rk, "review.next", rv.next || "", "")}</div>
+    </div>
+    <button class="btn primary" style="align-self:flex-start" data-act="sheet" data-v="newJourney">Start my next 13 weeks</button>
+  </section>`;
+}
+
+/* ---------- Duo ---------- */
+function duoView(){
+  const p = profile(); const me = Duo.summary();
+  const partnerName = pt => (S.profiles[pt.id] && S.profiles[pt.id].name) || pt.nick || "Your partner";
+  const cards = S.partners.length ? S.partners.map(pt => { const name = partnerName(pt); const cheeredMe = pt.cheers && pt.cheers[Store.uid] && Date.now() - pt.cheers[Store.uid] < 864e5 * 2; const iCheered = p.cheers && p.cheers[pt.id] && Date.now() - p.cheers[pt.id] < 6e4 * 60 * 12; return `
+    <section class="card"><div class="partner"><div class="avatar" aria-hidden="true">${esc(name.trim().charAt(0).toUpperCase() || "?")}</div>
+      <div><h2>${esc(name)}</h2><p class="muted" style="font-size:.85rem">Day ${+pt.day || 0} of ${TOTAL_DAYS} · updated ${esc(new Date(pt.updated || 0).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }))}</p></div></div>
+      ${cheeredMe ? `<span class="chip ember" style="align-self:flex-start">${esc(name)} cheered you on</span>` : ""}
+      <div class="grid3"><div class="stat"><span class="label">Streak</span><span class="v">${+pt.streak || 0}</span></div><div class="stat"><span class="label">Habits today</span><span class="v">${+pt.habitsToday || 0}<small>/${+pt.habitsTotal || 0}</small></span></div><div class="stat"><span class="label">Today's page</span><span class="v">${+pt.todayScore || 0}<small>%</small></span></div></div>
+      ${(pt.goals || []).map((g, i) => `<div class="field"><div class="row" style="justify-content:space-between"><span><span class="goal-n">GOAL ${i + 1}</span> ${esc(g.title)}</span><span class="mono">${+g.pct || 0}%</span></div>${bar(+g.pct || 0, "good")}</div>`).join("")}
+      ${pt.win ? `<div class="quote">${esc(pt.win)}<cite>Shared win</cite></div>` : ""}
+      ${me ? `<button class="btn ${iCheered ? "" : "ember"}" style="align-self:flex-start" data-act="cheer" data-id="${esc(pt.id)}" ${iCheered ? "disabled" : ""}>${iCheered ? "Cheer sent" : "Send a cheer"}</button>` : ""}
+    </section>`; }).join("") : `<div class="empty">${Store.mode === "cloud" ? "When your partner opens GreatestMe and turns on sharing, their progress shows up here." : "On this device, partners appear here once a second account turns on sharing."}</div>`;
+  return `
+  <div class="head"><div><span class="label">Accountability, not access</span><h1 style="margin-top:4px">Duo</h1><p class="sub">Your journal stays private. If you turn sharing on, your partner sees only your streak, habit and target rates, goal titles with progress, and the one win you choose to share.</p></div></div>
+  <section class="card"><div class="row" style="justify-content:space-between"><div><h2>Share my progress</h2><p class="muted" style="font-size:.88rem">${p.share ? "Sharing is on." : "Sharing is off. Nothing leaves your journal."}</p></div>
+    <button class="btn ${p.share ? "" : "primary"}" data-act="toggleShare">${p.share ? "Turn off" : "Turn on"}</button></div>
+    ${p.share ? `<div class="field"><label class="label" for="swin">Win to share</label><input id="swin" class="in box" data-doc="profile" data-f="sharedWin" value="${esc(p.sharedWin || "")}" placeholder="Something you want them to see" maxlength="200" autocomplete="off"></div>` : ""}
+  </section>
+  ${cards}`;
+}
+
+/* ---------- Sheets ---------- */
+function sheetView(){
+  const p = profile(); const j = J(); let body = "";
+  if (S.sheet === "settings") {
+    const journeys = Object.keys(Store.docs).filter(k => k.startsWith("journey-")).map(k => Store.docs[k]).sort((a, b) => b.created - a.created);
+    body = `<div class="card-h"><h2>Account & journeys</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div>
+      <div class="field"><label class="label" for="nick">Name on your journal</label><input id="nick" class="in box" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" autocomplete="off"></div>
+      <p class="muted" style="font-size:.85rem">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you, even from the app's owner." : `Signed in on this device as <b>${esc(Store.accountName)}</b>. Entries are stored in this browser only; export a backup regularly.`}</p>
+      <div class="field"><span class="label">Journeys</span>${journeys.map(x => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0"><div><b>${esc(x.title)}</b><div class="muted mono" style="font-size:.78rem">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
+      <button class="btn sm" style="align-self:flex-start" data-act="sheet" data-v="newJourney">+ New 13-week journey</button></div>
+      <div class="field"><span class="label">Journey start date</span><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"><span class="muted" style="font-size:.8rem">Changing this shifts which entries land on which day.</span></div>
+      <div class="field"><span class="label">Backup</span><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></div>
+      ${Store.mode === "local" ? `<div class="row"><button class="btn sm" data-act="signout">Sign out</button></div>` : ""}`;
+  } else if (S.sheet === "newJourney") {
+    body = `<div class="card-h"><h2>Start a new journey</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div>
+      <p class="muted">Your current journey is kept. Habits carry over; set fresh goals.</p>
+      <div class="field"><label class="label" for="njt">Name</label><input id="njt" class="in box" value="${esc("Journey " + (Object.keys(Store.docs).filter(k => k.startsWith("journey-")).length + 1))}"></div>
+      <div class="field"><label class="label" for="njs">Start date</label><input id="njs" type="date" class="in box" value="${esc(nextMonday())}"></div>
+      <button class="btn primary" data-act="createJourney">Create journey</button>`;
+  }
+  return `<div class="sheet-bg" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true">${body}</div></div>`;
+}
+function nextMonday(){ const d = new Date(); const dow = d.getDay(); if (dow !== 1) d.setDate(d.getDate() + ((8 - dow) % 7)); return iso(d); }
+
+/* ---------- Gate (local sign-in) ---------- */
+function gateView(){
+  const g = S.gate; const accts = Accounts.list();
+  return `<div class="gate"><form class="gate-card" id="gateForm" novalidate>
+    <div><div class="gate-brand">Greatest<b>Me</b></div><p class="muted" style="margin-top:8px">A 13-week journal for goals, habits and daily wins.</p></div>
+    <div class="seg"><button type="button" data-act="gmode" data-v="signin" aria-pressed="${g.mode === "signin"}">Sign in</button><button type="button" data-act="gmode" data-v="create" aria-pressed="${g.mode === "create"}">Create account</button></div>
+    ${g.mode === "signin" && accts.length ? `<div class="presets">${accts.map(a => `<button type="button" data-act="pickAcct" data-v="${esc(a.name)}" aria-pressed="${g.name === a.name}">${esc(a.name)}</button>`).join("")}</div>` : ""}
+    <div class="field"><label class="label" for="gname">Your name</label><input id="gname" class="in box" value="${esc(g.name || "")}" autocomplete="username" required></div>
+    <div class="field"><label class="label" for="gpass">Passcode</label><input id="gpass" type="password" class="in box" autocomplete="${g.mode === "create" ? "new-password" : "current-password"}" required></div>
+    ${g.mode === "create" ? `<div class="field"><label class="label" for="gpass2">Confirm passcode</label><input id="gpass2" type="password" class="in box" autocomplete="new-password"></div>` : ""}
+    ${g.err ? `<p class="err" role="alert">${esc(g.err)}</p>` : ""}
+    <button class="btn primary" type="submit">${g.mode === "create" ? "Create my account" : "Sign in"}</button>
+    <p class="muted" style="font-size:.8rem">Accounts on this device keep separate, passcode-protected journals. Open GreatestMe in Claude to sync across devices with your Claude account.</p>
+  </form></div>`;
+}
+
+/* ---------- Onboarding ---------- */
+function onboardView(){
+  const o = S.onboard || (S.onboard = { step: 1, nick: Store.accountName || "", start: today(), goals: [{ title: "", why: "", measure: "" }, { title: "", why: "", measure: "" }, { title: "", why: "", measure: "" }], habits: [] });
+  const steps = `<div class="steps">${[1, 2, 3].map(i => `<i class="${i <= o.step ? "on" : ""}"></i>`).join("")}</div>`;
+  let body = "";
+  if (o.step === 1) body = `<h2>Let's set up your journal</h2>
+    <div class="field"><label class="label" for="onick">What should we call you?</label><input id="onick" class="in box" value="${esc(o.nick)}" autocomplete="off" placeholder="Your first name"></div>
+    <div class="field"><label class="label" for="ostart">Day 1 of your 13 weeks</label><input id="ostart" type="date" class="in box" value="${esc(o.start)}"><div class="row"><button type="button" class="btn sm" data-act="ostart" data-v="${today()}">Today</button><button type="button" class="btn sm" data-act="ostart" data-v="${nextMonday()}">Next Monday</button></div></div>`;
+  if (o.step === 2) body = `<h2>Your 13-week goals</h2><p class="muted">One to three. Make each specific enough that you'd know on day 91 whether you hit it.</p>
+    ${o.goals.map((g, i) => `<div class="field"><label class="label" for="og${i}">Goal ${i + 1}${i ? " (optional)" : ""}</label><input id="og${i}" class="in box" data-og="${i}" value="${esc(g.title)}" placeholder="${["Save $5,000 for the emergency fund","Run a sub-25 5K","Launch the first product"][i]}" autocomplete="off"></div>`).join("")}`;
+  if (o.step === 3) body = `<h2>Daily habits</h2><p class="muted">Pick the few that make everything else easier. You can change these later.</p>
+    <div class="presets">${HABIT_PRESETS.map(p => `<button type="button" data-act="oh" data-v="${esc(p)}" aria-pressed="${o.habits.includes(p)}">${esc(p)}</button>`).join("")}</div>
+    <div class="row" style="flex-wrap:nowrap"><input id="ohnew" class="in box" placeholder="Your own habit" autocomplete="off"><button type="button" class="btn sm" data-act="ohadd">Add</button></div>
+    ${o.habits.filter(h => !HABIT_PRESETS.includes(h)).map(h => `<span class="chip">${esc(h)}</span>`).join(" ")}`;
+  return `<div class="gate"><div class="gate-card"><div class="gate-brand">Greatest<b>Me</b></div>${steps}${body}
+    ${S.onboardErr ? `<p class="err" role="alert">${esc(S.onboardErr)}</p>` : ""}
+    <div class="row" style="justify-content:space-between">${o.step > 1 ? `<button class="btn" data-act="oback">Back</button>` : "<span></span>"}<button class="btn primary" data-act="onext">${o.step < 3 ? "Continue" : "Open my journal"}</button></div></div></div>`;
+}
+function captureOnboard(){
+  const o = S.onboard; if (!o) return;
+  const n = $("#onick"); if (n) o.nick = n.value; const s = $("#ostart"); if (s && s.value) o.start = s.value;
+  document.querySelectorAll("[data-og]").forEach(el => { o.goals[+el.dataset.og].title = el.value; });
+}
+
+/* ============================ events ============================ */
+function onInput(e){
+  const el = e.target; if (!el.dataset || !el.dataset.doc) return;
+  const key = el.dataset.doc, f = el.dataset.f; const doc = Store.get(key); if (!doc) return;
+  let v = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.num) v = +v;
+  if (key.startsWith("journey-") && f === "start" && !v) return;
+  setPath(doc, f, v); Store.touch(key);
+  if (el.type === "checkbox" || el.tagName === "SELECT" || el.type === "date") render();
+}
+async function onClick(e){
+  const t = e.target.closest("[data-act]"); if (!t) return;
+  const a = t.dataset.act; const j = J();
+  if (a === "closebg" && e.target !== t) return;
+  switch (a) {
+    case "nav": S.view = t.dataset.v; if (S.view === "today") S.date = today(); if (S.view === "week") S.week = null; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); break;
+    case "day": { const n = +t.dataset.n; S.date = n === 0 ? today() : addDays(S.date, n); render(); break; }
+    case "week": { const n = +t.dataset.n; S.week = n === 0 ? weekOf(today()) : clamp((S.week || weekOf(today())) + n, 1, WEEKS); render(); break; }
+    case "scale": { const doc = Store.get(t.dataset.doc); const n = +t.dataset.n; setPath(doc, t.dataset.f, getPath(doc, t.dataset.f) === n ? 0 : n); Store.touch(t.dataset.doc); render(); break; }
+    case "addTarget": { const doc = Store.get(t.dataset.doc); doc.targets.push({ t: "", g: "", done: false }); Store.touch(t.dataset.doc); render(); break; }
+    case "habit": { const k = dayKey(t.dataset.d); const dd = Store.ensure(k, newDay); dd.habits[t.dataset.h] = !dd.habits[t.dataset.h]; Store.touch(k); render(); break; }
+    case "ms": { const g = j.goals.find(x => x.id === t.dataset.g); const m = g && g.milestones.find(x => x.id === t.dataset.m); if (m) { m.done = !m.done; Store.touch("journey-" + j.id); render(); } break; }
+    case "addGoal": if (j.goals.length < 3) { j.goals.push({ id: uid(), title: "", why: "", measure: "", reward: "", milestones: [] }); Store.touch("journey-" + j.id); render(); const el = $(`#gt${j.goals.length - 1}`); el && el.focus(); } break;
+    case "delGoal": if (t.dataset.confirm === "1") { j.goals = j.goals.filter(g => g.id !== t.dataset.g); Store.touch("journey-" + j.id); render(); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to remove"; t.classList.add("ember"); } break;
+    case "addMs": { const g = j.goals.find(x => x.id === t.dataset.g); const last = g.milestones.at(-1); g.milestones.push({ id: uid(), text: "", week: last ? Math.min(WEEKS, +last.week + 1) : weekOf(today()), done: false }); Store.touch("journey-" + j.id); render(); break; }
+    case "seedMs": { const g = j.goals.find(x => x.id === t.dataset.g); [2, 4, 6, 8, 10, 12, 13].forEach((w, i) => g.milestones.push({ id: uid(), text: w === 13 ? "Goal achieved" : `Checkpoint ${i + 1}`, week: w, done: false })); Store.touch("journey-" + j.id); render(); break; }
+    case "delMs": { const g = j.goals.find(x => x.id === t.dataset.g); g.milestones = g.milestones.filter(m => m.id !== t.dataset.m); Store.touch("journey-" + j.id); render(); break; }
+    case "addHabit": addHabit($("#newHabit").value); break;
+    case "presetHabit": addHabit(t.dataset.v); break;
+    case "delHabit": if (t.dataset.confirm === "1") { j.habits = j.habits.filter(h => h.id !== t.dataset.h); Store.touch("journey-" + j.id); render(); } else { t.dataset.confirm = "1"; t.classList.add("ember"); t.setAttribute("aria-label", "Tap again to remove"); t.title = "Tap again to remove"; } break;
+    case "toggleShare": { const p = profile(); p.share = !p.share; Store.touch("profile"); render(); Duo.publish(); toast(p.share ? "Sharing turned on" : "Sharing turned off"); break; }
+    case "cheer": { const p = profile(); p.cheers = p.cheers || {}; p.cheers[t.dataset.id] = Date.now(); Store.touch("profile"); await Duo.publish(); toast("Cheer sent"); break; }
+    case "sheet": S.sheet = t.dataset.v; render(); break;
+    case "close": case "closebg": S.sheet = null; render(); break;
+    case "switchJ": profile().active = t.dataset.id; Store.touch("profile"); S.sheet = null; S.date = today(); S.week = null; render(); break;
+    case "createJourney": { const start = $("#njs").value || nextMonday(); const nj = createJourney({ title: $("#njt").value.trim() || "Journey", start, goals: [], habits: j.habits.map(h => h.name) }); profile().active = nj.id; Store.touch("profile"); S.sheet = null; S.view = "goals"; render(); toast("New journey created. Set your goals."); break; }
+    case "export": doExport(); break;
+    case "signout": await Store.flush(); ls.del("gm:session"); location.reload(); break;
+    case "gmode": S.gate.mode = t.dataset.v; S.gate.err = ""; render(); break;
+    case "pickAcct": S.gate.name = t.dataset.v; render(); $("#gpass").focus(); break;
+    case "ostart": $("#ostart").value = t.dataset.v; break;
+    case "oh": { captureOnboard(); const o = S.onboard; const v = t.dataset.v; o.habits = o.habits.includes(v) ? o.habits.filter(x => x !== v) : o.habits.concat(v).slice(0, 8); render(); break; }
+    case "ohadd": { const v = $("#ohnew").value.trim(); if (v && !S.onboard.habits.includes(v)) S.onboard.habits.push(v); render(); break; }
+    case "oback": captureOnboard(); S.onboard.step--; S.onboardErr = ""; render(); break;
+    case "onext": {
+      captureOnboard(); const o = S.onboard; S.onboardErr = "";
+      if (o.step === 1 && !o.nick.trim()) { S.onboardErr = "Add a name so your journal knows who it belongs to."; render(); break; }
+      if (o.step === 2 && !o.goals.some(g => g.title.trim())) { S.onboardErr = "Add at least one goal. You can refine it later."; render(); break; }
+      if (o.step < 3) { o.step++; render(); break; }
+      const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits });
+      Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {} }; Store.touch("profile");
+      S.onboard = null; S.view = "today"; S.date = today(); render(); toast("Your journal is ready"); break;
+    }
+  }
+}
+function addHabit(name){ const j = J(); name = (name || "").trim(); if (!name || j.habits.length >= 8) return; j.habits.push({ id: uid(), name }); Store.touch("journey-" + j.id); render(); const n = $("#newHabit"); n && n.focus(); }
+
+async function doExport(){
+  await Store.flush();
+  const data = JSON.stringify({ app: "GreatestMe", version: 1, exported: new Date().toISOString(), docs: Store.docs }, null, 2);
+  const name = `greatestme-backup-${today()}.json`;
+  try {
+    const dl = window.claude && window.claude.use ? await claude.use("downloads") : null;
+    if (dl) { await dl.save({ filename: name, data }); toast("Backup ready"); return; }
+  } catch (e) { if (e && e.code && e.code !== "unavailable") { toast("Backup cancelled"); return; } }
+  const showText = () => { const out = $("#exportOut"); if (out) out.innerHTML = `<p class="muted" style="font-size:.8rem">Copy this text and keep it somewhere safe.</p><textarea class="in" readonly style="min-height:120px">${esc(data)}</textarea>`; };
+  if (window.claude) return showText();
+  try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast("Backup downloaded"); }
+  catch { const out = $("#exportOut"); if (out) { out.innerHTML = `<textarea class="in" readonly style="min-height:120px">${esc(data)}</textarea>`; } }
+}
+async function doImport(file){
+  try {
+    const obj = JSON.parse(await file.text()); if (!obj || obj.app !== "GreatestMe" || !obj.docs || typeof obj.docs !== "object") throw 0;
+    Object.entries(obj.docs).forEach(([k, v]) => { if (/^(profile|journey-[\w-]+|day-[\w-]+|week-[\w-]+)$/.test(k) && v && typeof v === "object") { Store.docs[k] = v; Store.dirty.set(k, true); } });
+    await Store.flush(); S.sheet = null; render(); toast("Backup imported");
+  } catch { toast("That file isn't a GreatestMe backup"); }
+}
+
+document.addEventListener("input", onInput);
+document.addEventListener("change", e => { if (e.target.id === "importFile" && e.target.files[0]) doImport(e.target.files[0]); else if (e.target.type === "checkbox" || e.target.tagName === "SELECT" || e.target.type === "date") { /* handled by input */ } });
+document.addEventListener("click", onClick);
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.id === "newHabit") { e.preventDefault(); addHabit(e.target.value); }
+  if (e.key === "Enter" && e.target.id === "ohnew") { e.preventDefault(); $('[data-act="ohadd"]').click(); }
+  if (e.key === "Escape" && S.sheet) { S.sheet = null; render(); }
+});
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "gateForm") return; e.preventDefault();
+  const g = S.gate; const name = $("#gname").value, pass = $("#gpass").value; g.name = name;
+  try {
+    let acct;
+    if (g.mode === "create") { if (pass !== ($("#gpass2").value)) throw new Error("Passcodes don't match."); acct = await Accounts.create(name, pass); }
+    else acct = await Accounts.signIn(name, pass);
+    ls.set("gm:session", { id: acct.id }); await startLocal(acct);
+  } catch (err) { g.err = err.message || "Something went wrong."; render(); }
+});
+window.addEventListener("pagehide", () => { if (Store.dirty.size) Store.flush(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden && Store.dirty.size) Store.flush(); });
+
+/* ============================ boot ============================ */
+async function startLocal(acct){
+  Store.mode = "local"; Store.uid = acct.id; Store.accountName = acct.name; S.gate = null;
+  await Store.loadAll(); Duo.start(); render();
+}
+function showGate(){ const accts = Accounts.list(); S.gate = { mode: accts.length ? "signin" : "create", name: accts.length === 1 ? accts[0].name : "", err: "" }; render(); }
+async function bootLocal(){
+  const sess = ls.get("gm:session"); const acct = sess && Accounts.list().find(a => a.id === sess.id);
+  if (acct) await startLocal(acct); else showGate();
+}
+async function boot(){
+  if (!(window.claude && typeof window.claude.use === "function")) return bootLocal();
+  try {
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    User = user; const id = user ? await user.id() : null;
+    if (!db || !id) return bootLocal();
+    Store.mode = "cloud"; Store.db = db; Store.uid = id; Store.col = db.collection("data/users/" + id);
+    try { const me = await user.me(); Store.accountName = (me && me.name) || ""; } catch {}
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 10000));
+    await Promise.race([Store.loadAll(), timeout]);
+    Duo.start(); render();
+  } catch (e) {
+    $("#root").innerHTML = `<div class="gate"><div class="gate-card"><div class="gate-brand">Greatest<b>Me</b></div><p>Your journal didn't load. Check your connection, then reopen this page.</p><button class="btn" id="useLocal">Use an on-device journal instead</button></div></div>`;
+    $("#useLocal").onclick = () => bootLocal();
+  }
+}
+boot();
+})();
+</script>
