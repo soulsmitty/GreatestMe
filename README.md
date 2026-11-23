@@ -21,12 +21,16 @@ opt-in "Duo" board for accountability.
 | Journeys | Unlimited consecutive 13-week journeys; habits carry over. |
 | Backup | Export / import JSON. |
 
-## Look and devices
+## Experience
 
-- **Theme:** Protocol / Pocketbook suite (cool canvas, white cards, hairlines, Plus Jakarta Sans + JetBrains Mono, slashed-zero figures). Auto / Light / Dark per device; each person picks their own accent.
-- **iPhone:** bottom tabs, 16px inputs (no iOS zoom), safe areas, tab bar hides while the keyboard is up, Home Screen badge shows habits left today.
-- **iPad + Apple Pencil:** an Ink tab with college-ruled, wide-ruled, dot, graph or blank paper per day. Pencil writes with pressure, fingers scroll (palm rejection), optional finger drawing, highlighter, eraser, undo/redo, multiple pages. It only appears on iPad or when a stylus is used. Every text field also accepts Scribble.
-- **Siri & Shortcuts:** deep links (`#today`, `#morning`, `#evening`, `#habits`, `#week`, `#ink`, `#progress`, `#duo`) for "Open URLs" shortcuts and time-of-day automations. Settings lists them with Copy buttons.
+- **Onboarding:** welcome, your name, pick your look, Day 1, goals, habits, then press-and-hold to commit.
+- **Today:** time-of-day greeting and scene, three progress rings (morning, targets, evening), streak flame, this week's check-ins.
+- **Guided rituals:** Morning (one-minute breathing, gratitude, intention, three targets) and Evening (wins, lessons, tomorrow, mood and energy), one prompt per screen.
+- **Celebrations:** confetti and a soft chime for targets, all habits done, a full page, milestones and streaks (3, 7, 14, 21, 30, 45, 60, 75, 91 days). Both can be turned off in Settings.
+- **Theme suites (Settings → Look, follows your account):** GreatestMe (house purple, light/dark), Synthwave (neon grid), Martin ('90s sitcom colour-blocking), Studio (minimal, light/dark).
+- **iPhone:** floating tab bar, 16px inputs (no iOS zoom), safe areas, Home Screen badge.
+- **iPad + Apple Pencil:** Ink tab with college-ruled, wide-ruled, dot, graph or blank paper; pressure, palm rejection, highlighter, eraser, undo/redo, multiple pages. Scribble works in every text field.
+- **Siri & Shortcuts:** deep links (`#today`, `#morning`, `#evening`, `#habits`, `#week`, `#ink`, `#progress`, `#duo`, `#preferences`) for Open URLs shortcuts and time-of-day automations.
 
 ## Files
 

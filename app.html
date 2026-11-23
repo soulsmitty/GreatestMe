@@ -2,224 +2,412 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@600;800&family=Bungee&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
-/* Protocol / Pocketbook theme suite: cool canvas, white cards, hairlines, mono eyebrows, slashed-zero figures.
-   Layout: left rail on iPad/Mac, bottom tabs on iPhone; one working column. Accent is per person (--acc / --acc2). */
+/* Theme suites. Default "greatestme": the deep iMessage purple with frosted glass (light + dark).
+   "synthwave": neon sunset over a grid (dark). "martin": loud '90s sitcom colour-blocking (bright).
+   "studio": quiet cool-grey (light + dark). Layout: left rail on iPad/Mac, bottom tabs on iPhone; one working column. */
 :root{
-  --canvas:#F2F4F7; --surface:#FFFFFF; --raised:#F8F9FB; --line:#E8EBF0; --ink:#0F1420; --muted:#6C7688; --faint:#949EB0;
-  --acc:#8B5CF6; --acc2:#F59E0B; --good:#10B981; --bad:#F43F5E;
-  --acc-soft:color-mix(in srgb,var(--acc) 12%,var(--surface)); --acc2-soft:color-mix(in srgb,var(--acc2) 14%,var(--surface)); --good-soft:color-mix(in srgb,var(--good) 14%,var(--surface));
-  --on-acc:#FFFFFF;
-  --shadow-card:0 1px 2px rgb(16 24 40 / .04),0 1px 3px rgb(16 24 40 / .06); --shadow-lift:0 4px 12px rgb(16 24 40 / .08),0 2px 4px rgb(16 24 40 / .04);
-  --paper:#FFFFFF; --rule:#A9C6E8; --margin:#E8868B;
-  --bg:var(--canvas); --violet:var(--acc); --violet-soft:var(--acc-soft); --ember:var(--acc2); --ember-soft:var(--acc2-soft); --warn:#F59E0B;
-  --f-display:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --f-body:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --canvas:#F4F0FF; --surface:rgb(255 255 255 / .72); --solid:#FFFFFF; --raised:#F7F4FF; --line:rgb(91 33 182 / .12); --ink:#1A1033; --muted:#5E5480; --faint:#8E86AD;
+  --acc:#7C3AED; --acc2:#2F7BF6; --good:#10B981; --bad:#F43F5E; --on-acc:#FFFFFF;
+  --acc-soft:color-mix(in srgb,var(--acc) 13%,transparent); --acc2-soft:color-mix(in srgb,var(--acc2) 14%,transparent); --good-soft:color-mix(in srgb,var(--good) 16%,transparent);
+  --shadow-card:0 1px 1px rgb(40 10 90 / .04),0 8px 28px rgb(70 20 140 / .08); --shadow-lift:0 12px 40px rgb(70 20 140 / .16);
+  --glass:blur(22px) saturate(1.5); --border-w:1px; --r:20px; --r-sm:12px; --press:scale(.97); --btn-shadow:none;
+  --glow-a:rgb(124 58 237 / .35); --glow-b:rgb(236 72 153 / .22); --glow-c:rgb(47 123 246 / .18);
+  --paper:#FFFFFF;
+  --f-display:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --f-body:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --r:14px; --shadow:var(--shadow-lift);
+  --h-case:none; --h-track:-.025em; --h-weight:800; --h-shadow:none;
+  --bg:var(--canvas); --violet:var(--acc); --violet-soft:var(--acc-soft); --ember:var(--acc2); --ember-soft:var(--acc2-soft); --warn:#F59E0B;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --canvas:#0B0E14; --surface:#141922; --raised:#1B212C; --line:#232A36; --ink:#E8ECF3; --muted:#8F9AAD; --faint:#6E798C;
-  --shadow-card:0 1px 2px rgb(0 0 0 / .3),0 1px 3px rgb(0 0 0 / .2); --shadow-lift:0 4px 14px rgb(0 0 0 / .4),0 2px 6px rgb(0 0 0 / .25);
-  --paper:#F7F5EF; --rule:#9DB8DA; --margin:#E07A80; color-scheme:dark}}
+  --canvas:#0D0820; --surface:rgb(255 255 255 / .06); --solid:#1A1233; --raised:rgb(255 255 255 / .09); --line:rgb(255 255 255 / .1); --ink:#F3EEFF; --muted:#B4A9D6; --faint:#8379A6;
+  --acc:#A78BFA; --acc2:#5B9CFF; --on-acc:#160C33; --shadow-card:0 1px 0 rgb(255 255 255 / .04) inset,0 10px 30px rgb(0 0 0 / .35); --shadow-lift:0 16px 50px rgb(0 0 0 / .5);
+  --glow-a:rgb(124 58 237 / .55); --glow-b:rgb(236 72 153 / .32); --glow-c:rgb(47 123 246 / .28); --paper:#FAF8F3; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --canvas:#0B0E14; --surface:#141922; --raised:#1B212C; --line:#232A36; --ink:#E8ECF3; --muted:#8F9AAD; --faint:#6E798C;
-  --shadow-card:0 1px 2px rgb(0 0 0 / .3),0 1px 3px rgb(0 0 0 / .2); --shadow-lift:0 4px 14px rgb(0 0 0 / .4),0 2px 6px rgb(0 0 0 / .25);
-  --paper:#F7F5EF; --rule:#9DB8DA; --margin:#E07A80; color-scheme:dark}
+  --canvas:#0D0820; --surface:rgb(255 255 255 / .06); --solid:#1A1233; --raised:rgb(255 255 255 / .09); --line:rgb(255 255 255 / .1); --ink:#F3EEFF; --muted:#B4A9D6; --faint:#8379A6;
+  --acc:#A78BFA; --acc2:#5B9CFF; --on-acc:#160C33; --shadow-card:0 1px 0 rgb(255 255 255 / .04) inset,0 10px 30px rgb(0 0 0 / .35); --shadow-lift:0 16px 50px rgb(0 0 0 / .5);
+  --glow-a:rgb(124 58 237 / .55); --glow-b:rgb(236 72 153 / .32); --glow-c:rgb(47 123 246 / .28); --paper:#FAF8F3; color-scheme:dark}
+/* Synthwave: always dark */
+:root[data-suite="synthwave"],.pv[data-suite="synthwave"]{
+  --canvas:#0B0320; --surface:rgb(24 6 48 / .78); --solid:#1A0838; --raised:rgb(255 46 151 / .08); --line:rgb(255 46 151 / .38); --ink:#FBEFFF; --muted:#C9A7E8; --faint:#9479B5;
+  --acc:#FF2E97; --acc2:#00E5FF; --good:#3CFFA0; --bad:#FF4D6D; --on-acc:#14021F; --warn:#FFD319;
+  --shadow-card:0 0 0 1px rgb(255 46 151 / .12),0 0 24px rgb(255 46 151 / .14); --shadow-lift:0 0 40px rgb(0 229 255 / .25);
+  --glass:blur(10px); --r:14px; --r-sm:8px; --glow-a:rgb(255 46 151 / .35); --glow-b:rgb(0 229 255 / .2); --glow-c:rgb(255 211 25 / .15); --paper:#FAF8F3;
+  --f-display:"Orbitron", "Plus Jakarta Sans", system-ui, sans-serif; --h-case:uppercase; --h-track:.04em; --h-weight:800; --h-shadow:0 0 12px rgb(255 46 151 / .65),0 0 2px rgb(255 255 255 / .6);
+  color-scheme:dark}
+/* Martin: '90s sitcom colour-blocking, always bright */
+:root[data-suite="martin"],.pv[data-suite="martin"]{
+  --canvas:#FFF1D6; --surface:#FFFFFF; --solid:#FFFFFF; --raised:#FFF8EA; --line:#151515; --ink:#151515; --muted:#4A4036; --faint:#7C6F60;
+  --acc:#7B2CBF; --acc2:#E63946; --good:#1E9E4A; --bad:#E63946; --on-acc:#FFFFFF; --warn:#FFB703;
+  --shadow-card:5px 5px 0 #151515; --shadow-lift:8px 8px 0 #151515; --btn-shadow:3px 3px 0 #151515; --press:translate(3px,3px);
+  --glass:none; --border-w:3px; --r:18px; --r-sm:12px; --glow-a:transparent; --glow-b:transparent; --glow-c:transparent; --paper:#FFFFFF;
+  --f-display:"Bungee", "Arial Black", system-ui, sans-serif; --f-body:"Nunito", "Segoe UI", system-ui, sans-serif; --h-case:uppercase; --h-track:.01em; --h-weight:400; --h-shadow:2px 2px 0 #FFB703;
+  color-scheme:light}
+/* Studio: quiet cool grey */
+:root[data-suite="studio"],.pv[data-suite="studio"]{
+  --canvas:#F2F4F7; --surface:#FFFFFF; --solid:#FFFFFF; --raised:#F8F9FB; --line:#E5E8EE; --ink:#0F1420; --muted:#6C7688; --faint:#949EB0;
+  --acc:#4F46E5; --acc2:#0EA5E9; --on-acc:#FFFFFF; --shadow-card:0 1px 2px rgb(16 24 40 / .05),0 1px 3px rgb(16 24 40 / .06); --shadow-lift:0 6px 18px rgb(16 24 40 / .1);
+  --glass:none; --r:14px; --glow-a:transparent; --glow-b:transparent; --glow-c:transparent; color-scheme:light}
+@media (prefers-color-scheme: dark){:root[data-suite="studio"]:not([data-theme="light"]){
+  --canvas:#0B0E14; --surface:#141922; --solid:#141922; --raised:#1B212C; --line:#232A36; --ink:#E8ECF3; --muted:#8F9AAD; --faint:#6E798C; --acc:#818CF8; --on-acc:#0B0E14; color-scheme:dark}}
+:root[data-suite="studio"][data-theme="dark"]{
+  --canvas:#0B0E14; --surface:#141922; --solid:#141922; --raised:#1B212C; --line:#232A36; --ink:#E8ECF3; --muted:#8F9AAD; --faint:#6E798C; --acc:#818CF8; --on-acc:#0B0E14; color-scheme:dark}
+.pv[data-suite="greatestme"]{--canvas:#0D0820; --surface:rgb(255 255 255 / .08); --solid:#1A1233; --line:rgb(255 255 255 / .12); --ink:#F3EEFF; --muted:#B4A9D6; --acc:#A78BFA; --acc2:#5B9CFF; --on-acc:#160C33; --glow-a:rgb(124 58 237 / .6); --glow-b:rgb(236 72 153 / .35); --f-display:"Plus Jakarta Sans",system-ui,sans-serif; --h-case:none; --h-shadow:none; --h-weight:800; --border-w:1px; --shadow-card:none; --r:14px}
+
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
-body{background:var(--canvas);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.02em}
-h1{font-size:clamp(1.55rem,4vw,1.85rem);font-weight:800}
-h2{font-size:1.08rem;font-weight:700}
-h3{font-size:1rem;font-weight:700}
+body{background:var(--canvas);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background-color .4s}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:var(--h-track);text-transform:var(--h-case);font-weight:var(--h-weight);text-shadow:var(--h-shadow)}
+h1{font-size:clamp(1.55rem,4.4vw,2rem);line-height:1.12}
+h2{font-size:1.06rem}
+h3{font-size:.98rem}
+:root[data-suite="synthwave"] h1{font-size:clamp(1.25rem,3.6vw,1.6rem)}
+:root[data-suite="martin"] h1{font-size:clamp(1.35rem,4vw,1.8rem)}
 p{margin:0}
 button,input,textarea,select{font:inherit;color:inherit}
-input,textarea,select{font-size:16px} /* 16px stops iOS Safari from zooming the page on focus */
+input,textarea,select{font-size:16px} /* 16px stops iOS from zooming the page on focus */
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-::selection{background:color-mix(in srgb,var(--ink) 12%,transparent)}
+::selection{background:var(--acc-soft)}
 .mono{font-family:var(--f-mono);font-variant-numeric:slashed-zero tabular-nums}
 .label{font-family:var(--f-mono);font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--faint);font-weight:500;line-height:1.4}
 .muted{color:var(--muted)}
+.small{font-size:.84rem}
+
+/* backdrop: themed atmosphere, fixed behind everything */
+.backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.backdrop::before{content:"";position:absolute;inset:-20%;background:
+  radial-gradient(40% 35% at 18% 12%,var(--glow-a),transparent 70%),
+  radial-gradient(35% 40% at 88% 30%,var(--glow-b),transparent 70%),
+  radial-gradient(45% 40% at 60% 100%,var(--glow-c),transparent 70%);animation:drift 26s ease-in-out infinite alternate}
+.backdrop::after{content:"";position:absolute;left:-30%;right:-30%;top:30%;height:26%;transform:rotate(-24deg);background:linear-gradient(90deg,transparent,var(--glow-b),transparent);filter:blur(30px);opacity:.7}
+:root[data-suite="synthwave"] .backdrop{background:linear-gradient(#0B0320 0%,#1E0640 55%,#3A0A4A 100%)}
+:root[data-suite="synthwave"] .backdrop::after{top:auto;bottom:-8%;left:-50%;right:-50%;height:48%;transform:perspective(320px) rotateX(62deg);filter:none;opacity:.55;
+  background:repeating-linear-gradient(90deg,rgb(255 46 151 / .55) 0 2px,transparent 2px 64px),repeating-linear-gradient(0deg,rgb(0 229 255 / .45) 0 2px,transparent 2px 48px);animation:grid 4s linear infinite}
+:root[data-suite="synthwave"] .sun{display:block}
+.sun{display:none;position:absolute;left:50%;bottom:34%;width:min(46vw,360px);aspect-ratio:1;transform:translateX(-50%);border-radius:50%;opacity:.38;
+  background:linear-gradient(#FFD319,#FF6AD5 60%,#C94BFF);-webkit-mask:repeating-linear-gradient(0deg,#000 0 14px,transparent 14px 20px);mask:repeating-linear-gradient(0deg,#000 0 14px,transparent 14px 20px)}
+:root[data-suite="martin"] .backdrop{background-color:#FFF1D6;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cpath d='M12 30q10-16 20 0t20 0 20 0' fill='none' stroke='%237B2CBF' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M118 22l16 28h-32z' fill='%2300A6A6'/%3E%3Ccircle cx='60' cy='118' r='11' fill='none' stroke='%23E63946' stroke-width='4'/%3E%3Crect x='128' y='112' width='22' height='22' transform='rotate(18 139 123)' fill='%23FFB703'/%3E%3Cpath d='M20 160l10-10 10 10 10-10' fill='none' stroke='%23151515' stroke-width='3'/%3E%3C/svg%3E");background-size:180px;opacity:.22}
+:root[data-suite="martin"] .backdrop::before,:root[data-suite="martin"] .backdrop::after,:root[data-suite="studio"] .backdrop::before,:root[data-suite="studio"] .backdrop::after{display:none}
+@keyframes drift{to{transform:translate3d(4%,3%,0) scale(1.08)}}
+@keyframes grid{to{background-position:0 48px,0 48px}}
 
 /* shell */
-.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
-.rail{position:sticky;top:0;height:100vh;height:100dvh;padding:24px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:20px;background:var(--surface)}
-.brand{font-family:var(--f-display);font-weight:800;font-size:1.35rem;padding:0 10px;letter-spacing:-.02em}
-.brand b{color:var(--ember)}
-.nav{display:flex;flex-direction:column;gap:2px}
-.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-weight:500;color:var(--muted)}
-.nav button svg{width:18px;height:18px;flex:none}
-.nav button:hover{background:var(--violet-soft);color:var(--ink)}
-.nav button[aria-current="page"]{background:var(--violet-soft);color:var(--violet);font-weight:600}
-.nav button:focus-visible{outline:2px solid var(--violet)}
-.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:0 6px}
-.main{min-width:0;padding-block:28px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.col{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh;min-height:100dvh}
+.rail{position:sticky;top:0;height:100vh;height:100dvh;padding:24px 14px calc(18px + env(safe-area-inset-bottom,0px));border-right:var(--border-w) solid var(--line);display:flex;flex-direction:column;gap:22px;background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
+.brand{font-family:var(--f-display);font-weight:800;font-size:1.3rem;padding:0 10px;letter-spacing:-.02em;text-transform:none;display:flex;align-items:center;gap:8px}
+.brand b{color:var(--acc)}
+.brand .orb{width:26px;height:26px;border-radius:9px;background:conic-gradient(from 210deg,var(--acc),var(--acc2),var(--acc));box-shadow:0 0 18px var(--glow-a)}
+:root[data-suite="martin"] .brand{font-weight:400;font-size:1.1rem}
+:root[data-suite="martin"] .brand .orb{border:3px solid #151515;box-shadow:2px 2px 0 #151515;border-radius:8px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button,.tabs button{all:unset;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nav button{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r-sm);font-weight:600;color:var(--muted);transition:background .2s,color .2s}
+.nav button svg{width:19px;height:19px;flex:none}
+.nav button:hover{background:var(--acc-soft);color:var(--ink)}
+.nav button[aria-current="page"]{background:var(--acc);color:var(--on-acc);box-shadow:0 6px 20px var(--glow-a)}
+:root[data-suite="martin"] .nav button[aria-current="page"]{border:3px solid #151515;box-shadow:3px 3px 0 #151515;padding:7px 9px}
+.nav button:focus-visible,.tabs button:focus-visible{outline:2px solid var(--acc)}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding:0 4px}
+.me{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--r-sm);cursor:pointer;border:0;background:transparent;text-align:left}
+.me:hover{background:var(--acc-soft)}
+.main{min-width:0;padding-block:28px 110px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.col{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.col.enter>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.col.enter>*:nth-child(2){animation-delay:.04s}.col.enter>*:nth-child(3){animation-delay:.08s}.col.enter>*:nth-child(4){animation-delay:.12s}.col.enter>*:nth-child(5){animation-delay:.16s}.col.enter>*:nth-child(n+6){animation-delay:.2s}
+@keyframes rise{from{opacity:.001;transform:translateY(14px)}}
 .tabs{display:none}
+.mtop{display:none;justify-content:space-between;align-items:center}
 @media (max-width:820px){
   .app{grid-template-columns:1fr}
   .rail{display:none}
-  .tabs{display:grid;grid-template-columns:repeat(var(--tabs,6),1fr);position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
-    padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
-  .tabs button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.66rem;color:var(--muted);padding:4px 0;border-radius:8px}
-  .tabs button svg{width:20px;height:20px}
-  .tabs button[aria-current="page"]{color:var(--violet);font-weight:600}
-  .main{padding-block:16px 110px}
-  .mtop{display:flex!important}
+  .tabs{display:grid;grid-template-columns:repeat(var(--tabs,6),1fr);position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:20;
+    background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border:var(--border-w) solid var(--line);border-radius:26px;padding:6px;box-shadow:var(--shadow-lift)}
+  :root[data-suite="greatestme"] .tabs,:root:not([data-suite]) .tabs{background:color-mix(in srgb,var(--solid) 78%,transparent)}
+  .tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.64rem;font-weight:600;color:var(--muted);padding:6px 0 5px;border-radius:20px;transition:color .2s,background .2s}
+  .tabs button svg{width:21px;height:21px}
+  .tabs button[aria-current="page"]{color:var(--acc);background:var(--acc-soft)}
+  .main{padding-block:12px 128px}
+  .mtop{display:flex}
 }
-.mtop{display:none;justify-content:space-between;align-items:center}
+body.kb .tabs{display:none}
 
 /* page head */
 .head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
-.head .sub{color:var(--muted);margin-top:4px}
+.head .sub{color:var(--muted);margin-top:6px;max-width:62ch}
 .daynav{display:flex;align-items:center;gap:6px}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--violet-soft);color:var(--violet);font-size:.78rem;font-weight:600}
-.chip.ember{background:var(--ember-soft);color:var(--ember)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--acc-soft);color:var(--acc);font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.chip.ember{background:var(--acc2-soft);color:var(--acc2)}
 .chip.good{background:var(--good-soft);color:var(--good)}
+:root[data-suite="martin"] .chip{border:2px solid #151515;background:#FFB703;color:#151515}
+:root[data-suite="martin"] .chip.ember{background:#00A6A6;color:#fff}
+:root[data-suite="martin"] .chip.good{background:#1E9E4A;color:#fff}
+.title-bar{display:flex;align-items:center;gap:10px}
+.title-bar::before{content:"";width:6px;height:.95em;border-radius:999px;background:linear-gradient(var(--acc),var(--acc2));flex:none}
 
 /* cards */
-.card{background:var(--surface);box-shadow:var(--shadow-card);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border:var(--border-w) solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0;box-shadow:var(--shadow-card)}
 .card-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @media (max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
-.quote{border-left:3px solid var(--ember);padding:4px 0 4px 14px;font-family:var(--f-display);font-weight:500;font-size:1.05rem}
-.quote cite{display:block;font-family:var(--f-body);font-style:normal;font-size:.8rem;color:var(--muted);margin-top:4px}
+.quote{border-left:3px solid var(--acc2);padding:2px 0 2px 14px;font-family:var(--f-display);font-weight:600;font-size:1.02rem;text-transform:none;letter-spacing:-.01em}
+:root[data-suite="synthwave"] .quote,:root[data-suite="martin"] .quote{font-family:var(--f-body);font-weight:700}
+.quote cite{display:block;font-family:var(--f-body);font-style:normal;font-weight:500;font-size:.8rem;color:var(--muted);margin-top:4px}
 
 /* inputs */
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.in,textarea.in,select.in{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:8px 2px;border-radius:0;outline:none}
-.in:focus{border-bottom-color:var(--violet)}
-textarea.in{resize:vertical;min-height:72px;border:1px solid var(--line);border-radius:10px;padding:10px}
-textarea.in:focus{border-color:var(--violet)}
-select.in{border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:var(--surface)}
-.box{border:1px solid var(--line)!important;border-radius:10px!important;padding:10px 12px!important}
+.in,textarea.in,select.in{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:9px 2px;border-radius:0;outline:none;transition:border-color .2s}
+:root[data-suite="martin"] .in{border-bottom-width:2px}
+.in:focus{border-bottom-color:var(--acc)}
+textarea.in{resize:vertical;min-height:78px;border:1px solid var(--line);border-radius:var(--r-sm);padding:11px;background:var(--raised)}
+textarea.in:focus{border-color:var(--acc)}
+select.in{border:1px solid var(--line);border-radius:var(--r-sm);padding:8px;background:var(--solid)}
+.box{border:1px solid var(--line)!important;border-radius:var(--r-sm)!important;padding:11px 13px!important;background:var(--raised)!important}
+.box:focus{border-color:var(--acc)!important;box-shadow:0 0 0 4px var(--acc-soft)}
+:root[data-suite="martin"] .box,:root[data-suite="martin"] textarea.in,:root[data-suite="martin"] select.in{border:2px solid #151515!important}
 .num-rows{display:flex;flex-direction:column;gap:2px}
 .num-row{display:grid;grid-template-columns:22px 1fr;align-items:center;gap:8px}
-.num-row .n{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
-.target{display:grid;grid-template-columns:26px 1fr minmax(0,150px);gap:8px;align-items:center}
-@media (max-width:520px){.target{grid-template-columns:26px 1fr}.target select{grid-column:2}}
-.check{appearance:none;width:22px;height:22px;border:2px solid var(--line);border-radius:7px;cursor:pointer;display:grid;place-items:center;margin:0;background:var(--surface)}
+.num-row .n{font-family:var(--f-mono);font-size:.78rem;color:var(--faint)}
+.target{display:grid;grid-template-columns:28px 1fr minmax(0,160px);gap:8px;align-items:center}
+@media (max-width:520px){.target{grid-template-columns:28px 1fr}.target select{grid-column:2}}
+.check{appearance:none;-webkit-appearance:none;width:24px;height:24px;border:2px solid var(--line);border-radius:8px;cursor:pointer;display:grid;place-items:center;margin:0;background:var(--solid);transition:background .2s,border-color .2s;flex:none}
+:root[data-suite="martin"] .check{border:2.5px solid #151515}
 .check:checked{background:var(--good);border-color:var(--good)}
 .check:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
-.done-text{text-decoration:line-through;color:var(--muted)}
+.pop{animation:pop .42s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.done-text{text-decoration:line-through;text-decoration-color:var(--good);color:var(--muted)}
 
-.btn{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;justify-content:center}
-.btn:hover{border-color:var(--violet)}
-.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+.btn{cursor:pointer;border:var(--border-w) solid var(--line);background:var(--solid);border-radius:var(--r-sm);padding:9px 15px;font-weight:700;display:inline-flex;align-items:center;gap:7px;justify-content:center;transition:transform .12s,box-shadow .2s,border-color .2s;box-shadow:var(--btn-shadow);-webkit-user-select:none;user-select:none}
+.btn:hover{border-color:var(--acc)}
+.btn:active:not(:disabled){transform:var(--press)}
+:root[data-suite="martin"] .btn{border-color:#151515}
+:root[data-suite="martin"] .btn:active:not(:disabled){box-shadow:0 0 0 #151515}
+.btn.primary{background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 70%,var(--acc2)));border-color:transparent;color:var(--on-acc);box-shadow:0 8px 22px var(--glow-a)}
+:root[data-suite="martin"] .btn.primary{background:var(--acc);border-color:#151515;box-shadow:var(--btn-shadow)}
+:root[data-suite="synthwave"] .btn.primary{box-shadow:0 0 18px rgb(255 46 151 / .55)}
 .btn.ember{background:var(--acc2);border-color:var(--acc2);color:#fff}
-.btn.ghost{border-color:transparent;background:transparent}
-.btn.sm{padding:5px 10px;font-size:.84rem}
-.btn.icon{padding:6px;width:34px;height:34px}
+.btn.ghost{border-color:transparent;background:transparent;box-shadow:none}
+.btn.sm{padding:6px 11px;font-size:.84rem}
+.btn.lg{padding:14px 22px;font-size:1.02rem;border-radius:16px}
+.btn.icon{padding:6px;width:38px;height:38px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .scale{display:flex;gap:6px;flex-wrap:wrap}
-.scale button{cursor:pointer;min-width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-mono);font-weight:600}
-.scale button[aria-pressed="true"]{background:var(--violet);color:var(--surface);border-color:var(--violet)}
+.scale button{cursor:pointer;min-width:42px;height:42px;border-radius:var(--r-sm);border:var(--border-w) solid var(--line);background:var(--solid);font-family:var(--f-mono);font-weight:600;transition:transform .12s}
+.scale button:active{transform:scale(.92)}
+.scale button[aria-pressed="true"]{background:var(--acc);color:var(--on-acc);border-color:var(--acc)}
+.faces button{font-family:inherit;font-size:1.3rem;min-width:48px;height:48px}
 
 /* meters */
-.bar{height:8px;background:var(--violet-soft);border-radius:99px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--violet);border-radius:99px;transition:width .3s}
-.bar.ember i{background:var(--ember)}
+.bar{height:8px;background:var(--acc-soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:99px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
 .bar.good i{background:var(--good)}
-.stat{display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);min-width:0}
-.stat .v{font-family:var(--f-display);font-weight:800;font-size:1.9rem;line-height:1}
-.stat .v small{font-size:.9rem;color:var(--muted);font-weight:600}
+:root[data-suite="martin"] .bar{border:2px solid #151515;height:12px;background:#fff}
+.stat{display:flex;flex-direction:column;gap:4px;padding:14px;border:var(--border-w) solid var(--line);border-radius:var(--r-sm);background:var(--surface);min-width:0;box-shadow:var(--shadow-card)}
+.stat .v{font-family:var(--f-mono);font-weight:600;font-size:1.8rem;line-height:1;letter-spacing:-.03em;font-variant-numeric:slashed-zero tabular-nums}
+.stat .v small{font-size:.85rem;color:var(--muted);font-weight:500}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 @media (max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
 
-/* journey strip: 13 weeks */
 .strip{display:grid;grid-template-columns:repeat(13,1fr);gap:4px}
-.strip span{height:10px;border-radius:3px;background:var(--line)}
-.strip span.past{background:var(--violet)}
-.strip span.now{background:var(--ember)}
+.strip span{height:10px;border-radius:4px;background:var(--line)}
+.strip span.past{background:var(--acc)}
+.strip span.now{background:var(--acc2);box-shadow:0 0 12px var(--acc2)}
 
-/* habit grids */
 .hgrid{overflow-x:auto}
 .hgrid table{border-collapse:separate;border-spacing:4px;min-width:100%}
 .hgrid th{font-size:.72rem;color:var(--muted);font-weight:600;text-align:center;padding:0 2px}
-.hgrid th.hn{text-align:left;font-size:.88rem;color:var(--ink);font-weight:500;min-width:120px}
+.hgrid th.hn{text-align:left;font-size:.88rem;color:var(--ink);font-weight:600;min-width:120px}
 .hgrid td{text-align:center}
-.cell{cursor:pointer;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.cell{cursor:pointer;width:32px;height:32px;border-radius:9px;border:var(--border-w) solid var(--line);background:var(--solid);transition:background .2s}
 .cell[aria-pressed="true"]{background:var(--good);border-color:var(--good)}
 .cell:disabled{opacity:.35;cursor:default}
-.heat{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;max-width:420px}
+.heat{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;max-width:440px}
 .heat .wk{display:grid;grid-template-rows:repeat(7,1fr);gap:3px}
 .heat i{aspect-ratio:1;border-radius:3px;background:var(--line);max-width:100%}
 .heat i.on{background:var(--good)}
 .heat i.future{background:transparent;border:1px dashed var(--line)}
 
-.goal{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
-.goal-n{font-family:var(--f-mono);font-size:.75rem;color:var(--ember);font-weight:600}
-.ms{display:grid;grid-template-columns:26px 1fr 92px 34px;gap:8px;align-items:center}
-@media (max-width:520px){.ms{grid-template-columns:26px 1fr 80px 34px}}
-
+.goal-n{font-family:var(--f-mono);font-size:.72rem;color:var(--acc2);font-weight:600;letter-spacing:.08em}
+.ms{display:grid;grid-template-columns:28px 1fr 92px 38px;gap:8px;align-items:center}
 details.sched summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between}
 details.sched summary::-webkit-details-marker{display:none}
 .sched-grid{display:grid;grid-template-columns:62px 1fr;gap:0 10px;margin-top:10px}
 .sched-grid .t{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);padding-top:9px}
-
 .spark{width:100%;height:120px;display:block}
-.empty{padding:22px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);text-align:center}
+.empty{padding:26px 18px;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted);text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty svg{width:120px;height:auto}
 .partner{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
-.avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;background:var(--ember-soft);color:var(--ember);font-size:1.2rem}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-weight:600;z-index:50;font-size:.9rem}
-.save{font-size:.75rem;color:var(--muted)}
+.avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--on-acc);font-size:1.15rem;flex:none;text-transform:uppercase}
+.avatar.sm{width:34px;height:34px;font-size:.9rem}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--canvas);padding:10px 18px;border-radius:14px;font-weight:700;z-index:60;font-size:.9rem;animation:toast .35s cubic-bezier(.3,1.4,.5,1);box-shadow:var(--shadow-lift)}
+@media (min-width:821px){.toast{bottom:28px}}
+@keyframes toast{from{transform:translate(-50%,20px);opacity:0}}
+.save{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+
+/* hero (Today) */
+.hero{position:relative;overflow:hidden;border-radius:calc(var(--r) + 4px);padding:22px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;color:var(--ink);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 22%,var(--surface)),color-mix(in srgb,var(--acc2) 14%,var(--surface)));border:var(--border-w) solid var(--line);box-shadow:var(--shadow-card);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
+:root[data-suite="martin"] .hero{background:#FFB703}
+.hero .scene{position:absolute;right:-8px;bottom:-6px;width:200px;opacity:.9;pointer-events:none}
+.hero .hi{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
+.hero .greet{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.hero .ring{position:relative;width:118px;height:118px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .trk{fill:none;stroke:var(--line);stroke-width:9}
+.ring .arc{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)}
+.ring .ctr{position:absolute;inset:0;display:grid;place-items:center;text-align:center;line-height:1.05}
+.ring .ctr b{font-family:var(--f-mono);font-size:1.5rem;letter-spacing:-.04em}
+.ring .ctr span{font-size:.62rem;font-family:var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.hero h1{font-size:clamp(1.3rem,4.6vw,1.9rem)}
+@media (max-width:520px){.hero .hi{padding-right:92px}.hero{grid-template-columns:1fr}.hero .ring{position:absolute;right:16px;top:16px;width:84px;height:84px}.ring .ctr b{font-size:1.1rem}.hero .scene{width:150px;opacity:.55}}
+.week7{display:flex;gap:6px}
+.week7 .d{display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+.week7 .d i{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;background:var(--solid)}
+.week7 .d.on i{background:var(--acc2);border-color:var(--acc2);color:#fff}
+.week7 .d.now i{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+.week7 .d.on i::after{content:"✓";font-size:13px;font-weight:800}
+.flame{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-weight:700;font-size:.95rem}
+.flame svg{width:22px;height:22px;transform-origin:50% 90%}
+.flame.lit svg{animation:flicker 1.6s ease-in-out infinite}
+.flame.out{color:var(--faint);filter:grayscale(1)}
+@keyframes flicker{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.08,1.12) rotate(2deg)}}
+.rituals{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ritual-card{all:unset;cursor:pointer;position:relative;overflow:hidden;border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:6px;min-height:118px;border:var(--border-w) solid var(--line);box-shadow:var(--shadow-card);transition:transform .15s,box-shadow .2s;background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
+.ritual-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.ritual-card:active{transform:var(--press)}
+.ritual-card:focus-visible{outline:2px solid var(--acc)}
+.ritual-card svg.art{position:absolute;right:-6px;bottom:-8px;width:110px;opacity:.95}
+.ritual-card .st{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.ritual-card.done .st{color:var(--good)}
+:root[data-suite="martin"] .ritual-card:nth-child(1){background:#00A6A6;color:#fff}
+:root[data-suite="martin"] .ritual-card:nth-child(2){background:#7B2CBF;color:#fff}
+@media (max-width:420px){.rituals{grid-template-columns:1fr}}
+
+/* illustrations (inline SVG; colours from the active suite) */
+.i-a{fill:var(--acc)}.i-b{fill:var(--acc2)}.i-g{fill:var(--good)}.i-w{fill:var(--warn)}.i-ink{fill:var(--ink)}.i-l{fill:var(--line)}.i-s{fill:var(--solid)}
+.i-sa{stroke:var(--acc);fill:none}.i-sb{stroke:var(--acc2);fill:none}.i-si{stroke:var(--ink);fill:none}
+.tw{animation:tw 2.4s ease-in-out infinite}.tw:nth-of-type(2n){animation-delay:.8s}.tw:nth-of-type(3n){animation-delay:1.5s}
+@keyframes tw{50%{opacity:.25}}
+.float{animation:float 5s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-6px)}}
+.sunrise{animation:sunrise 1.6s cubic-bezier(.2,.8,.2,1) both}
+@keyframes sunrise{from{transform:translateY(22px);opacity:.3}}
+
+/* ritual overlay (guided morning/evening) */
+.ritual{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:var(--canvas);
+  padding:calc(14px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));animation:fadeIn .3s ease}
+.ritual .backdrop{z-index:0}
+.ritual>*{position:relative;z-index:1}
+@keyframes fadeIn{from{opacity:0}}
+.r-top{display:flex;align-items:center;gap:12px;max-width:640px;width:100%;margin:0 auto}
+.r-prog{flex:1;display:grid;grid-auto-flow:column;gap:5px}
+.r-prog i{height:6px;border-radius:9px;background:var(--line);overflow:hidden;position:relative}
+.r-prog i.on::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--acc),var(--acc2));animation:fill .45s ease both}
+@keyframes fill{from{transform:translateX(-100%)}}
+.r-body{flex:1;overflow:auto;display:flex;flex-direction:column;justify-content:center;gap:18px;max-width:640px;width:100%;margin:0 auto;padding:18px 0}
+.r-body h1{font-size:clamp(1.6rem,6vw,2.3rem)}
+.r-body .kicker{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+.r-step{animation:slideIn .4s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:16px}
+@keyframes slideIn{from{opacity:0;transform:translateX(26px)}}
+.r-foot{display:flex;gap:10px;max-width:640px;width:100%;margin:0 auto}
+.r-foot .btn.lg{flex:1}
+.big-in{font-size:1.2rem!important;padding:14px 16px!important}
+.breath{width:min(62vw,260px);aspect-ratio:1;margin:8px auto;display:grid;place-items:center;position:relative}
+.breath::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,var(--acc) 0,color-mix(in srgb,var(--acc) 40%,transparent) 55%,transparent 72%);animation:breathe 8s ease-in-out infinite;opacity:.85}
+.breath span{position:relative;font-family:var(--f-display);font-weight:800;font-size:1.3rem;color:var(--ink);text-transform:var(--h-case)}
+@keyframes breathe{0%,100%{transform:scale(.55)}50%{transform:scale(1)}}
+
+/* celebration */
+.fx{position:fixed;inset:0;pointer-events:none;z-index:80}
+.cele{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,var(--canvas) 70%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:fadeIn .25s}
+.cele-card{max-width:400px;width:100%;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center;padding:28px 24px;border-radius:26px;background:var(--solid);border:var(--border-w) solid var(--line);box-shadow:var(--shadow-lift);animation:bounceIn .55s cubic-bezier(.3,1.5,.5,1)}
+.cele-card svg{width:150px;height:auto}
+.cele-card .num{font-family:var(--f-mono);font-size:3.2rem;font-weight:700;line-height:1;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes bounceIn{from{transform:scale(.7);opacity:0}}
 
 /* auth / onboarding */
-.gate{min-height:100vh;display:grid;place-items:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.gate-card{width:100%;max-width:520px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow)}
-.gate-brand{font-family:var(--f-display);font-weight:800;font-size:2.4rem;letter-spacing:-.03em;line-height:1}
-.gate-brand b{color:var(--ember)}
-.seg{display:flex;background:var(--violet-soft);border-radius:10px;padding:3px}
-.seg button{flex:1;all:unset;text-align:center;cursor:pointer;padding:7px;border-radius:8px;font-weight:600;color:var(--muted)}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
-.err{color:var(--ember);font-size:.88rem}
+.gate{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding-block:28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.gate-card{width:100%;max-width:540px;background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border:var(--border-w) solid var(--line);border-radius:28px;padding:28px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow-lift)}
+.gate-card>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.gate-brand{font-family:var(--f-display);font-weight:800;font-size:2.3rem;letter-spacing:-.035em;line-height:1;text-transform:none}
+.gate-brand b{color:var(--acc)}
+:root[data-suite="martin"] .gate-brand{font-weight:400;letter-spacing:0}
+.hero-art{width:100%;max-width:300px;margin:0 auto}
+.seg{display:flex;background:var(--acc-soft);border-radius:12px;padding:3px}
+.seg button{flex:1;all:unset;text-align:center;cursor:pointer;padding:8px;border-radius:10px;font-weight:700;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--solid);color:var(--ink);box-shadow:var(--shadow-card)}
+.err{color:var(--bad);font-size:.88rem}
 .steps{display:flex;gap:6px}
-.steps i{flex:1;height:4px;border-radius:4px;background:var(--line)}
-.steps i.on{background:var(--violet)}
-.presets{display:flex;flex-wrap:wrap;gap:6px}
-.presets button{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.85rem}
-.presets button[aria-pressed="true"]{background:var(--violet);color:var(--surface);border-color:var(--violet)}
-.sheet-bg{position:fixed;inset:0;background:rgba(10,6,20,.5);z-index:40;display:grid;place-items:center;padding:16px}
-.sheet{background:var(--surface);border-radius:18px;max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--line)}
-.loading{min-height:100vh;display:grid;place-items:center;color:var(--muted)}
-/* Protocol / Pocketbook details */
-.card{border-radius:var(--r)}
-.chip{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
-.stat .v,.mono,.v small{font-variant-numeric:slashed-zero tabular-nums}
-.stat .v{font-family:var(--f-mono);font-weight:600;letter-spacing:-.02em}
-.title-bar{display:flex;align-items:center;gap:10px}
-.title-bar::before{content:"";width:6px;height:24px;border-radius:999px;background:var(--acc);flex:none}
-.save{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
-.toggle3{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface);box-shadow:var(--shadow-card)}
-.toggle3 button{all:unset;cursor:pointer;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:6px 12px;border-radius:999px;color:var(--muted)}
+.steps i{flex:1;height:5px;border-radius:5px;background:var(--line);overflow:hidden;position:relative}
+.steps i.on::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.presets{display:flex;flex-wrap:wrap;gap:7px}
+.presets button{cursor:pointer;border:var(--border-w) solid var(--line);background:var(--solid);border-radius:999px;padding:7px 13px;font-size:.88rem;font-weight:600;transition:transform .12s}
+.presets button:active{transform:scale(.95)}
+.presets button[aria-pressed="true"]{background:var(--acc);color:var(--on-acc);border-color:var(--acc)}
+.commit{position:relative;width:150px;height:150px;border-radius:50%;margin:6px auto;border:0;cursor:pointer;background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--on-acc);font-family:var(--f-display);font-weight:800;font-size:1.05rem;box-shadow:0 12px 36px var(--glow-a);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;text-transform:var(--h-case)}
+.commit svg{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);transform:rotate(-90deg)}
+.commit circle{fill:none;stroke:var(--acc2);stroke-width:6;stroke-linecap:round;stroke-dasharray:490;stroke-dashoffset:490}
+.commit.holding circle{transition:stroke-dashoffset 1.5s linear;stroke-dashoffset:0}
+.commit.holding{transform:scale(.96)}
+
+/* settings */
+.set-group{display:flex;flex-direction:column;gap:0;padding:4px 0}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);min-width:0}
+.set-row:last-child{border-bottom:0}
+.set-row>div{min-width:0}
+.switch{appearance:none;-webkit-appearance:none;width:50px;height:30px;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:background .2s;flex:none;margin:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .3);transition:transform .22s cubic-bezier(.3,1.4,.5,1)}
+.switch:checked{background:var(--good)}
+.switch:checked::after{transform:translateX(20px)}
+.suites{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (min-width:700px){.suites{grid-template-columns:repeat(4,1fr)}}
+.suite{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:8px;border-radius:16px;padding:6px;border:2px solid transparent;transition:transform .15s}
+.suite:active{transform:scale(.97)}
+.suite[aria-pressed="true"]{border-color:var(--acc)}
+.suite:focus-visible{outline:2px solid var(--acc)}
+.suite .nm{font-weight:700;font-size:.9rem;padding:0 4px;display:flex;justify-content:space-between;align-items:center}
+.pv{position:relative;overflow:hidden;aspect-ratio:4/3;border-radius:12px;background:var(--canvas);border:1px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:6px;font-family:var(--f-body);color:var(--ink)}
+.pv::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 60% at 20% 10%,var(--glow-a),transparent 70%),radial-gradient(60% 60% at 90% 60%,var(--glow-b),transparent 70%)}
+.pv[data-suite="synthwave"]{background:linear-gradient(#0B0320,#3A0A4A)}
+.pv[data-suite="synthwave"]::after{content:"";position:absolute;left:-40%;right:-40%;bottom:-20%;height:55%;transform:perspective(120px) rotateX(60deg);background:repeating-linear-gradient(90deg,rgb(255 46 151 / .7) 0 1px,transparent 1px 18px),repeating-linear-gradient(0deg,rgb(0 229 255 / .6) 0 1px,transparent 1px 14px)}
+.pv[data-suite="martin"]::before{background:none}
+.pv>*{position:relative;z-index:1}
+.pv .t{font-family:var(--f-display);font-weight:var(--h-weight);text-transform:var(--h-case);text-shadow:var(--h-shadow);font-size:.85rem;letter-spacing:var(--h-track)}
+.pv .c{background:var(--surface);border:var(--border-w) solid var(--line);border-radius:8px;padding:6px;display:flex;gap:5px;align-items:center;box-shadow:var(--shadow-card)}
+.pv .c i{height:6px;border-radius:4px;background:var(--line);flex:1}
+.pv .c b{width:14px;height:14px;border-radius:4px;background:var(--acc);flex:none}
+.pv .p{align-self:flex-start;background:var(--acc);color:var(--on-acc);border-radius:99px;padding:2px 9px;font-size:.62rem;font-weight:700}
+.toggle3{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--solid)}
+.toggle3 button{all:unset;cursor:pointer;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:7px 12px;border-radius:999px;color:var(--muted)}
 .toggle3 button[aria-pressed="true"]{background:var(--ink);color:var(--canvas)}
-.swatches{display:flex;gap:10px;flex-wrap:wrap}
-.swatches button{width:34px;height:34px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line);cursor:pointer}
-.swatches button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
-.linkrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}
-.linkrow code{font-family:var(--f-mono);font-size:.78rem;overflow-wrap:anywhere;color:var(--muted)}
-body.kb .tabs{display:none}
+.linkrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:9px 0}
+.linkrow code{font-family:var(--f-mono);font-size:.76rem;overflow-wrap:anywhere;color:var(--muted)}
+.sheet-bg{position:fixed;inset:0;background:rgb(10 6 20 / .5);z-index:40;display:grid;place-items:center;padding:16px;animation:fadeIn .2s}
+.sheet{background:var(--solid);border-radius:22px;max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:16px;border:var(--border-w) solid var(--line);animation:bounceIn .35s cubic-bezier(.3,1.3,.5,1)}
+.loading{min-height:100vh;display:grid;place-items:center;color:var(--muted)}
+
 /* Ink (iPad + Apple Pencil) */
-.ink-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-card)}
+.ink-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;background:var(--solid);border:var(--border-w) solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-card)}
 .ink-bar .grp{display:flex;gap:4px;align-items:center;padding-right:8px;border-right:1px solid var(--line)}
 .ink-bar .grp:last-child{border-right:0}
 .ink-bar button.t{cursor:pointer;min-width:44px;height:44px;border-radius:10px;border:1px solid transparent;background:transparent;display:grid;place-items:center;color:var(--muted)}
+.ink-bar button.t svg{width:22px;height:22px}
 .ink-bar button.t[aria-pressed="true"]{background:var(--acc-soft);color:var(--acc);border-color:color-mix(in srgb,var(--acc) 30%,transparent)}
-.ink-bar .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+.ink-bar .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--solid);box-shadow:0 0 0 1px var(--line)}
 .ink-bar button.t[aria-pressed="true"] .dot{box-shadow:0 0 0 2px var(--ink)}
 .ink-pages{display:flex;flex-direction:column;gap:18px}
 .ink-page{position:relative;background:var(--paper);border-radius:6px;box-shadow:var(--shadow-lift);overflow:hidden;max-width:100%}
 .ink-page canvas{display:block;width:100%;touch-action:pan-y pinch-zoom;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .ink-page.finger canvas{touch-action:none}
 .ink-page .pg{position:absolute;right:12px;bottom:8px;font-family:var(--f-mono);font-size:10px;color:#8A8F99}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
-<div id="root"><div class="loading"><div style="text-align:center"><div class="gate-brand">Greatest<b>Me</b></div><p style="margin-top:10px">Opening your journal…</p></div></div></div>
+<div id="root"><div class="backdrop"><div class="sun"></div></div><div class="loading"><div style="text-align:center"><div class="gate-brand">Greatest<b>Me</b></div><p style="margin-top:10px">Opening your journal…</p></div></div></div>
 
 <script>
 (() => {
@@ -444,20 +632,6 @@ const Duo = {
 };
 
 /* ============================ appearance, devices, Apple integrations ============================ */
-const ACCENTS = {
-  violet:  { a: "#8B5CF6", b: "#F59E0B", on: "#FFFFFF", name: "Violet" },
-  emerald: { a: "#10B981", b: "#06B6D4", on: "#0F1420", name: "Emerald" },
-  cyan:    { a: "#06B6D4", b: "#8B5CF6", on: "#0F1420", name: "Cyan" },
-  blue:    { a: "#3B82F6", b: "#10B981", on: "#FFFFFF", name: "Blue" },
-  pink:    { a: "#EC4899", b: "#8B5CF6", on: "#FFFFFF", name: "Pink" },
-  rose:    { a: "#F43F5E", b: "#F59E0B", on: "#FFFFFF", name: "Rose" },
-  amber:   { a: "#F59E0B", b: "#F43F5E", on: "#0F1420", name: "Amber" },
-};
-function applyAccent(){
-  const p = profile(); const ac = ACCENTS[(p && p.accent) || "violet"] || ACCENTS.violet; const r = document.documentElement.style;
-  r.setProperty("--acc", ac.a); r.setProperty("--acc2", ac.b); r.setProperty("--on-acc", ac.on);
-  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", ac.a);
-}
 const Theme = {
   orig: null,
   get(){ try { return localStorage.getItem("gm-theme") || "auto"; } catch { return "auto"; } },
@@ -480,7 +654,7 @@ const DEEP = [["today","Today's page"],["morning","Morning: gratitude and target
 function routeHash(){
   let h = ""; try { h = (location.hash || "").slice(1).toLowerCase(); } catch {}
   if (!h || !profile() || !J()) return;
-  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", duo:"duo" };
+  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", duo:"duo", preferences:"prefs" };
   if (!map[h]) return;
   S.view = map[h]; if (S.view === "today" || S.view === "ink") S.date = today(); if (S.view === "week") S.week = null; S.sheet = null;
   render();
@@ -630,6 +804,167 @@ function inkView(){
   : `<div class="empty">Opening your page…</div>`}`;
 }
 
+/* ============================ suites, delight, rituals ============================ */
+const SUITES = {
+  greatestme: { name: "GreatestMe", note: "The house purple. Light & dark.", color: "#7C3AED", modes: true },
+  synthwave:  { name: "Synthwave",  note: "Neon sunset over the grid.", color: "#FF2E97", modes: false },
+  martin:     { name: "Martin",     note: "'90s sitcom colour, loud and proud.", color: "#7B2CBF", modes: false },
+  studio:     { name: "Studio",     note: "Quiet and minimal. Light & dark.", color: "#4F46E5", modes: true },
+};
+const Suite = {
+  current(){ const p = profile(); return (p && SUITES[p.suite] && p.suite) || ls.get("gm-suite") || "greatestme"; },
+  apply(name = this.current()){
+    if (!SUITES[name]) name = "greatestme";
+    document.documentElement.setAttribute("data-suite", name); ls.set("gm-suite", name);
+    const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", name === "synthwave" ? "#0B0320" : name === "martin" ? "#FFF1D6" : name === "studio" ? "#F2F4F7" : "#0D0820");
+  },
+};
+function applyAccent(){ Suite.apply(); }
+const Prefs = {
+  get(){ return Object.assign({ sound: true, confetti: true }, ls.get("gm-prefs") || {}); },
+  set(k, v){ const p = this.get(); p[k] = v; ls.set("gm-prefs", p); },
+};
+const reduced = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* sound: a soft synthesized chime, voiced per suite */
+let AC = null;
+function chime(big){
+  if (!Prefs.get().sound) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume();
+    const suite = Suite.current(); const type = suite === "synthwave" ? "sawtooth" : suite === "martin" ? "square" : "sine";
+    const notes = big ? [523.25, 659.25, 783.99, 1046.5] : [783.99, 1174.66]; const t0 = AC.currentTime;
+    notes.forEach((f, i) => { const o = AC.createOscillator(), g = AC.createGain(), flt = AC.createBiquadFilter();
+      o.type = type; o.frequency.value = f; flt.type = "lowpass"; flt.frequency.value = type === "sine" ? 8000 : 2400;
+      const s = t0 + i * (big ? .11 : .08); g.gain.setValueAtTime(0, s); g.gain.linearRampToValueAtTime(type === "sine" ? .09 : .035, s + .02); g.gain.exponentialRampToValueAtTime(.0001, s + .5);
+      o.connect(flt); flt.connect(g); g.connect(AC.destination); o.start(s); o.stop(s + .55); });
+  } catch {}
+}
+/* confetti */
+function confetti(x, y, big){
+  if (!Prefs.get().confetti || reduced()) return;
+  const cv = document.createElement("canvas"); cv.className = "fx"; document.body.appendChild(cv);
+  const dpr = Math.min(devicePixelRatio || 1, 2); cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; const c = cv.getContext("2d"); c.scale(dpr, dpr);
+  const cols = [cssVar("--acc"), cssVar("--acc2"), cssVar("--good"), cssVar("--warn"), "#FFFFFF"].filter(Boolean);
+  const ox = x ?? innerWidth / 2, oy = y ?? innerHeight * .35, n = big ? 150 : 36, tri = Suite.current() === "martin";
+  const P = Array.from({ length: n }, () => { const a = Math.random() * Math.PI * 2, v = (big ? 7 : 4) + Math.random() * (big ? 9 : 4);
+    return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - (big ? 6 : 3), r: 4 + Math.random() * 6, s: Math.random() * 6, vs: (Math.random() - .5) * .3, c: cols[Math.random() * cols.length | 0], k: Math.random() * 3 | 0 }; });
+  let t = 0; const step = () => { t++; c.clearRect(0, 0, innerWidth, innerHeight);
+    P.forEach(p => { p.vy += .32; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.s += p.vs; c.save(); c.translate(p.x, p.y); c.rotate(p.s); c.fillStyle = p.c; c.globalAlpha = Math.max(0, 1 - t / 110);
+      if (p.k === 0) c.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); else if (p.k === 1 || !tri) { c.beginPath(); c.arc(0, 0, p.r / 2.4, 0, 7); c.fill(); } else { c.beginPath(); c.moveTo(0, -p.r / 2); c.lineTo(p.r / 2, p.r / 2); c.lineTo(-p.r / 2, p.r / 2); c.fill(); } c.restore(); });
+    if (t < 115) requestAnimationFrame(step); else cv.remove(); };
+  requestAnimationFrame(step);
+}
+function buzz(ms = 12){ try { navigator.vibrate && navigator.vibrate(ms); } catch {} }
+function burstAt(el, big){ const r = el && el.getBoundingClientRect ? el.getBoundingClientRect() : null; confetti(r ? r.left + r.width / 2 : undefined, r ? r.top + r.height / 2 : undefined, big); chime(big); buzz(big ? 30 : 12); }
+function celebrate(o){ S.cele = o; render(); confetti(undefined, undefined, true); chime(true); buzz(40); }
+
+/* illustrations: original inline SVG, coloured by the active suite */
+const ART = {
+  sunrise: `<svg viewBox="0 0 200 140" aria-hidden="true"><g class="sunrise"><circle cx="122" cy="94" r="34" class="i-w"/><g class="i-sb" stroke-width="5" stroke-linecap="round"><path d="M122 46V32M84 62l-10-10M160 62l10-10M70 94H56M174 94h14"/></g></g><path d="M0 112q50-30 100 0t100-6V140H0z" class="i-a" opacity=".85"/><path d="M0 126q60-22 120 0t80-4V140H0z" class="i-b" opacity=".9"/></svg>`,
+  day: `<svg viewBox="0 0 200 140" aria-hidden="true"><circle cx="140" cy="44" r="24" class="i-w float"/><g class="float" style="animation-delay:1s"><ellipse cx="80" cy="56" rx="30" ry="11" class="i-s" opacity=".9"/><ellipse cx="98" cy="48" rx="18" ry="12" class="i-s" opacity=".9"/></g><path d="M0 112q50-30 100 0t100-6V140H0z" class="i-a" opacity=".85"/><path d="M0 126q60-22 120 0t80-4V140H0z" class="i-b" opacity=".9"/></svg>`,
+  night: `<svg viewBox="0 0 200 140" aria-hidden="true"><path d="M142 26a32 32 0 1 0 30 50 26 26 0 1 1-30-50z" class="i-w float"/><g class="i-w"><circle class="tw" cx="40" cy="30" r="2.4"/><circle class="tw" cx="76" cy="18" r="1.8"/><circle class="tw" cx="104" cy="44" r="2.2"/><circle class="tw" cx="60" cy="62" r="1.6"/><circle class="tw" cx="184" cy="30" r="1.8"/></g><path d="M0 116q50-26 100 0t100-6V140H0z" class="i-a" opacity=".8"/><path d="M0 128q60-20 120 0t80-4V140H0z" class="i-b" opacity=".85"/></svg>`,
+  mountain: `<svg viewBox="0 0 200 140" aria-hidden="true"><path d="M6 134L78 38l30 40 22-26 64 82z" class="i-a"/><path d="M78 38l14 19-8-3-6 8-6-8-8 3z" class="i-s" opacity=".9"/><path d="M36 132q34-18 52-30t36-28 26-26" class="i-sb" stroke-width="3" stroke-dasharray="5 6" stroke-linecap="round"/><path d="M150 50V18" class="i-si" stroke-width="3" stroke-linecap="round"/><path d="M150 18l22 8-22 8z" class="i-b float"/></svg>`,
+  sprout: `<svg viewBox="0 0 200 140" aria-hidden="true"><path d="M70 92h60l-8 42H78z" class="i-b"/><rect x="64" y="84" width="72" height="12" rx="4" class="i-a"/><path d="M100 84V50" class="i-si" stroke-width="4" stroke-linecap="round"/><g class="float"><path d="M100 60c-26 2-34-14-34-26 18 0 32 8 34 26z" class="i-g"/><path d="M100 52c6-22 24-28 38-26-2 16-14 28-38 26z" class="i-g" opacity=".85"/></g></svg>`,
+  duo: `<svg viewBox="0 0 200 140" aria-hidden="true"><circle cx="78" cy="70" r="40" class="i-a" opacity=".85"/><circle cx="122" cy="70" r="40" class="i-b" opacity=".85"/><path d="M100 98c-16-10-24-18-24-28a10 10 0 0 1 24-6 10 10 0 0 1 24 6c0 10-8 18-24 28z" class="i-s float"/></svg>`,
+  trophy: `<svg viewBox="0 0 200 160" aria-hidden="true"><g class="float"><path d="M64 22h72v34a36 36 0 0 1-72 0z" class="i-w"/><path d="M64 32H44a20 20 0 0 0 22 24M136 32h20a20 20 0 0 1-22 24" class="i-si" stroke-width="5" stroke-opacity=".5"/><rect x="92" y="90" width="16" height="22" class="i-a"/><rect x="68" y="112" width="64" height="14" rx="4" class="i-a"/></g><g class="i-b"><circle class="tw" cx="34" cy="30" r="4"/><circle class="tw" cx="170" cy="24" r="3"/><circle class="tw" cx="176" cy="90" r="4"/><circle class="tw" cx="26" cy="96" r="3"/></g></svg>`,
+  flameBig: `<svg viewBox="0 0 120 150" aria-hidden="true"><g class="float"><path d="M60 8c8 26 40 40 40 78a40 40 0 0 1-80 0c0-20 12-30 18-46 4 12 10 16 16 18C58 46 50 30 60 8z" class="i-b"/><path d="M60 64c4 14 22 20 22 40a22 22 0 0 1-44 0c0-10 6-16 10-24 2 6 6 8 8 8-2-8 0-16 4-24z" class="i-w"/></g></svg>`,
+  welcome: `<svg viewBox="0 0 240 180" aria-hidden="true"><ellipse cx="120" cy="92" rx="104" ry="34" class="i-sa" stroke-width="2" opacity=".5" transform="rotate(-14 120 92)"/><ellipse cx="120" cy="92" rx="84" ry="24" class="i-sb" stroke-width="2" opacity=".6" transform="rotate(18 120 92)"/><g class="float"><circle cx="120" cy="90" r="44" class="i-a"/><circle cx="104" cy="74" r="14" class="i-s" opacity=".35"/></g><circle cx="214" cy="62" r="7" class="i-b float"/><circle cx="34" cy="122" r="5" class="i-w float" style="animation-delay:1.2s"/><g class="i-w"><circle class="tw" cx="40" cy="30" r="3"/><circle class="tw" cx="196" cy="150" r="3"/><circle class="tw" cx="180" cy="20" r="2"/></g></svg>`,
+  empty: `<svg viewBox="0 0 200 120" aria-hidden="true"><rect x="40" y="20" width="120" height="84" rx="12" class="i-l"/><rect x="56" y="38" width="60" height="8" rx="4" class="i-a" opacity=".6"/><rect x="56" y="56" width="88" height="8" rx="4" class="i-b" opacity=".4"/><rect x="56" y="74" width="40" height="8" rx="4" class="i-b" opacity=".4"/><circle cx="160" cy="24" r="10" class="i-w float"/></svg>`,
+};
+const FLAME = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.5 4.5 7 7 7 13a7 7 0 0 1-14 0c0-3.5 2-5.2 3-8 .7 2 1.8 2.8 2.8 3.1C10.4 7.6 10.6 5 12 2z" fill="#FF7A1A"/><path d="M12 12c.8 2.4 3.6 3.4 3.6 6.4a3.6 3.6 0 0 1-7.2 0c0-1.7 1-2.7 1.6-4 .4 1 1 1.4 1.4 1.4-.3-1.3 0-2.6.6-3.8z" fill="#FFD23F"/></svg>`;
+
+/* rings: morning / targets / evening, like activity rings */
+function dayParts(dd){
+  if (!dd) return { m: 0, t: 0, e: 0 };
+  const m = Math.min(1, dd.gratitude.filter(x => x.trim()).length / 3 * .6 + (dd.intention.trim() ? .4 : 0));
+  const set = dd.targets.filter(x => x.t.trim()); const t = set.length ? set.filter(x => x.done).length / set.length : 0;
+  const e = (dd.wins.some(x => x.trim()) ? .4 : 0) + ((dd.lessons || "").trim() ? .3 : 0) + (dd.mood > 0 ? .3 : 0);
+  return { m, t, e: Math.min(1, e) };
+}
+function rings(parts, center, sub){
+  const R = [[52, parts.m, "var(--acc)"], [39, parts.t, "var(--acc2)"], [26, parts.e, "var(--good)"]];
+  return `<div class="ring" role="img" aria-label="Morning ${Math.round(parts.m * 100)}%, targets ${Math.round(parts.t * 100)}%, evening ${Math.round(parts.e * 100)}%"><svg viewBox="0 0 120 120">${R.map(([r, v, col]) => { const C = 2 * Math.PI * r;
+    return `<circle class="trk" cx="60" cy="60" r="${r}" style="stroke-width:10;opacity:.6"/><circle class="arc" cx="60" cy="60" r="${r}" style="stroke:${col};stroke-width:10;stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C * (1 - v)).toFixed(1)};--c:${C.toFixed(1)}"/>`; }).join("")}</svg>
+    <div class="ctr"><div><b>${center}</b><br><span>${sub}</span></div></div></div>`;
+}
+
+/* celebrations: compare before/after snapshots of today */
+const STREAK_MARKS = [3, 7, 14, 21, 30, 45, 60, 75, 91];
+function snap(){ const j = J(); if (!j) return null; const dd = Store.get(dayKey(today())); const st = stats(j);
+  return { score: dayScore(dd), habits: dd ? j.habits.filter(h => dd.habits[h.id]).length : 0, hTotal: j.habits.length, streak: st.streak, tDone: dd ? dd.targets.filter(t => t.t.trim() && t.done).length : 0, ms: j.goals.reduce((a, g) => a + g.milestones.filter(m => m.done).length, 0) }; }
+function checkWins(el){
+  const prev = S.snap, cur = snap(); S.snap = cur; if (!prev || !cur) return;
+  if (cur.ms > prev.ms) { burstAt(el, true); toast("Milestone reached. That's real progress."); return; }
+  if (cur.streak > prev.streak && STREAK_MARKS.includes(cur.streak) && !S.ritual) return celebrate({ art: ART.flameBig, num: cur.streak, title: `${cur.streak}-day streak`, sub: cur.streak >= 30 ? "This is who you are now." : "Momentum is building. Protect it tomorrow." });
+  if (cur.score === 100 && prev.score < 100 && !S.ritual) return celebrate({ art: ART.trophy, title: "Page complete", sub: "Morning, targets and evening, all closed. Rest easy tonight." });
+  if (cur.hTotal && cur.habits === cur.hTotal && prev.habits < cur.hTotal) { burstAt(el, true); toast("Every habit done today"); return; }
+  if (cur.habits > prev.habits || cur.tDone > prev.tDone) burstAt(el, false);
+}
+
+/* guided rituals */
+const RITUALS = {
+  morning: { title: "Morning", steps: ["breathe", "grat", "intent", "targets", "done"] },
+  evening: { title: "Evening", steps: ["wins", "lessons", "improve", "mood", "done"] },
+};
+function greeting(){ const h = new Date().getHours(); return h < 5 ? "Still up" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; }
+function sceneNow(){ const h = new Date().getHours(); return h >= 5 && h < 12 ? ART.sunrise : h < 17 && h >= 12 ? ART.day : ART.night; }
+function ritualView(){
+  const r = S.ritual, R = RITUALS[r.kind], step = R.steps[r.step], d = today(), key = dayKey(d), dd = Store.ensure(key, newDay), p = profile();
+  const nick = esc((p.nick || "").split(" ")[0]);
+  let body = "";
+  if (step === "breathe") body = `<span class="kicker">One minute to arrive</span><h1>Breathe with the circle, ${nick}.</h1><div class="breath"><span id="breathTxt">Breathe in</span></div><p class="muted">In as it grows, out as it shrinks. Three breaths, then begin.</p>`;
+  if (step === "grat") body = `<span class="kicker">Gratitude</span><h1>What are you grateful for this morning?</h1>${dd.gratitude.map((g, i) => inp(`rg${i}`, key, `gratitude.${i}`, g, ["Someone who showed up for you", "Something you get to do today", "Something small and simple"][i], "in box big-in")).join("")}`;
+  if (step === "intent") body = `<span class="kicker">Intention</span><h1>Today I will be…</h1>${inp("rint", key, "intention", dd.intention, "Focused, patient, present", "in box big-in")}<div class="presets">${["Focused", "Patient", "Present", "Bold", "Disciplined", "Kind", "Locked in"].map(w => `<button data-act="rword" data-v="${w}">${w}</button>`).join("")}</div>`;
+  if (step === "targets") body = `<span class="kicker">Today's targets</span><h1>Three moves that matter most.</h1>${dd.targets.slice(0, 3).map((t, i) => inp(`rt${i}`, key, `targets.${i}.t`, t.t, ["The one that matters most", "Second", "Third"][i], "in box big-in")).join("")}<p class="muted small">Link them to goals and check them off on Today.</p>`;
+  if (step === "wins") body = `<span class="kicker">Wins</span><h1>What went right today?</h1>${dd.wins.map((w, i) => inp(`rw${i}`, key, `wins.${i}`, w, ["Small counts. Name it.", "", ""][i], "in box big-in")).join("")}`;
+  if (step === "lessons") body = `<span class="kicker">Lessons</span><h1>What did today teach you?</h1>${ta("rl", key, "lessons", dd.lessons, "What would you tell yourself this morning?").replace('class="in"', 'class="in big-in" style="min-height:140px"')}`;
+  if (step === "improve") body = `<span class="kicker">Tomorrow</span><h1>One thing you'll do better tomorrow.</h1>${inp("ri", key, "improve", dd.improve, "One adjustment", "in box big-in")}${inp("rgp", key, "gratitudePM", dd.gratitudePM, "And tonight I'm grateful for…", "in box big-in")}`;
+  if (step === "mood") body = `<span class="kicker">Check in</span><h1>How did today feel?</h1><div class="field"><span class="label">Mood</span><div class="scale faces" role="group">${["😣", "🙁", "😐", "🙂", "😄"].map((f, i) => `<button data-act="scale" data-doc="${key}" data-f="mood" data-n="${i + 1}" aria-pressed="${dd.mood === i + 1}" aria-label="Mood ${i + 1} of 5">${f}</button>`).join("")}</div></div>
+    <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained", "Low", "Okay", "Strong", "Charged"])}</div>`;
+  if (step === "done") { const st = stats(); const parts = dayParts(dd);
+    body = `<div style="display:grid;place-items:center;gap:14px;text-align:center">${rings(parts, `${dayScore(dd)}%`, "today")}<span class="kicker">${R.title} complete</span><h1>${r.kind === "morning" ? `You're set, ${nick}. Go make it count.` : `Day closed. Proud of you, ${nick}.`}</h1>
+      <span class="flame ${journalled(dd) ? "lit" : "out"}">${FLAME}${st.streak} day streak</span></div>`; }
+  const last = r.step === R.steps.length - 1;
+  return `<div class="ritual" role="dialog" aria-modal="true" aria-label="${R.title} ritual"><div class="backdrop"><div class="sun"></div></div>
+    <div class="r-top"><button class="btn icon ghost" data-act="rclose" aria-label="Close">${ICON.x}</button><div class="r-prog">${R.steps.map((_, i) => `<i class="${i <= r.step ? "on" : ""}"></i>`).join("")}</div></div>
+    <div class="r-body"><div class="r-step" id="rstep${r.step}">${body}</div></div>
+    <div class="r-foot">${r.step > 0 && !last ? `<button class="btn lg" data-act="rback">Back</button>` : ""}<button class="btn primary lg" data-act="${last ? "rclose" : "rnext"}">${last ? "Finish" : step === "breathe" ? "I'm here" : "Continue"}</button></div></div>`;
+}
+let breathT = null;
+function breathLoop(){ clearInterval(breathT); const el = () => document.getElementById("breathTxt"); let inn = true; breathT = setInterval(() => { const e = el(); if (!e) return clearInterval(breathT); inn = !inn; e.textContent = inn ? "Breathe in" : "Breathe out"; }, 4000); }
+
+/* settings */
+function prefsView(){
+  const p = profile(), j = J(), cur = Suite.current(), pr = Prefs.get();
+  const journeys = Object.keys(Store.docs).filter(k => k.startsWith("journey-")).map(k => Store.docs[k]).sort((a, b) => b.created - a.created);
+  const pv = k => `<div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div>`;
+  return `
+  <div class="head"><div><span class="label">Make it yours</span><h1 class="title-bar" style="margin-top:4px">Settings</h1></div></div>
+  <section class="card"><div class="row" style="gap:14px;flex-wrap:nowrap"><div class="avatar">${esc((p.nick || "?").trim().charAt(0))}</div><div style="min-width:0;flex:1"><input id="nick" class="in" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" aria-label="Your name" style="font-weight:700;font-size:1.1rem"><p class="muted small">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you." : `On-device account: ${esc(Store.accountName)}. Entries stay in this browser.`}</p></div></div></section>
+  <section class="card"><div class="card-h"><h2>Look</h2><span class="label">Follows your account</span></div>
+    <div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="suite" data-v="${k}" aria-pressed="${cur === k}">${pv(k)}<span class="nm">${esc(SUITES[k].name)}${cur === k ? `<span class="chip good">On</span>` : ""}</span></button>`).join("")}</div>
+    <p class="muted small">${esc(SUITES[cur].note)}</p>
+    ${SUITES[cur].modes ? `<div class="set-row"><div><b>Appearance</b><p class="muted small">Auto follows your iPhone or iPad.</p></div><div class="toggle3" role="group" aria-label="Appearance">${["auto", "light", "dark"].map(t => `<button data-act="theme" data-v="${t}" aria-pressed="${Theme.get() === t}">${t}</button>`).join("")}</div></div>` : ""}
+  </section>
+  <section class="card"><div class="card-h"><h2>Feel</h2><span class="label">This device</span></div><div class="set-group">
+    <label class="set-row"><div><b>Sounds</b><p class="muted small">A soft chime when you close a loop.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="sound" ${pr.sound ? "checked" : ""}></label>
+    <label class="set-row"><div><b>Celebrations</b><p class="muted small">Confetti for streaks, full pages and milestones.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="confetti" ${pr.confetti ? "checked" : ""}></label>
+    ${Device.iPad || Device.penSeen || window.innerWidth >= 700 ? `<div class="set-row"><div><b>Handwriting pages</b><p class="muted small">Auto shows Ink on iPad and wherever a stylus is used.</p></div><div class="toggle3" role="group" aria-label="Handwriting pages">${[["auto", "Auto"], ["on", "On"], ["off", "Off"]].map(([k, l]) => `<button data-act="inkPref" data-v="${k}" aria-pressed="${(p.ink || "auto") === k}">${l}</button>`).join("")}</div></div>` : ""}
+  </div></section>
+  <section class="card"><div class="card-h"><h2>Siri, Shortcuts & reminders</h2></div>
+    <p class="muted small">In Shortcuts, make a shortcut with one action, <b>Open URLs</b>, and paste a link. Name it what you'll say, like "Morning pages". For reminders, use Automation → Time of Day to open Morning at 7:00 and Evening at 9:00.</p>
+    ${DEEP.map(([h, l]) => `<div class="linkrow"><div><b class="small">${esc(l)}</b><br><code>${esc(baseUrl() + "#" + h)}</code></div><button class="btn sm" data-act="copy" data-v="${esc(baseUrl() + "#" + h)}">Copy</button></div>`).join("")}
+  </section>
+  <section class="card"><div class="card-h"><h2>Journeys</h2><button class="btn sm" data-act="sheet" data-v="newJourney">+ New journey</button></div>
+    ${journeys.map(x => `<div class="set-row"><div><b>${esc(x.title)}</b><div class="muted mono small">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
+    <div class="field"><label class="label" for="jstart">Day 1 of this journey</label><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"></div></section>
+  <section class="card"><div class="card-h"><h2>Backup</h2></div><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
+  <section class="card"><div class="card-h"><h2>Ideas & requests</h2></div><p class="muted small">${window.claude ? "Want something changed or added? Leave a comment on this page and send it to Claude. Requests get built into the app for both of you." : "Want something changed or added? Tell Dalton, or open an issue on the GreatestMe GitHub repo."}</p></section>
+  ${Store.mode === "local" ? `<button class="btn" style="align-self:flex-start" data-act="signout">Sign out</button>` : ""}`;
+}
+
 /* ============================ rendering ============================ */
 let User = null;
 const NAV = [["today","Today"],["week","Week"],["goals","Goals"],["habits","Habits"],["progress","Progress"],["duo","Duo"]];
@@ -639,28 +974,33 @@ function render(){
   const root = $("#root");
   const scrollY = window.scrollY;
   const active = document.activeElement && document.activeElement.id;
-  if (S.gate) { root.innerHTML = gateView(); return; }
-  if (!profile() || !J()) { root.innerHTML = onboardView(); return; }
+  Suite.apply();
+  const BD = `<div class="backdrop"><div class="sun"></div></div>`;
+  if (S.gate) { root.innerHTML = BD + gateView(); return; }
+  if (!profile() || !J()) { root.innerHTML = BD + onboardView(); return; }
   if (S.view === "ink" && !canInk()) S.view = "today";
-  applyAccent();
-  const v = { today: todayView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, duo: duoView }[S.view]();
+  const entering = S.lastView !== S.view; S.lastView = S.view;
+  const v = { today: todayView, prefs: prefsView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, duo: duoView }[S.view]();
   const items = navItems(); const nav = () => items.map(([k, l]) => `<button data-act="nav" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
   const p = profile();
-  root.innerHTML = `<div class="app">
-    <aside class="rail"><div class="brand">Greatest<b>Me</b></div><nav class="nav">${nav()}</nav>
-      <div class="rail-foot"><div class="label">${esc(p.nick || "")}</div><div id="savestate" class="save"></div>
-      <button class="btn sm" data-act="sheet" data-v="settings">${ICON.gear.replace("<svg", '<svg width="16" height="16"')} Account & journeys</button></div></aside>
-    <main class="main"><div class="col">
-      <div class="mtop"><div class="brand" style="padding:0">Greatest<b>Me</b></div><button class="btn icon ghost" aria-label="Account and journeys" data-act="sheet" data-v="settings">${ICON.gear}</button></div>
+  root.innerHTML = `${BD}<div class="app">
+    <aside class="rail"><div class="brand"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></div><nav class="nav">${nav()}</nav>
+      <div class="rail-foot"><div id="savestate" class="save" style="padding:0 8px"></div>
+      <button class="me" data-act="nav" data-v="prefs" aria-label="Settings" ${S.view === "prefs" ? 'aria-current="page"' : ""}><span class="avatar sm">${esc((p.nick || "?").trim().charAt(0))}</span><span style="flex:1;min-width:0"><b style="display:block">${esc(p.nick || "")}</b><span class="muted small">Settings</span></span>${ICON.gear.replace("<svg", '<svg width="18" height="18"')}</button></div></aside>
+    <main class="main"><div class="col ${entering ? "enter" : ""}">
+      <div class="mtop"><div class="brand" style="padding:0"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></div><button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear}</button></div>
       ${v}
     </div></main>
     <nav class="tabs" style="--tabs:${items.length}">${nav()}</nav>
-  </div>${S.sheet ? sheetView() : ""}${S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : ""}`;
+  </div>${S.ritual ? ritualView() : ""}${S.cele ? celeView() : ""}${S.sheet ? sheetView() : ""}${S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : ""}`;
+  if (S.pop) { const el = document.getElementById(S.pop); if (el) el.classList.add("pop"); S.pop = null; }
+  if (S.ritual && RITUALS[S.ritual.kind].steps[S.ritual.step] === "breathe") breathLoop();
   Store.setStatus(Store.status);
   if (S.view === "ink") Ink.mount();
   if (active) { const el = document.getElementById(active); if (el) el.focus({ preventScroll: true }); }
   window.scrollTo(0, scrollY);
 }
+function celeView(){ const c = S.cele; return `<div class="cele" data-act="celeClose"><div class="cele-card" role="dialog" aria-modal="true" aria-label="${esc(c.title)}">${c.art || ""}${c.num != null ? `<div class="num">${+c.num}</div>` : ""}<h1>${esc(c.title)}</h1><p class="muted">${esc(c.sub || "")}</p><button class="btn primary lg" data-act="celeClose" style="width:100%">Keep going</button></div></div>`; }
 function toast(msg){ S.toast = msg; render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 2200); }
 
 const bind = (key, path, extra = "") => `data-doc="${esc(key)}" data-f="${esc(path)}" ${extra}`;
@@ -679,14 +1019,25 @@ function todayView(){
   const status = n < 1 ? `<span class="chip">Starts in ${1 - n} day${n === 0 ? "" : "s"}</span>` : n > TOTAL_DAYS ? `<span class="chip ember">Journey complete</span>` : `<span class="chip">Day ${n} of ${TOTAL_DAYS}</span><span class="chip ember">Week ${weekOf(d)}</span>`;
   const habits = j.habits.length ? j.habits.map(h => `<label class="row" style="gap:10px"><input type="checkbox" class="check" id="h-${esc(h.id)}" ${bind(key, "habits." + h.id)} ${dd.habits[h.id] ? "checked" : ""}><span class="${dd.habits[h.id] ? "done-text" : ""}">${esc(h.name)}</span></label>`).join("") : `<p class="muted">No habits yet. Add up to 8 in Habits.</p>`;
   const hours = Array.from({ length: 17 }, (_, i) => i + 6);
+  const isToday = d === today(), st = stats(j), nick = esc(((profile().nick || "").split(" ")[0]) || "");
+  const wkStart = n >= 1 ? addDays(j.start, (weekOf(d) - 1) * 7) : addDays(d, -((parse(d).getDay() + 6) % 7));
+  const week7 = `<div class="week7" aria-label="This week">${Array.from({ length: 7 }, (_, i) => { const x = addDays(wkStart, i); const on = journalled(Store.get(dayKey(x))); return `<div class="d ${on ? "on" : ""} ${x === d ? "now" : ""}"><i></i>${esc(fmtDate(x, { weekday: "narrow" }))}</div>`; }).join("")}</div>`;
+  const parts = dayParts(dd), mDone = parts.m >= 1 && dd.targets.some(t => t.t.trim()), eDone = parts.e >= .99;
+  const lit = journalled(Store.get(dayKey(today())));
   return `
-  <div class="head"><div><div class="row">${status}</div><h1 style="margin-top:8px">${esc(fmtDate(d))}</h1></div>
+  <div class="head"><span class="label">${esc(j.title)} · ${n >= 1 && n <= TOTAL_DAYS ? `Week ${weekOf(d)}` : "Outside journey"}</span>
     <div class="daynav"><button class="btn icon" aria-label="Previous day" data-act="day" data-n="-1">${ICON.left}</button>
-    <button class="btn sm" data-act="day" data-n="0" ${d === today() ? "disabled" : ""}>Today</button>
+    <button class="btn sm" data-act="day" data-n="0" ${isToday ? "disabled" : ""}>Today</button>
     <button class="btn icon" aria-label="Next day" data-act="day" data-n="1">${ICON.right}</button></div></div>
-  <div class="card"><div class="quote">${esc(q)}<cite>${esc(who)}</cite></div>
-    <div class="row" style="justify-content:space-between"><span class="label">Page complete</span><span class="mono">${sc}%</span></div>${bar(sc, "ember")}</div>
-  ${!inJ && n >= 1 ? `<div class="card"><p>This date is outside your current 13-week journey. Start a new journey from <b>Account & journeys</b> when you're ready for the next one.</p></div>` : ""}
+  <section class="hero">${isToday ? `<div class="scene">${sceneNow()}</div>` : ""}
+    <div class="hi"><span class="greet">${isToday ? `${greeting()}, ${nick}` : "Looking back"}</span><h1>${esc(fmtDate(d))}</h1>
+      <div class="row">${status}<span class="flame ${lit ? "lit" : "out"}" title="${lit ? "Streak alive today" : "Journal today to keep your streak"}">${FLAME}${st.streak}</span></div>${week7}</div>
+    ${rings(parts, `${sc}%`, "today")}</section>
+  ${isToday ? `<div class="rituals">
+    <button class="ritual-card ${mDone ? "done" : ""}" data-act="ritual" data-v="morning">${ART.sunrise.replace("<svg", '<svg class="art"')}<span class="st">${mDone ? "✓ Done" : "3 min · guided"}</span><h2>Morning ritual</h2><span class="small" style="max-width:60%">Breathe, gratitude, intention, targets</span></button>
+    <button class="ritual-card ${eDone ? "done" : ""}" data-act="ritual" data-v="evening">${ART.night.replace("<svg", '<svg class="art"')}<span class="st">${eDone ? "✓ Done" : "3 min · guided"}</span><h2>Evening ritual</h2><span class="small" style="max-width:60%">Wins, lessons, tomorrow, check-in</span></button></div>` : ""}
+  <div class="card"><div class="quote">${esc(q)}<cite>${esc(who)}</cite></div></div>
+  ${!inJ && n >= 1 ? `<div class="card"><p>This date is outside your current 13-week journey. Start a new journey in <b>Settings</b> when you're ready for the next one.</p></div>` : ""}
   <div class="grid2">
     <section class="card"><div class="card-h"><h2>Morning</h2><span class="label">Set the day</span></div>
       <div class="field"><span class="label">I'm grateful for</span><div class="num-rows">${dd.gratitude.map((g, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`g${i}`, key, `gratitude.${i}`, g, i === 0 ? "Someone who showed up for me…" : "")}</div>`).join("")}</div></div>
@@ -741,7 +1092,7 @@ function weekView(){
   </section>
   <section class="card"><div class="card-h"><h2>Habit tracker</h2><span class="label">Tap to check off</span></div>
     ${j.habits.length ? `<div class="hgrid"><table><thead><tr><th class="hn">Habit</th>${days.map(d => `<th>${esc(fmtDate(d, { weekday: "narrow" }))}<br><span class="mono">${parse(d).getDate()}</span></th>`).join("")}<th>Total</th></tr></thead><tbody>
-    ${j.habits.map(h => { let c = 0; const cells = days.map(d => { const dd = Store.get(dayKey(d)); const on = !!(dd && dd.habits[h.id]); if (on) c++; return `<td><button class="cell" data-act="habit" data-d="${d}" data-h="${esc(h.id)}" aria-pressed="${on}" aria-label="${esc(h.name)} on ${esc(fmtDate(d))}" ${d > t ? "disabled" : ""}></button></td>`; }).join(""); return `<tr><th class="hn">${esc(h.name)}</th>${cells}<td class="mono">${c}/7</td></tr>`; }).join("")}
+    ${j.habits.map(h => { let c = 0; const cells = days.map(d => { const dd = Store.get(dayKey(d)); const on = !!(dd && dd.habits[h.id]); if (on) c++; return `<td><button class="cell" id="c-${d}-${esc(h.id)}" data-act="habit" data-d="${d}" data-h="${esc(h.id)}" aria-pressed="${on}" aria-label="${esc(h.name)} on ${esc(fmtDate(d))}" ${d > t ? "disabled" : ""}></button></td>`; }).join(""); return `<tr><th class="hn">${esc(h.name)}</th>${cells}<td class="mono">${c}/7</td></tr>`; }).join("")}
     </tbody></table></div>` : `<p class="muted">No habits yet.</p>`}
   </section>
   <section class="card"><div class="card-h"><h2>Weekly review</h2><span class="label">Be honest. Then adjust.</span></div>
@@ -868,24 +1219,7 @@ function duoView(){
 /* ---------- Sheets ---------- */
 function sheetView(){
   const p = profile(); const j = J(); let body = "";
-  if (S.sheet === "settings") {
-    const journeys = Object.keys(Store.docs).filter(k => k.startsWith("journey-")).map(k => Store.docs[k]).sort((a, b) => b.created - a.created);
-    body = `<div class="card-h"><h2>Account & journeys</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div>
-      <div class="field"><label class="label" for="nick">Name on your journal</label><input id="nick" class="in box" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" autocomplete="off"></div>
-      <p class="muted" style="font-size:.85rem">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you, even from the app's owner." : `Signed in on this device as <b>${esc(Store.accountName)}</b>. Entries are stored in this browser only; export a backup regularly.`}</p>
-      <div class="field"><span class="label">Journeys</span>${journeys.map(x => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0"><div><b>${esc(x.title)}</b><div class="muted mono" style="font-size:.78rem">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
-      <button class="btn sm" style="align-self:flex-start" data-act="sheet" data-v="newJourney">+ New 13-week journey</button></div>
-      <div class="field"><span class="label">Appearance on this device</span><div class="toggle3" role="group" aria-label="Theme">${["auto","light","dark"].map(t => `<button data-act="theme" data-v="${t}" aria-pressed="${Theme.get() === t}">${t === "auto" ? "◐ Auto" : t === "light" ? "☀ Light" : "☾ Dark"}</button>`).join("")}</div></div>
-      <div class="field"><span class="label">Your accent</span><div class="swatches">${Object.entries(ACCENTS).map(([k, a]) => `<button data-act="accent" data-v="${k}" aria-pressed="${(p.accent || "violet") === k}" aria-label="${a.name}" title="${a.name}" style="background:${a.a}"></button>`).join("")}</div><span class="muted" style="font-size:.8rem">Your accent follows your account. Your partner keeps their own.</span></div>
-      ${Device.iPad || Device.penSeen || window.innerWidth >= 700 ? `<div class="field"><span class="label">Handwriting pages</span><div class="toggle3" role="group" aria-label="Handwriting pages">${[["auto","Auto"],["on","On"],["off","Off"]].map(([k, l]) => `<button data-act="inkPref" data-v="${k}" aria-pressed="${(p.ink || "auto") === k}">${l}</button>`).join("")}</div><span class="muted" style="font-size:.8rem">Auto shows the Ink tab on iPad and wherever a stylus is used. It never appears on iPhone unless you turn it on.</span></div>` : ""}
-      <div class="field"><span class="label">Siri, Shortcuts & reminders</span>
-        <p class="muted" style="font-size:.85rem">In the Shortcuts app, make a shortcut with one action, <b>Open URLs</b>, and paste a link below. Name it what you'll say, like "Morning pages", and Siri runs it. For reminders, go to Automation, then Time of Day, and set it to open your Morning link at 7:00 and your Evening link at 9:00.</p>
-        ${DEEP.map(([h, l]) => `<div class="linkrow"><div><b style="font-size:.9rem">${esc(l)}</b><br><code>${esc(baseUrl() + "#" + h)}</code></div><button class="btn sm" data-act="copy" data-v="${esc(baseUrl() + "#" + h)}">Copy</button></div>`).join("")}
-      </div>
-      <div class="field"><span class="label">Journey start date</span><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"><span class="muted" style="font-size:.8rem">Changing this shifts which entries land on which day.</span></div>
-      <div class="field"><span class="label">Backup</span><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></div>
-      ${Store.mode === "local" ? `<div class="row"><button class="btn sm" data-act="signout">Sign out</button></div>` : ""}`;
-  } else if (S.sheet === "newJourney") {
+  if (S.sheet === "newJourney") {
     body = `<div class="card-h"><h2>Start a new journey</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div>
       <p class="muted">Your current journey is kept. Habits carry over; set fresh goals.</p>
       <div class="field"><label class="label" for="njt">Name</label><input id="njt" class="in box" value="${esc("Journey " + (Object.keys(Store.docs).filter(k => k.startsWith("journey-")).length + 1))}"></div>
@@ -900,7 +1234,7 @@ function nextMonday(){ const d = new Date(); const dow = d.getDay(); if (dow !==
 function gateView(){
   const g = S.gate; const accts = Accounts.list();
   return `<div class="gate"><form class="gate-card" id="gateForm" novalidate>
-    <div><div class="gate-brand">Greatest<b>Me</b></div><p class="muted" style="margin-top:8px">A 13-week journal for goals, habits and daily wins.</p></div>
+    <div class="hero-art" style="max-width:220px">${ART.welcome}</div><div><div class="gate-brand">Greatest<b>Me</b></div><p class="muted" style="margin-top:8px">A 13-week journal for goals, habits and daily wins.</p></div>
     <div class="seg"><button type="button" data-act="gmode" data-v="signin" aria-pressed="${g.mode === "signin"}">Sign in</button><button type="button" data-act="gmode" data-v="create" aria-pressed="${g.mode === "create"}">Create account</button></div>
     ${g.mode === "signin" && accts.length ? `<div class="presets">${accts.map(a => `<button type="button" data-act="pickAcct" data-v="${esc(a.name)}" aria-pressed="${g.name === a.name}">${esc(a.name)}</button>`).join("")}</div>` : ""}
     <div class="field"><label class="label" for="gname">Your name</label><input id="gname" class="in box" value="${esc(g.name || "")}" autocomplete="username" required></div>
@@ -914,21 +1248,24 @@ function gateView(){
 
 /* ---------- Onboarding ---------- */
 function onboardView(){
-  const o = S.onboard || (S.onboard = { step: 1, nick: Store.accountName || "", start: today(), goals: [{ title: "", why: "", measure: "" }, { title: "", why: "", measure: "" }, { title: "", why: "", measure: "" }], habits: [] });
-  const steps = `<div class="steps">${[1, 2, 3].map(i => `<i class="${i <= o.step ? "on" : ""}"></i>`).join("")}</div>`;
-  let body = "";
-  if (o.step === 1) body = `<h2>Let's set up your journal</h2>
-    <div class="field"><label class="label" for="onick">What should we call you?</label><input id="onick" class="in box" value="${esc(o.nick)}" autocomplete="off" placeholder="Your first name"></div>
-    <div class="field"><label class="label" for="ostart">Day 1 of your 13 weeks</label><input id="ostart" type="date" class="in box" value="${esc(o.start)}"><div class="row"><button type="button" class="btn sm" data-act="ostart" data-v="${today()}">Today</button><button type="button" class="btn sm" data-act="ostart" data-v="${nextMonday()}">Next Monday</button></div></div>`;
-  if (o.step === 2) body = `<h2>Your 13-week goals</h2><p class="muted">One to three. Make each specific enough that you'd know on day 91 whether you hit it.</p>
-    ${o.goals.map((g, i) => `<div class="field"><label class="label" for="og${i}">Goal ${i + 1}${i ? " (optional)" : ""}</label><input id="og${i}" class="in box" data-og="${i}" value="${esc(g.title)}" placeholder="${["Save $5,000 for the emergency fund","Run a sub-25 5K","Launch the first product"][i]}" autocomplete="off"></div>`).join("")}`;
-  if (o.step === 3) body = `<h2>Daily habits</h2><p class="muted">Pick the few that make everything else easier. You can change these later.</p>
-    <div class="presets">${HABIT_PRESETS.map(p => `<button type="button" data-act="oh" data-v="${esc(p)}" aria-pressed="${o.habits.includes(p)}">${esc(p)}</button>`).join("")}</div>
-    <div class="row" style="flex-wrap:nowrap"><input id="ohnew" class="in box" placeholder="Your own habit" autocomplete="off"><button type="button" class="btn sm" data-act="ohadd">Add</button></div>
-    ${o.habits.filter(h => !HABIT_PRESETS.includes(h)).map(h => `<span class="chip">${esc(h)}</span>`).join(" ")}`;
-  return `<div class="gate"><div class="gate-card"><div class="gate-brand">Greatest<b>Me</b></div>${steps}${body}
+  const o = S.onboard || (S.onboard = { step: 0, nick: Store.accountName || "", suite: Suite.current(), start: today(), goals: [{ title: "", why: "" }, { title: "", why: "" }, { title: "", why: "" }], habits: [] });
+  const N = 7; const steps = o.step ? `<div class="steps">${Array.from({ length: N - 1 }, (_, i) => `<i class="${i < o.step ? "on" : ""}"></i>`).join("")}</div>` : "";
+  let body = "", cta = "Continue";
+  if (o.step === 0) { body = `<div class="hero-art">${ART.welcome}</div><div class="gate-brand">Greatest<b>Me</b></div><h1>Thirteen weeks to the greatest version of you.</h1><p class="muted">Set three goals. Show up every morning and every evening. Watch what ninety-one days of follow-through can do.</p>`; cta = "Let's begin"; }
+  if (o.step === 1) body = `<span class="label">Step 1 · You</span><h1>First, what should we call you?</h1><input id="onick" class="in box big-in" value="${esc(o.nick)}" autocomplete="given-name" placeholder="Your first name">`;
+  if (o.step === 2) body = `<span class="label">Step 2 · Your look</span><h1>Pick your vibe${o.nick ? ", " + esc(o.nick.split(" ")[0]) : ""}.</h1><p class="muted small">You can change it any time in Settings.</p><div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="osuite" data-v="${k}" aria-pressed="${o.suite === k}"><div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div><span class="nm">${esc(SUITES[k].name)}</span></button>`).join("")}</div>`;
+  if (o.step === 3) body = `<span class="label">Step 3 · Day 1</span><h1>When does your journey start?</h1><p class="muted">Thirteen weeks from Day 1. Starting today works. So does a fresh Monday.</p><input id="ostart" type="date" class="in box big-in" value="${esc(o.start)}"><div class="row"><button type="button" class="btn sm" data-act="ostart" data-v="${today()}">Today</button><button type="button" class="btn sm" data-act="ostart" data-v="${nextMonday()}">Next Monday</button></div>`;
+  if (o.step === 4) body = `<div class="hero-art" style="max-width:200px">${ART.mountain}</div><span class="label">Step 4 · Goals</span><h1>What will be true in 13 weeks?</h1><p class="muted small">One to three. Specific enough that on day 91 you'll know.</p>
+    ${o.goals.map((g, i) => `<input id="og${i}" class="in box" data-og="${i}" value="${esc(g.title)}" placeholder="${["Save $5,000 for the emergency fund", "Run a sub-25 5K", "Launch the first product"][i]}${i ? " (optional)" : ""}" autocomplete="off" aria-label="Goal ${i + 1}">`).join("")}`;
+  if (o.step === 5) body = `<div class="hero-art" style="max-width:180px">${ART.sprout}</div><span class="label">Step 5 · Habits</span><h1>Which daily habits carry you there?</h1><p class="muted small">Pick a few. Fewer, done daily, beats many, done sometimes.</p>
+    <div class="presets">${HABIT_PRESETS.map(h => `<button type="button" data-act="oh" data-v="${esc(h)}" aria-pressed="${o.habits.includes(h)}">${esc(h)}</button>`).join("")}${o.habits.filter(h => !HABIT_PRESETS.includes(h)).map(h => `<button type="button" data-act="oh" data-v="${esc(h)}" aria-pressed="true">${esc(h)}</button>`).join("")}</div>
+    <div class="row" style="flex-wrap:nowrap"><input id="ohnew" class="in box" placeholder="Add your own" autocomplete="off"><button type="button" class="btn sm" data-act="ohadd">Add</button></div>`;
+  if (o.step === 6) { const g = o.goals.filter(x => x.title.trim()); body = `<span class="label">Step 6 · Commit</span><h1>Make the promise.</h1><p class="muted">For the next 13 weeks I'll show up morning and evening for:</p>
+    <div class="card" style="gap:8px">${g.map((x, i) => `<div class="row"><span class="goal-n">GOAL ${i + 1}</span><b>${esc(x.title)}</b></div>`).join("")}<div class="muted small">${o.habits.length} daily habit${o.habits.length === 1 ? "" : "s"} · starting ${esc(fmtDate(o.start, { weekday: "long", month: "long", day: "numeric" }))}</div></div>
+    <button class="commit" id="commitBtn" aria-label="Press and hold to commit"><svg viewBox="0 0 166 166" aria-hidden="true"><circle cx="83" cy="83" r="78"/></svg>Hold to<br>commit</button><p class="muted small" style="text-align:center">Press and hold</p>`; }
+  return `<div class="gate"><div class="gate-card" id="ob${o.step}">${o.step ? `<div class="row" style="justify-content:space-between"><button class="btn icon ghost" data-act="oback" aria-label="Back">${ICON.left}</button><div style="flex:1">${steps}</div></div>` : ""}${body}
     ${S.onboardErr ? `<p class="err" role="alert">${esc(S.onboardErr)}</p>` : ""}
-    <div class="row" style="justify-content:space-between">${o.step > 1 ? `<button class="btn" data-act="oback">Back</button>` : "<span></span>"}<button class="btn primary" data-act="onext">${o.step < 3 ? "Continue" : "Open my journal"}</button></div></div></div>`;
+    ${o.step < 6 ? `<button class="btn primary lg" data-act="onext">${cta}</button>` : ""}</div></div>`;
 }
 function captureOnboard(){
   const o = S.onboard; if (!o) return;
@@ -943,7 +1280,9 @@ function onInput(e){
   let v = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.num) v = +v;
   if (key.startsWith("journey-") && f === "start" && !v) return;
   setPath(doc, f, v); Store.touch(key);
+  if (el.type === "checkbox") S.pop = el.id;
   if (el.type === "checkbox" || el.tagName === "SELECT" || el.type === "date") render();
+  if (el.type === "checkbox") checkWins(document.getElementById(el.id));
 }
 async function onClick(e){
   const t = e.target.closest("[data-act]"); if (!t) return;
@@ -953,10 +1292,10 @@ async function onClick(e){
     case "nav": S.view = t.dataset.v; if ((S.view === "today" || S.view === "ink") && !t.dataset.keepdate) S.date = today(); try { history.replaceState(null, "", "#" + S.view); } catch {} if (S.view === "week") S.week = null; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); break;
     case "day": { const n = +t.dataset.n; S.date = n === 0 ? today() : addDays(S.date, n); render(); break; }
     case "week": { const n = +t.dataset.n; S.week = n === 0 ? weekOf(today()) : clamp((S.week || weekOf(today())) + n, 1, WEEKS); render(); break; }
-    case "scale": { const doc = Store.get(t.dataset.doc); const n = +t.dataset.n; setPath(doc, t.dataset.f, getPath(doc, t.dataset.f) === n ? 0 : n); Store.touch(t.dataset.doc); render(); break; }
+    case "scale": { const doc = Store.get(t.dataset.doc); const n = +t.dataset.n; setPath(doc, t.dataset.f, getPath(doc, t.dataset.f) === n ? 0 : n); Store.touch(t.dataset.doc); buzz(8); render(); if (!S.ritual) checkWins(); break; }
     case "addTarget": { const doc = Store.get(t.dataset.doc); doc.targets.push({ t: "", g: "", done: false }); Store.touch(t.dataset.doc); render(); break; }
-    case "habit": { const k = dayKey(t.dataset.d); const dd = Store.ensure(k, newDay); dd.habits[t.dataset.h] = !dd.habits[t.dataset.h]; Store.touch(k); render(); break; }
-    case "ms": { const g = j.goals.find(x => x.id === t.dataset.g); const m = g && g.milestones.find(x => x.id === t.dataset.m); if (m) { m.done = !m.done; Store.touch("journey-" + j.id); render(); } break; }
+    case "habit": { const k = dayKey(t.dataset.d); const dd = Store.ensure(k, newDay); dd.habits[t.dataset.h] = !dd.habits[t.dataset.h]; Store.touch(k); const cid = t.id; S.pop = cid; render(); checkWins(document.getElementById(cid)); break; }
+    case "ms": { const g = j.goals.find(x => x.id === t.dataset.g); const m = g && g.milestones.find(x => x.id === t.dataset.m); if (m) { m.done = !m.done; Store.touch("journey-" + j.id); S.pop = t.id; render(); checkWins(document.getElementById(t.id)); } break; }
     case "addGoal": if (j.goals.length < 3) { j.goals.push({ id: uid(), title: "", why: "", measure: "", reward: "", milestones: [] }); Store.touch("journey-" + j.id); render(); const el = $(`#gt${j.goals.length - 1}`); el && el.focus(); } break;
     case "delGoal": if (t.dataset.confirm === "1") { j.goals = j.goals.filter(g => g.id !== t.dataset.g); Store.touch("journey-" + j.id); render(); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to remove"; t.classList.add("ember"); } break;
     case "addMs": { const g = j.goals.find(x => x.id === t.dataset.g); const last = g.milestones.at(-1); g.milestones.push({ id: uid(), text: "", week: last ? Math.min(WEEKS, +last.week + 1) : weekOf(today()), done: false }); Store.touch("journey-" + j.id); render(); break; }
@@ -990,15 +1329,22 @@ async function onClick(e){
     case "ostart": $("#ostart").value = t.dataset.v; break;
     case "oh": { captureOnboard(); const o = S.onboard; const v = t.dataset.v; o.habits = o.habits.includes(v) ? o.habits.filter(x => x !== v) : o.habits.concat(v).slice(0, 8); render(); break; }
     case "ohadd": { const v = $("#ohnew").value.trim(); if (v && !S.onboard.habits.includes(v)) S.onboard.habits.push(v); render(); break; }
-    case "oback": captureOnboard(); S.onboard.step--; S.onboardErr = ""; render(); break;
+    case "oback": captureOnboard(); S.onboard.step = Math.max(0, S.onboard.step - 1); S.onboardErr = ""; render(); break;
+    case "osuite": S.onboard.suite = t.dataset.v; ls.set("gm-suite", t.dataset.v); Suite.apply(t.dataset.v); chime(false); render(); break;
+    case "suite": profile().suite = t.dataset.v; Store.touch("profile"); Suite.apply(t.dataset.v); chime(false); render(); break;
+    case "pref": Prefs.set(t.dataset.v, t.checked); if (t.checked) { t.dataset.v === "sound" ? chime(false) : confetti(undefined, undefined, false); } break;
+    case "ritual": S.ritual = { kind: t.dataset.v, step: 0 }; S.snap = snap(); render(); break;
+    case "rnext": { const R = RITUALS[S.ritual.kind]; S.ritual.step = Math.min(R.steps.length - 1, S.ritual.step + 1); render(); const f = document.querySelector(".r-step input,.r-step textarea"); if (f && !Device.iOS) f.focus({ preventScroll: true });
+      if (R.steps[S.ritual.step] === "done") { setTimeout(() => { confetti(undefined, undefined, true); chime(true); buzz(30); }, 250); } break; }
+    case "rback": S.ritual.step = Math.max(0, S.ritual.step - 1); render(); break;
+    case "rclose": S.ritual = null; clearInterval(breathT); S.view = "today"; S.date = today(); render(); checkWins(); break;
+    case "rword": { const k = dayKey(today()); const dd = Store.ensure(k, newDay); dd.intention = t.dataset.v; Store.touch(k); render(); break; }
+    case "celeClose": if (e.target === t || t.tagName === "BUTTON") { S.cele = null; render(); } break;
     case "onext": {
       captureOnboard(); const o = S.onboard; S.onboardErr = "";
       if (o.step === 1 && !o.nick.trim()) { S.onboardErr = "Add a name so your journal knows who it belongs to."; render(); break; }
-      if (o.step === 2 && !o.goals.some(g => g.title.trim())) { S.onboardErr = "Add at least one goal. You can refine it later."; render(); break; }
-      if (o.step < 3) { o.step++; render(); break; }
-      const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits });
-      Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {} }; Store.touch("profile");
-      S.onboard = null; S.view = "today"; S.date = today(); render(); toast("Your journal is ready"); break;
+      if (o.step === 4 && !o.goals.some(g => g.title.trim())) { S.onboardErr = "Add at least one goal. You can refine it later."; render(); break; }
+      o.step++; render(); const f = document.querySelector(".gate-card input"); if (f && o.step !== 3) f.focus({ preventScroll: true }); break;
     }
   }
 }
@@ -1026,12 +1372,13 @@ async function doImport(file){
 }
 
 document.addEventListener("input", onInput);
+document.addEventListener("change", e => { if (e.target.dataset && e.target.dataset.doc && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== "checkbox" && !S.ritual) checkWins(e.target); });
 document.addEventListener("change", e => { if (e.target.id === "inkTpl" && Ink.data) { Ink.data.meta.tpl = e.target.value; profile().inkTpl = e.target.value; Store.touch("profile"); Ink.queue(0); render(); return; } if (e.target.id === "importFile" && e.target.files[0]) doImport(e.target.files[0]); else if (e.target.type === "checkbox" || e.target.tagName === "SELECT" || e.target.type === "date") { /* handled by input */ } });
 document.addEventListener("click", onClick);
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "newHabit") { e.preventDefault(); addHabit(e.target.value); }
   if (e.key === "Enter" && e.target.id === "ohnew") { e.preventDefault(); $('[data-act="ohadd"]').click(); }
-  if (e.key === "Escape" && S.sheet) { S.sheet = null; render(); }
+  if (e.key === "Escape" && (S.sheet || S.cele || S.ritual)) { S.sheet = null; S.cele = null; S.ritual = null; render(); }
 });
 document.addEventListener("submit", async e => {
   if (e.target.id !== "gateForm") return; e.preventDefault();
@@ -1045,6 +1392,19 @@ document.addEventListener("submit", async e => {
 });
 window.addEventListener("pagehide", () => { if (Store.dirty.size) Store.flush(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden && Store.dirty.size) Store.flush(); });
+
+function finishOnboard(){
+  const o = S.onboard; if (!o) return;
+  const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits });
+  Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {}, suite: o.suite }; Store.touch("profile");
+  S.onboard = null; S.view = "today"; S.date = today(); S.snap = snap();
+  celebrate({ art: ART.mountain, title: "Your journey begins", sub: `Day 1 is ${fmtDate(jn.start, { weekday: "long", month: "long", day: "numeric" })}. See you tomorrow morning.` });
+}
+let holdT = null;
+document.addEventListener("pointerdown", e => { const b = e.target.closest && e.target.closest("#commitBtn"); if (!b) return; e.preventDefault(); b.classList.add("holding"); buzz(10);
+  clearTimeout(holdT); holdT = setTimeout(() => { b.classList.remove("holding"); finishOnboard(); }, 1500); });
+["pointerup", "pointercancel", "pointerleave"].forEach(ev => document.addEventListener(ev, e => { const b = document.getElementById("commitBtn"); if (b && b.classList.contains("holding") && holdT && (ev !== "pointerleave" || e.target === b)) { clearTimeout(holdT); holdT = null; b.classList.remove("holding"); } }, true));
+document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#commitBtn") && e.detail === 0) finishOnboard(); });
 
 /* ============================ boot ============================ */
 async function startLocal(acct){
