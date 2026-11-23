@@ -35,7 +35,7 @@ opt-in "Duo" board for accountability.
 ## Links
 
 - **Claude version (synced accounts):** https://claude.ai/artifact/RJPQtHABp9CxhXiWbFcWZn
-- **Web version (on-device accounts):** deployed by `.github/workflows/pages.yml` to GitHub Pages on every push to `main`. Turn it on once under Settings → Pages → Source: **GitHub Actions**.
+- **Web version (on-device accounts):** https://soulsmitty.github.io/GreatestMe/ — deployed by `.github/workflows/pages.yml` to GitHub Pages on every push to `main`. (Pages source is set to **GitHub Actions**.)
 
 ## Develop
 
