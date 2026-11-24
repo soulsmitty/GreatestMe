@@ -82,4 +82,7 @@ async function main(){
   }
   console.log(`done: ${sent} email(s) sent, ${profiles.length} journal(s) checked`);
 }
-main().catch(e => { console.error("Recap run failed:", e.message); process.exit(1); });
+main().catch(e => {
+  if (/42501|permission denied/.test(e.message)) { console.log("Recaps are waiting on one database permission. Run the last three lines of supabase/schema.sql (the service_role grants) in Supabase → SQL Editor. Skipping until then."); process.exit(0); }
+  console.error("Recap run failed:", e.message); process.exit(1);
+});
