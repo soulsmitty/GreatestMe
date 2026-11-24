@@ -271,6 +271,8 @@ details.sched summary::-webkit-details-marker{display:none}
 .hero .greet{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .hero .ring{position:relative;width:118px;height:118px;flex:none}
 .ring{position:relative;width:104px;height:104px;flex:none}
+.hero .ring{z-index:1}.hero .ring::before{content:"";position:absolute;inset:4px;border-radius:50%;background:color-mix(in srgb,var(--solid) 72%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.hero .ring svg{position:relative}
 .ring .ctr{pointer-events:none}
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring .trk{fill:none;stroke:var(--line);stroke-width:9}
@@ -446,20 +448,34 @@ details.sched summary::-webkit-details-marker{display:none}
 .schip.done{background:var(--good-soft);color:var(--good)}.schip.part{background:var(--acc-soft);color:var(--acc)}
 .acc.is-done:not(.open){opacity:.85}
 @media (max-width:420px){.acc-h{gap:10px;padding:14px}.acc-in{padding:0 14px}.acc.open .acc-in{padding:0 14px 14px}}
-.cal-wrap{display:flex;flex-direction:column;gap:0;scroll-margin-top:16px}
+.cal-sec{padding:0;gap:0;scroll-margin-top:16px}
+.cal-in{padding:0 14px 16px!important;display:flex;flex-direction:column;gap:12px}
+.cal-sec .cal-card{box-shadow:none;border:0;background:transparent;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none;margin-top:0!important}
+.wk-strip{display:grid;grid-template-columns:repeat(7,minmax(64px,1fr));gap:8px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding:2px;-webkit-overflow-scrolling:touch}
+.wk-strip::-webkit-scrollbar{display:none}
+.wd{all:unset;box-sizing:border-box;cursor:pointer;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;border-radius:14px;border:1px solid var(--line);background:var(--solid);min-height:104px;transition:transform .12s}
+.wd:active{transform:scale(.95)}.wd:focus-visible{outline:2px solid var(--acc)}
+.wd .wn{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.wd b{font-size:1rem}
+.wd.now{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}.wd.now b{color:var(--acc)}
+.wd.fut{background:transparent;border-style:dashed}
+.wd .mood{font-size:.8rem;min-height:1em;line-height:1}
+.mini-ph{width:34px;height:34px;border-radius:50%;border:2px dashed var(--line)}
+@media (min-width:500px){.wk-strip{overflow:visible}}
 .more{display:flex;flex-direction:column;gap:18px}
 .more>summary{list-style:none;align-self:flex-start}.more>summary::-webkit-details-marker{display:none}
 .more-in{display:flex;flex-direction:column;gap:18px;margin-top:18px}
 /* daily highlights */
-.hl{display:flex;flex-direction:column;gap:8px;min-width:0}
-.hl-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}
+.hl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-width:0}
+.hl-track{height:178px;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;scroll-snap-stop:always;scrollbar-width:none;overscroll-behavior:contain;border-radius:var(--r);-webkit-overflow-scrolling:touch}
+.hl-track:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .hl-track::-webkit-scrollbar{display:none}
-.hl-card{flex:0 0 min(84%,360px);scroll-snap-align:start;background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border:var(--border-w) solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-card);min-height:150px}
+.hl-card{height:178px;box-sizing:border-box;scroll-snap-align:start;overflow:hidden;background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border:var(--border-w) solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-card);min-height:150px}
 .hl-card.quote-card{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 16%,var(--surface)),var(--surface))}
 .hl-big{display:flex;align-items:baseline;gap:8px}.hl-big b{font-size:2rem;line-height:1}.hl-big svg{width:26px;height:26px;align-self:center}
-.hl-dots{display:flex;justify-content:center;gap:6px}.hl-dots i{width:6px;height:6px;border-radius:6px;background:var(--line);transition:width .25s,background .25s}.hl-dots i.on{width:18px;background:var(--acc)}
+.hl-dots{display:flex;flex-direction:column;justify-content:center;gap:5px}.hl-dots i{width:6px;height:6px;border-radius:6px;background:var(--line);transition:height .25s,background .25s}.hl-dots i.on{height:16px;background:var(--acc)}
 .glasses{display:flex;gap:4px;flex-wrap:wrap}.glasses i{width:14px;height:20px;border-radius:3px 3px 6px 6px;border:2px solid var(--acc2);opacity:.45}.glasses i.on{background:var(--acc2);opacity:1}
-@media (min-width:821px){.hl-card{flex-basis:calc(50% - 6px)}}
+
 /* badges */
 .badge-pop{position:fixed;bottom:calc(150px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:65;display:flex;align-items:center;gap:12px;text-align:left;max-width:min(420px,calc(100% - 24px));padding:10px 16px 10px 10px;border-radius:20px;background:var(--solid);color:var(--ink);border:var(--border-w) solid var(--line);box-shadow:var(--shadow-lift);cursor:pointer;font:inherit}
 .badge-pop.in{animation:dropIn .5s cubic-bezier(.3,1.4,.5,1)}
@@ -530,7 +546,7 @@ details.sched summary::-webkit-details-marker{display:none}
 #tourLayer .spot{position:fixed;border-radius:18px;box-shadow:0 0 0 9999px rgb(8 5 20 / .62);transition:all .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
 .tour-card{position:fixed;background:var(--solid);color:var(--ink);border:var(--border-w) solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow-lift);transition:top .3s cubic-bezier(.2,.8,.2,1),left .3s}
 .tour-card.in{animation:fadeIn .25s ease}
-button.brand{border:0;background:none;color:inherit;cursor:pointer;text-align:left}
+button.brand{border:0;background:none;color:inherit;cursor:pointer;text-align:left;min-height:44px}
 button.brand:focus-visible{outline:2px solid var(--acc);border-radius:10px}
 .back{display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;padding:6px 0}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -791,7 +807,7 @@ function routeHash(){
   if (h === "morning" || h === "evening") { S.breathStart = Date.now(); S.ritual = { kind: h, step: 0 }; S.snap = snap(); S.anim = { ritual: true, step: true }; render(); return; }
   if (h === "win") { S.openMap = S.openMap || {}; S.openMap[today() + ":evening"] = true; }
   render();
-  if (h === "calendar") { setTimeout(() => { const el = document.getElementById("sec-calendar"); el && el.scrollIntoView({ block: "start" }); }, 60); return; }
+  if (h === "calendar") { try { localStorage.setItem("gm-cal-open", "1"); } catch {} render(); setTimeout(() => { const el = document.getElementById("sec-calendar"); el && el.scrollIntoView({ block: "start" }); }, 60); return; }
   const focus = { morning: "g0", evening: "w0", win: "w0" }[h];
   if (focus) setTimeout(() => { const el = document.getElementById(focus); if (el) { el.scrollIntoView({ block: "center" }); if (h !== "morning") el.focus({ preventScroll: true }); } }, 60);
   else if (h === "review") setTimeout(() => { const el = document.getElementById("wr1"); el && el.scrollIntoView({ block: "center" }); }, 60);
@@ -1151,7 +1167,7 @@ function calendarView(){
         <span class="meta">${dd && dd.mood ? `<span class="mood">${MOOD_FACE[dd.mood]}</span>` : ""}${j.habits.length && !fut && inJ ? `<span class="hb"><i style="width:${Math.round(hDone / j.habits.length * 100)}%"></i></span>` : ""}</span></button>`; }));
     body = `<section class="card cal-card" style="margin-top:12px">
       <div class="cal-top"><button class="btn icon" data-act="calMonth" data-n="-1" aria-label="Previous month">${ICON.left}</button><div class="row" style="gap:8px;justify-content:center"><h2 aria-live="polite">${esc(parse(first).toLocaleDateString(undefined, { month: "long", year: "numeric" }))}</h2>${ym !== t.slice(0, 7) ? `<button class="btn sm" data-act="calMonth" data-n="0">Today</button>` : ""}</div><button class="btn icon" data-act="calMonth" data-n="1" aria-label="Next month">${ICON.right}</button></div>
-      <div class="cal-sum"><span><b class="mono">${journaled}</b> days journaled</span><span><b class="mono">${best}</b> best run</span><span><b class="mono">${avg ? avg.toFixed(1) : "–"}</b> avg mood</span></div>
+      <div class="cal-sum"><span><b class="mono">${journaled}</b> day${journaled === 1 ? "" : "s"} journaled</span><span><b class="mono">${best}</b> best run</span><span><b class="mono">${avg ? avg.toFixed(1) : "–"}</b> avg mood</span></div>
       <div class="cal-grid" id="calGrid">${["M", "T", "W", "T", "F", "S", "S"].map(x => `<span class="dow" aria-hidden="true">${x}</span>`).join("")}${cells.join("")}</div>
       <div class="legend"><span><i style="background:var(--acc)"></i>Morning</span><span><i style="background:var(--acc2)"></i>Targets</span><span><i style="background:var(--good)"></i>Evening</span><span><i class="bar-i"></i>Habits</span></div>
       </section>${tip("cal", "Tap any day to see what you wrote. Swipe the month sideways to move between months.")}`;
@@ -1169,7 +1185,17 @@ function calendarView(){
   }
   return { seg, body: body + (mode === "journey" ? tip("cal13", "Tap a week label to open that week's plan and review. Tap a square to see that day.") : "") };
 }
-function calendarSection(){ const c = calendarView(); return `<section class="cal-wrap" id="sec-calendar"><div class="head"><div><span class="label">Every day of your 13 weeks</span><h2 class="title-bar" style="font-size:1.3rem;margin-top:4px">Calendar</h2></div>${c.seg}</div>${c.body}</section>`; }
+function calendarSection(){
+  const j = J(), t = today(), n = dayNum(t, j); let open = false; try { open = localStorage.getItem("gm-cal-open") === "1"; } catch {}
+  const ws = n >= 1 && n <= TOTAL_DAYS ? addDays(j.start, (weekOf(t, j) - 1) * 7) : addDays(t, -((parse(t).getDay() + 6) % 7));
+  const days = Array.from({ length: 7 }, (_, i) => addDays(ws, i)); const done = days.filter(d => d <= t && journalled(Store.get(dayKey(d)))).length; const past = days.filter(d => d <= t).length;
+  const strip = `<div class="wk-strip" role="list" aria-label="This week">${days.map(d => { const dd = Store.get(dayKey(d)); const fut = d > t; const inJ = dayNum(d, j) >= 1 && dayNum(d, j) <= TOTAL_DAYS;
+    return `<button role="listitem" class="wd ${d === t ? "now" : ""} ${fut ? "fut" : ""}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}${journalled(dd) ? ", journaled" : ""}"><span class="wn">${esc(fmtDate(d, { weekday: "short" }))}</span><b class="mono">${parse(d).getDate()}</b>${fut || !inJ ? `<span class="mini-ph"></span>` : miniRing(dd, 34)}<span class="mood">${dd && dd.mood ? MOOD_FACE[dd.mood] : ""}</span></button>`; }).join("")}</div>`;
+  const c = open ? calendarView() : null;
+  return `<section class="card cal-sec ${open ? "open" : ""}" id="sec-calendar">
+    <button class="acc-h" data-act="calToggle" aria-expanded="${open}" aria-controls="calFull"><span class="sdot ${done === past && past ? "done" : done ? "part" : ""}" style="--p:${past ? Math.round(done / past * 100) : 0}%" aria-hidden="true">${done === past && past ? "✓" : ""}</span><span class="acc-t"><h2>Calendar</h2><span class="muted small">This week · ${done} of ${past || 7} day${(past || 7) === 1 ? "" : "s"} journaled</span></span><span class="schip ${open ? "part" : ""}">${open ? "Full view" : "This week"}</span>${CHEV}</button>
+    <div class="acc-in cal-in">${strip}${open ? `<div class="row" style="justify-content:center">${c.seg}</div><div id="calFull">${c.body}</div>` : ""}</div></section>`;
+}
 function daySheet(){
   const d = S.sheetDate, j = J(), dd = Store.get(dayKey(d)), has = journalled(dd);
   const list = (arr, title) => { const xs = (arr || []).filter(x => (x || "").trim()); return xs.length ? `<div class="field"><span class="label">${title}</span>${xs.map(x => `<p>• ${esc(x)}</p>`).join("")}</div>` : ""; };
@@ -1194,7 +1220,7 @@ const TOUR = [
   { sel: ".hero .ring", title: "Three rings, one day", text: "Morning, targets and evening. Close all three and the day is complete." },
   { sel: ".ritual-card", title: "Guided rituals", text: "About three minutes each. One prompt at a time, morning and night." },
   { sel: '#sec-morning .acc-h', title: "Sections that track themselves", text: "Each part of the day shows whether it's done. Finished parts fold away and the next one opens for you." },
-  { sel: '#sec-calendar .cal-card', title: "Your calendar", text: "At the bottom of Today: every day of your 13 weeks. Tap any day to look back." },
+  { sel: '#sec-calendar', title: "Your calendar", text: "This week at a glance. Tap a day to look back, or tap Calendar to open the month and all 13 weeks." },
   { sel: '[data-act=nav][data-v=habits]', title: "Habits", text: "Your daily non-negotiables, with streaks you'll want to protect." },
   { sel: '[data-act=nav][data-v=prefs]', title: "Settings", text: "Change your look, set your reminders and connect with your partner. Replay this tour from Help in Settings." },
 ];
@@ -1337,7 +1363,7 @@ function badgePop(b, more){
   el.innerHTML = `<span class="badge earned">${b.icon}</span><span><span class="label">Badge earned</span><b>${esc(b.name)}</b><span class="muted small">${esc(b.desc)}${more ? ` · +${more} more` : ""}</span></span>`;
   el.setAttribute("aria-label", `Badge earned: ${b.name}. Open Progress to see your badges.`); el.hidden = false; el.classList.remove("in"); void el.offsetWidth; el.classList.add("in");
   const r = el.getBoundingClientRect(); confetti(r.left + 30, r.top + 30, false); chime(false); buzz(20);
-  clearTimeout(badgePop.t); badgePop.t = setTimeout(() => { el.hidden = true; }, 3200);
+  clearTimeout(badgePop.t); badgePop.t = setTimeout(() => { el.hidden = true; }, 2600);
 }
 function badgesCard(){
   const p = profile(); const got = (p && p.badges) || {}; const n = BADGES.filter(b => got[b.id]).length;
@@ -1370,10 +1396,20 @@ function highlights(d, j){
     const mm = dd.mindful ? Math.max(1, Math.round(dd.mindful / 60)) : 0;
     cards.push(`<div class="hl-card"><span class="label">Mindful minutes</span>${mm ? `<div class="hl-big"><b class="mono">${mm}</b><span>today</span></div><p class="small">From your breathing in the Morning ritual.</p>` : `<p>One minute of breathing sets the tone. It's the first step of the Morning ritual.</p><button class="btn sm" data-act="ritual" data-v="morning">Breathe now</button>`}</div>`);
   }
-  return `<section class="hl" aria-label="Daily highlights"><div class="hl-track" id="hlTrack">${cards.join("")}</div>${cards.length > 1 ? `<div class="hl-dots" aria-hidden="true">${cards.map((_, i) => `<i class="${i ? "" : "on"}"></i>`).join("")}</div>` : ""}</section>`;
+  return `<section class="hl" aria-label="Daily highlights" aria-roledescription="stack"><div class="hl-track" id="hlTrack" tabindex="0">${cards.join("")}</div>${cards.length > 1 ? `<div class="hl-dots" aria-hidden="true">${cards.map((_, i) => `<i class="${i ? "" : "on"}"></i>`).join("")}</div>` : ""}</section>`;
 }
-document.addEventListener("scroll", e => { const t = e.target; if (!t || t.id !== "hlTrack") return; const w = t.firstElementChild ? t.firstElementChild.getBoundingClientRect().width + 12 : 1; const i = Math.round(t.scrollLeft / w);
-  t.parentElement.querySelectorAll(".hl-dots i").forEach((d, k) => d.classList.toggle("on", k === i)); }, true);
+/* Smart Stack: one card at a time, swipe up/down, gentle auto-advance */
+const Stack = { idx: 0, last: 0, hold: 0, timer: null,
+  el(){ return document.getElementById("hlTrack"); },
+  sync(){ const t = this.el(); if (!t) return; const h = t.clientHeight || 1; this.idx = Math.round(t.scrollTop / h); t.parentElement.querySelectorAll(".hl-dots i").forEach((d, k) => d.classList.toggle("on", k === this.idx)); },
+  restore(){ const t = this.el(); if (t) { t.scrollTop = this.idx * t.clientHeight; this.sync(); } },
+  tick(){ const t = this.el(); if (!t || document.hidden || reduced() || Date.now() - this.hold < 9000 || S.ritual || S.sheet || S.cele || S.tour) return;
+    const r = t.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; if (t.contains(document.activeElement)) return;
+    const n = t.children.length; if (n < 2) return; this.idx = (this.idx + 1) % n; t.scrollTo({ top: this.idx * t.clientHeight, behavior: "smooth" }); },
+  start(){ clearInterval(this.timer); this.timer = setInterval(() => this.tick(), 8000); } };
+Stack.start();
+document.addEventListener("scroll", e => { if (e.target && e.target.id === "hlTrack") Stack.sync(); }, true);
+["pointerdown", "touchstart", "wheel", "focusin"].forEach(ev => document.addEventListener(ev, e => { if (e.target.closest && e.target.closest("#hlTrack")) Stack.hold = Date.now(); }, { passive: true, capture: true }));
 
 /* ============================ rendering ============================ */
 let User = null;
@@ -1411,6 +1447,7 @@ function render(){
   if (S.ritual && RITUALS[S.ritual.kind].steps[S.ritual.step] === "breathe") breathLoop();
   Store.setStatus(Store.status);
   if (S.view === "ink") Ink.mount();
+  if (S.view === "today") Stack.restore();
   if (active) { const el = document.getElementById(active); if (el) { el.focus({ preventScroll: true }); if (caret) try { el.setSelectionRange(caret[0], caret[1]); } catch {} } }
   window.scrollTo(0, entering ? 0 : scrollY);
   const appEl = document.querySelector(".app"); if (appEl) appEl.inert = !!(S.sheet || S.cele || S.ritual || S.tour);
@@ -1782,9 +1819,10 @@ async function onClick(e){
     case "signout": await Store.flush(); if (Store.mode === "supa") { ls.del(mirrorKey()); try { await sb.auth.signOut(); } catch {} } ls.del("gm:session"); location.reload(); break;
     case "migrate": await migrate(); break;
     case "calMode": S.calMode = t.dataset.v; render(); break;
+    case "calToggle": { let o = false; try { o = localStorage.getItem("gm-cal-open") === "1"; localStorage.setItem("gm-cal-open", o ? "0" : "1"); } catch {} S.calOpenMem = !o; buzz(6); render(); if (!o) setTimeout(() => { const el = document.getElementById("sec-calendar"); el && el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 60); break; }
     case "schedPref": profile().schedule = t.checked; Store.touch("profile"); break;
     case "water": { const k = dayKey(S.date); const dd = Store.ensure(k, newDay); const goal = profile().waterGoal || 8; const before = dd.water || 0; dd.water = clamp(before + +t.dataset.n, 0, 30); Store.touch(k); buzz(8);
-      const tr = document.getElementById("hlTrack"); const x = tr ? tr.scrollLeft : 0; render(); const tr2 = document.getElementById("hlTrack"); if (tr2) tr2.scrollLeft = x;
+      Stack.sync(); render();
       if (dd.water === goal && before < goal) { const b = document.querySelector("[data-act=water][data-n='1']"); burstAt(b, false); toast("Water goal reached"); } break; }
     case "secToggle": { const sec = t.closest(".acc"); const open = !sec.classList.contains("open"); sec.classList.toggle("open", open); t.setAttribute("aria-expanded", open); sec.querySelector(".acc-b").inert = !open; S.openMap = S.openMap || {}; S.openMap[S.date + ":" + t.dataset.v] = open; buzz(6);
       if (open) { const f = sec.querySelector(".acc-in input:not([type=checkbox]),.acc-in textarea"); if (f && !Device.iOS) setTimeout(() => f.focus({ preventScroll: true }), 220); } break; }
@@ -1935,7 +1973,7 @@ const Sync = {
   apply(rows){
     let changed = false;
     rows.forEach(r => { if (!r || !r.key || r.key.startsWith("ink|") || Store.dirty.has(r.key) || Store.writing.has(r.key)) return;
-      Base[r.key] = clone(r.data); if (JSON.stringify(Store.docs[r.key]) !== JSON.stringify(r.data)) { Store.docs[r.key] = r.data; changed = true; } });
+      Base[r.key] = clone(r.data); if (r.updated_at) BaseAt[r.key] = r.updated_at; if (JSON.stringify(Store.docs[r.key]) !== JSON.stringify(r.data)) { Store.docs[r.key] = r.data; changed = true; } });
     this.note(rows);
     if (changed) { ls.set(mirrorKey(), Store.docs); softRender(); }
   },
@@ -1956,7 +1994,7 @@ document.addEventListener("pointerdown", () => { pressing = true; }, true);
 function softRender(){ const a = document.activeElement; if (pressing || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest("#root"))) { S.needsRender = true; return; } render(); }
 document.addEventListener("focusout", () => setTimeout(() => { if (S.needsRender && !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { S.needsRender = false; render(); } }, 50));
 
-const Base = {}; const clone = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+const Base = {}; const BaseAt = {}; const clone = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
 function merge3(b, l, s){ const J = JSON.stringify; if (J(l) === J(b)) return s; if (J(s) === J(b) || s === undefined) return l;
   if (l && s && typeof l === "object" && typeof s === "object" && Array.isArray(l) === Array.isArray(s)) { const out = Array.isArray(l) ? [] : {};
     new Set([...Object.keys(l), ...Object.keys(s)]).forEach(k => { const v = merge3(b && typeof b === "object" ? b[k] : undefined, l[k], s[k]); if (v !== undefined) out[k] = v; }); return out; }
@@ -1965,7 +2003,7 @@ const SupaStore = {
   async loadAll(){
     try {
       const rows = await sbAll(() => sb.from("docs").select("key,data,updated_at").eq("user_id", Store.uid).not("key", "like", "ink|%"));
-      const out = {}; rows.forEach(r => { out[r.key] = r.data; Base[r.key] = clone(r.data); }); Sync.note(rows);
+      const out = {}; rows.forEach(r => { out[r.key] = r.data; Base[r.key] = clone(r.data); BaseAt[r.key] = r.updated_at; }); Sync.note(rows);
       const mirror = ls.get(mirrorKey()) || {}; const pend = Pending.get();
       pend.forEach(k => { if (k in mirror) { out[k] = mirror[k]; Store.dirty.set(k, true); } else if (!(k in mirror) && out[k]) { delete out[k]; Store.dirty.set(k, true); } });
       Store.docs = out; ls.set(mirrorKey(), out); S.offline = false;
@@ -1978,14 +2016,22 @@ const SupaStore = {
     ls.set(mirrorKey(), Store.docs); Pending.add(keys);
     try {
       const upKeys = keys.filter(k => Store.docs[k]); const dels = keys.filter(k => !Store.docs[k]); let merged = false;
-      if (upKeys.length) {
-        const { data: srv, error: e1 } = await sb.from("docs").select("key,data").eq("user_id", Store.uid).in("key", upKeys); if (e1) throw e1;
-        const sm = {}; (srv || []).forEach(r => { sm[r.key] = r.data; });
-        const ups = upKeys.map(k => { let d = clone(Store.docs[k]);
-          if (k in sm && JSON.stringify(sm[k]) !== JSON.stringify(Base[k])) { d = merge3(Base[k], d, sm[k]); if (JSON.stringify(d) !== JSON.stringify(Store.docs[k]) && !Store.dirty.has(k)) { Store.docs[k] = clone(d); merged = true; } }
-          return { user_id: Store.uid, key: k, data: d }; });
-        const { error } = await sb.from("docs").upsert(ups); if (error) throw error;
-        ups.forEach(r => { Base[r.key] = clone(r.data); });
+      for (const k of upKeys) {
+        let d = clone(Store.docs[k]);
+        for (let attempt = 0; attempt < 4; attempt++) {
+          if (BaseAt[k]) { // only overwrite the version we last saw; otherwise merge the newer one in and retry
+            const { data: rows, error } = await sb.from("docs").update({ data: d }).eq("user_id", Store.uid).eq("key", k).eq("updated_at", BaseAt[k]).select("key,updated_at"); if (error) throw error;
+            if (rows && rows.length) { BaseAt[k] = rows[0].updated_at; Base[k] = clone(d); break; }
+          } else {
+            const { data: rows, error } = await sb.from("docs").insert({ user_id: Store.uid, key: k, data: d }).select("key,updated_at");
+            if (!error && rows && rows.length) { BaseAt[k] = rows[0].updated_at; Base[k] = clone(d); break; }
+            if (error && !/duplicate|23505|conflict/i.test((error.code || "") + " " + (error.message || ""))) throw error;
+          }
+          const { data: cur, error: e2 } = await sb.from("docs").select("key,data,updated_at").eq("user_id", Store.uid).eq("key", k); if (e2) throw e2;
+          if (!cur || !cur.length) { BaseAt[k] = null; Base[k] = undefined; continue; }
+          d = merge3(Base[k], d, cur[0].data); Base[k] = clone(cur[0].data); BaseAt[k] = cur[0].updated_at;
+          if (!Store.dirty.has(k)) { Store.docs[k] = clone(d); merged = true; }
+        }
       }
       if (merged) { ls.set(mirrorKey(), Store.docs); softRender(); }
       if (dels.length) { const { error } = await sb.from("docs").delete().eq("user_id", Store.uid).in("key", dels); if (error) throw error; }

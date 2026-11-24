@@ -36,7 +36,7 @@ async function onboard(p, nick){
   await p.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }).then(() => p.keyboard.press('Escape')).catch(() => {}); await p.waitForTimeout(150);
 }
 const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
-  document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.hl-track,.backdrop,svg,canvas,.fx')) return;
+  document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.hl-track,.wk-strip,.backdrop,svg,canvas,.fx')) return;
     if (r.right > W + 1 || r.left < -1) bad.push(el.id || el.className || el.tagName); });
   return document.documentElement.scrollWidth > W || bad.length ? bad.slice(0, 4).join(', ') || 'page scrolls sideways' : ''; });
 
@@ -89,7 +89,9 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   // 2b. Calendar, day summary, logo home, Partner via Settings, tour replay.
   ok(await A.locator('#sec-morning .schip').innerText().then(t => /done|\/3/i.test(t)), 'Today sections show their completion status');
   ok(await A.locator('.tabs [data-v=calendar], .nav [data-v=calendar]').count() === 0, 'Calendar lives on Today, not in the tab bar');
-  await A.locator('#sec-calendar').scrollIntoViewIfNeeded(); ok(await A.locator('.cal-grid .cd.now').count() === 1, 'calendar at the bottom of Today shows today');
+  await A.locator('#sec-calendar').scrollIntoViewIfNeeded(); ok(await A.locator('#sec-calendar .wk-strip .wd').count() === 7 && await A.locator('.cal-grid').count() === 0, 'calendar starts folded to this week (7 days)');
+  await A.click('#sec-calendar .wd.now'); ok(/My son/.test(await A.locator('.sheet').innerText()), 'tapping today in the week strip shows what was written'); await A.keyboard.press('Escape');
+  await A.click('[data-act=calToggle]'); ok(await A.locator('.cal-grid .cd.now').count() === 1, 'unfolding the calendar shows the month with today');
   await A.click('.cal-grid .cd.now'); ok(/My son/.test(await A.locator('.sheet').innerText()), 'tapping a day shows what was written');
   await A.click('[data-act=dayGo]'); ok(await A.locator('.hero').count() === 1, 'open this day goes to Today');
   await A.click('[data-act=calMode][data-v=journey]'); ok(await A.locator('.jr').count() === 13, 'calendar shows all 13 weeks');

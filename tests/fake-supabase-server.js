@@ -9,7 +9,8 @@ function op(b){ const t = T[b.table]; const uid = b.uid; if (!uid) return { erro
   if (b.op === 'select') { let rows = t.filter(r => visible(b.table, r, uid) && match(r, b.f || [])); if (b.range) rows = rows.slice(b.range[0], b.range[1] + 1); return { data: rows }; }
   if (b.op === 'upsert' || b.op === 'insert') { for (const r of b.rows) { const owner = r.user_id || r.owner_id; if (owner !== uid) return { error: { message: 'row-level security' } };
       const i = t.findIndex(x => pk[b.table](x) === pk[b.table](r)); const row = { ...r, updated_at: stamp(), created_at: new Date().toISOString() };
-      if (i >= 0) { if (b.op === 'insert') return { error: { message: 'duplicate' } }; t[i] = row; } else t.push(row); } return { data: null }; }
+      if (i >= 0) { if (b.op === 'insert') return { error: { message: 'duplicate key', code: '23505' } }; t[i] = row; } else t.push(row); } return { data: b.rows.map(r => t.find(x => pk[b.table](x) === pk[b.table](r))) }; }
+  if (b.op === 'update') { const hit = t.filter(r => visible(b.table, r, uid) && match(r, b.f || [])); hit.forEach(r => { Object.assign(r, b.patch, { updated_at: stamp() }); }); return { data: hit }; }
   if (b.op === 'delete') { for (let i = t.length - 1; i >= 0; i--) if (visible(b.table, t[i], uid) && match(t[i], b.f || [])) t.splice(i, 1); return { data: null }; } }
 function rpc(b){ const uid = b.uid;
   if (b.fn === 'accept_invite') { const c = String(b.args.invite_code).trim().toUpperCase(); const inv = T.invites.find(i => i.code === c); if (!inv) return { error: { message: 'That invite code is not valid or has expired.' } };
