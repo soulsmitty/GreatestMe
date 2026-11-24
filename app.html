@@ -424,6 +424,50 @@ details.sched summary::-webkit-details-marker{display:none}
 .ink-page canvas{display:block;width:100%;touch-action:pan-y pinch-zoom;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .ink-page.finger canvas{touch-action:none}
 .ink-page .pg{position:absolute;right:12px;bottom:8px;font-family:var(--f-mono);font-size:10px;color:#8A8F99}
+/* collapsible sections */
+.acc{padding:0;gap:0;overflow:hidden}
+.acc-h{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:16px 18px;width:100%;-webkit-tap-highlight-color:transparent}
+.acc-h:focus-visible{outline:2px solid var(--acc);outline-offset:-2px;border-radius:var(--r)}
+.acc-t{display:flex;flex-direction:column;min-width:0}
+.acc-t .small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{color:var(--muted);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.acc.open .chev{transform:rotate(180deg)}
+.acc-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.2,.8,.2,1)}
+.acc.open .acc-b{grid-template-rows:1fr}
+.acc-in{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:14px;padding:0 18px}
+.acc.open .acc-in{padding:0 18px 18px}
+.acc:not(.open) .acc-in{visibility:hidden}
+.sdot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none;font-size:13px;font-weight:800}
+.sdot.done{background:var(--good);border-color:var(--good);color:#fff;animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
+.sdot.part{border-color:transparent;background:conic-gradient(var(--acc) var(--p),var(--line) 0);-webkit-mask:radial-gradient(circle,transparent 7px,#000 8px);mask:radial-gradient(circle,transparent 7px,#000 8px)}
+.schip{font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:var(--line);color:var(--muted);white-space:nowrap}
+.schip.done{background:var(--good-soft);color:var(--good)}.schip.part{background:var(--acc-soft);color:var(--acc)}
+.acc.is-done:not(.open){opacity:.85}
+@media (max-width:420px){.acc-h{gap:10px;padding:14px}.acc-in{padding:0 14px}.acc.open .acc-in{padding:0 14px 14px}}
+.cal-wrap{display:flex;flex-direction:column;gap:0;scroll-margin-top:16px}
+/* daily highlights */
+.hl{display:flex;flex-direction:column;gap:8px;min-width:0}
+.hl-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}
+.hl-track::-webkit-scrollbar{display:none}
+.hl-card{flex:0 0 min(84%,360px);scroll-snap-align:start;background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border:var(--border-w) solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-card);min-height:150px}
+.hl-card.quote-card{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 16%,var(--surface)),var(--surface))}
+.hl-big{display:flex;align-items:baseline;gap:8px}.hl-big b{font-size:2rem;line-height:1}.hl-big svg{width:26px;height:26px;align-self:center}
+.hl-dots{display:flex;justify-content:center;gap:6px}.hl-dots i{width:6px;height:6px;border-radius:6px;background:var(--line);transition:width .25s,background .25s}.hl-dots i.on{width:18px;background:var(--acc)}
+.glasses{display:flex;gap:4px;flex-wrap:wrap}.glasses i{width:14px;height:20px;border-radius:3px 3px 6px 6px;border:2px solid var(--acc2);opacity:.45}.glasses i.on{background:var(--acc2);opacity:1}
+@media (min-width:821px){.hl-card{flex-basis:calc(50% - 6px)}}
+/* badges */
+.badge-pop{position:fixed;bottom:calc(150px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:65;display:flex;align-items:center;gap:12px;text-align:left;max-width:min(420px,calc(100% - 24px));padding:10px 16px 10px 10px;border-radius:20px;background:var(--solid);color:var(--ink);border:var(--border-w) solid var(--line);box-shadow:var(--shadow-lift);cursor:pointer;font:inherit}
+.badge-pop.in{animation:dropIn .5s cubic-bezier(.3,1.4,.5,1)}
+.badge-pop b{display:block}.badge-pop .badge{width:44px;height:44px;font-size:1.3rem;flex:none}
+@keyframes dropIn{from{transform:translate(-50%,30px);opacity:0}}
+@media (min-width:821px){.badge-pop{bottom:84px}}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.bd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;font-size:.74rem;padding:8px 4px;border-radius:12px}
+.bd b{font-size:.78rem}
+.bd:not(.earned){opacity:.55}
+.badge{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;background:var(--line)}
+.bd.earned .badge,.badge.earned{background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 6px 18px var(--glow-a)}
+.badge.big{width:110px;height:110px;font-size:3.2rem;margin:0 auto}
 /* calendar */
 .cal-card{gap:12px}
 .cal-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -741,10 +785,11 @@ const DEEP = [["today","Today's page"],["morning","Morning: gratitude and target
 function routeHash(){
   let h = ""; try { h = (location.hash || "").slice(1).toLowerCase(); } catch {}
   if (!h || !profile() || !J()) return;
-  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", calendar:"calendar", duo:"partner", partner:"partner", preferences:"prefs" };
+  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", calendar:"today", duo:"partner", partner:"partner", preferences:"prefs" };
   if (!map[h]) return;
   S.view = map[h]; if (S.view === "today" || S.view === "ink") S.date = today(); if (S.view === "week") S.week = null; S.sheet = null;
   render();
+  if (h === "calendar") { setTimeout(() => { const el = document.getElementById("sec-calendar"); el && el.scrollIntoView({ block: "start" }); }, 60); return; }
   const focus = { morning: "g0", evening: "w0", win: "w0" }[h];
   if (focus) setTimeout(() => { const el = document.getElementById(focus); if (el) { el.scrollIntoView({ block: "center" }); if (h !== "morning") el.focus({ preventScroll: true }); } }, 60);
   else if (h === "review") setTimeout(() => { const el = document.getElementById("wr1"); el && el.scrollIntoView({ block: "center" }); }, 60);
@@ -986,7 +1031,8 @@ const STREAK_MARKS = [3, 7, 14, 21, 30, 45, 60, 75, 91];
 function snap(){ const j = J(); if (!j) return null; const dd = Store.get(dayKey(today())); const st = stats(j);
   return { score: dayScore(dd), habits: dd ? j.habits.filter(h => dd.habits[h.id]).length : 0, hTotal: j.habits.length, streak: st.streak, tDone: dd ? dd.targets.filter(t => t.t.trim() && t.done).length : 0, ms: j.goals.reduce((a, g) => a + g.milestones.filter(m => m.done).length, 0) }; }
 function once(kind){ const k = dayKey(today()); const dd = Store.ensure(k, newDay); dd.cele = dd.cele || {}; if (dd.cele[kind]) return false; dd.cele[kind] = 1; Store.touch(k); return true; }
-function checkWins(el){
+function checkWins(el){ _checkWins(el); setTimeout(() => { if (!S.cele && !S.ritual) checkBadges(); }, 700); }
+function _checkWins(el){
   const prev = S.snap, cur = snap(); S.snap = cur; if (!prev || !cur) return;
   if (cur.ms > prev.ms) { burstAt(el, true); toast("Milestone reached. That's real progress."); return; }
   if (cur.streak > prev.streak && STREAK_MARKS.includes(cur.streak) && !S.ritual && once("streak" + cur.streak)) return celebrate({ art: ART.flameBig, num: cur.streak, title: `${cur.streak}-day streak`, sub: cur.streak >= 30 ? "This is who you are now." : "Momentum is building. Protect it tomorrow." });
@@ -1049,8 +1095,14 @@ function prefsView(){
     <label class="set-row"><div><b>Celebrations</b><p class="muted small">Confetti for streaks, full pages and milestones.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="confetti" ${pr.confetti ? "checked" : ""}></label>
     ${Device.iPad || Device.penSeen || window.innerWidth >= 700 ? `<div class="set-row"><div><b>Handwriting pages</b><p class="muted small">Auto shows Ink on iPad and wherever a stylus is used.</p></div><div class="toggle3" role="group" aria-label="Handwriting pages">${[["auto", "Auto"], ["on", "On"], ["off", "Off"]].map(([k, l]) => `<button data-act="inkPref" data-v="${k}" aria-pressed="${(p.ink || "auto") === k}">${l}</button>`).join("")}</div></div>` : ""}
   </div></section>
-  <section class="card"><div class="card-h"><h2>Siri, Shortcuts & reminders</h2></div>
-    <p class="muted small">In Shortcuts, make a shortcut with one action, <b>Open URLs</b>, and paste a link. Name it what you'll say, like "Morning pages". For reminders, use Automation → Time of Day to open Morning at 7:00 and Evening at 9:00.</p>
+  <section class="card"><div class="card-h"><h2>Reminders</h2><span class="label">Your times</span></div>
+    ${remindersForm(remindersOf(p), "p")}
+    <div class="row"><button class="btn" data-act="addRem" data-v="p">Add to my iPhone Calendar</button></div>
+    <p class="muted small">Calendar alerts work even when GreatestMe is closed. After changing times, add them again and delete the old GreatestMe events.</p>${remHelp}</section>
+  <section class="card"><div class="card-h"><h2>Water</h2></div>
+    <div class="set-row"><div><b>Daily water goal</b><p class="muted small">Glasses, for the water card on Today</p></div><input type="number" min="1" max="20" class="in box" id="waterGoal" value="${+(p.waterGoal || 8)}" style="width:80px" data-doc="profile" data-f="waterGoal" data-num="1" inputmode="numeric"></div></section>
+  <section class="card"><div class="card-h"><h2>Siri & Shortcuts</h2></div>
+    <p class="muted small">In Shortcuts, make a shortcut with one action, <b>Open URLs</b>, and paste a link. Name it what you'll say, like "Morning pages", then just ask Siri.</p>
     ${DEEP.map(([h, l]) => `<div class="linkrow"><div><b class="small">${esc(l)}</b><br><code>${esc(baseUrl() + "#" + h)}</code></div><button class="btn sm" data-act="copy" data-v="${esc(baseUrl() + "#" + h)}">Copy</button></div>`).join("")}
   </section>
   <section class="card"><div class="card-h"><h2>Journeys</h2><button class="btn sm" data-act="sheet" data-v="newJourney">+ New journey</button></div>
@@ -1088,7 +1140,7 @@ function calendarView(){
       return `<button class="cd ${d === t ? "now" : ""} ${inJ ? "" : "out"} ${fut ? "fut" : ""} ${journalled(dd) ? "on" : ""}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}${journalled(dd) ? ", journaled" : ""}${dd && dd.mood ? ", mood " + dd.mood + " of 5" : ""}">
         <span class="dn">${parse(d).getDate()}</span>${marks}${fut || !inJ ? "" : miniRing(dd)}
         <span class="meta">${dd && dd.mood ? `<span class="mood">${MOOD_FACE[dd.mood]}</span>` : ""}${j.habits.length && !fut && inJ ? `<span class="hb"><i style="width:${Math.round(hDone / j.habits.length * 100)}%"></i></span>` : ""}</span></button>`; }));
-    body = `<section class="card cal-card">
+    body = `<section class="card cal-card" style="margin-top:12px">
       <div class="cal-top"><button class="btn icon" data-act="calMonth" data-n="-1" aria-label="Previous month">${ICON.left}</button><div class="row" style="gap:8px;justify-content:center"><h2 aria-live="polite">${esc(parse(first).toLocaleDateString(undefined, { month: "long", year: "numeric" }))}</h2>${ym !== t.slice(0, 7) ? `<button class="btn sm" data-act="calMonth" data-n="0">Today</button>` : ""}</div><button class="btn icon" data-act="calMonth" data-n="1" aria-label="Next month">${ICON.right}</button></div>
       <div class="cal-sum"><span><b class="mono">${journaled}</b> days journaled</span><span><b class="mono">${best}</b> best run</span><span><b class="mono">${avg ? avg.toFixed(1) : "–"}</b> avg mood</span></div>
       <div class="cal-grid" id="calGrid">${["M", "T", "W", "T", "F", "S", "S"].map(x => `<span class="dow" aria-hidden="true">${x}</span>`).join("")}${cells.join("")}</div>
@@ -1102,20 +1154,20 @@ function calendarView(){
         <div class="jr-days">${Array.from({ length: 7 }, (_, i) => { const d = addDays(ws, i); const dd = Store.get(dayKey(d)); const sc = d > t ? -1 : dayScore(dd);
           return `<button class="hd ${d === t ? "now" : ""} ${sc < 0 ? "fut" : ""}" style="--lv:${sc < 0 ? 0 : (sc / 100).toFixed(2)}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}, ${sc < 0 ? "upcoming" : sc + "% complete"}"></button>`; }).join("")}</div>
         <div class="jr-r">${ms.length ? `<span class="ms-flag ${msDone === ms.length ? "done" : (weekOf(t) > w + 1 && dayNum(t) >= 1) ? "over" : ""}" title="${msDone === ms.length || !(weekOf(t) > w + 1) ? `${msDone} of ${ms.length} milestones` : `${ms.length - msDone} overdue`}">⚑ ${msDone}/${ms.length}</span>` : ""}${wd && wd.score ? `<span class="wscore" title="Weekly review score">${wd.score}</span>` : ""}</div></div>`; }).join("");
-    body = `<section class="card cal-card"><div class="card-h"><h2>Your 13 weeks</h2><span class="label">${esc(fmtDate(j.start, { month: "short", day: "numeric" }))} → ${esc(fmtDate(endDate(j), { month: "short", day: "numeric" }))}</span></div>
+    body = `<section class="card cal-card" style="margin-top:12px"><div class="card-h"><h2>Your 13 weeks</h2><span class="label">${esc(fmtDate(j.start, { month: "short", day: "numeric" }))} → ${esc(fmtDate(endDate(j), { month: "short", day: "numeric" }))}</span></div>
       <div class="jgrid">${rows}</div>
       <div class="legend"><span><i class="lv" style="--lv:.15"></i>Started</span><span><i class="lv" style="--lv:.6"></i>Most of it</span><span><i class="lv" style="--lv:1"></i>Full page</span><span>⚑ Milestones</span><span><i class="ws"></i>Week score</span></div></section>`;
   }
-  return `<div class="head"><div><span class="label">${esc(j.title)} · ${esc(dayLabel(t))}</span><h1 class="title-bar" style="margin-top:4px">Calendar</h1></div>${seg}</div>
-  ${body}${mode === "journey" ? tip("cal13", "Tap a week label to open that week's plan and review. Tap a square to see that day.") : ""}`;
+  return { seg, body: body + (mode === "journey" ? tip("cal13", "Tap a week label to open that week's plan and review. Tap a square to see that day.") : "") };
 }
+function calendarSection(){ const c = calendarView(); return `<section class="cal-wrap" id="sec-calendar"><div class="head"><div><span class="label">Every day of your 13 weeks</span><h2 class="title-bar" style="font-size:1.3rem;margin-top:4px">Calendar</h2></div>${c.seg}</div>${c.body}</section>`; }
 function daySheet(){
   const d = S.sheetDate, j = J(), dd = Store.get(dayKey(d)), has = journalled(dd);
   const list = (arr, title) => { const xs = (arr || []).filter(x => (x || "").trim()); return xs.length ? `<div class="field"><span class="label">${title}</span>${xs.map(x => `<p>• ${esc(x)}</p>`).join("")}</div>` : ""; };
   const tg = dd ? dd.targets.filter(x => x.t.trim()) : [];
   const after = dayNum(d, j) > TOTAL_DAYS;
   return `<div class="card-h"><div><span class="label">${esc(dayLabel(d))}</span><h2 id="sheetTitle" style="margin-top:4px">${esc(fmtDate(d))}</h2></div><div class="row" style="gap:4px"><button class="btn icon ghost" data-act="dayStep" data-n="-1" aria-label="Previous day">${ICON.left}</button><button class="btn icon ghost" data-act="dayStep" data-n="1" aria-label="Next day">${ICON.right}</button><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div></div>
-    ${has || (dd && dd.mood) ? `<div class="row" style="gap:16px">${rings(dayParts(dd), `${dayScore(dd)}%`, "complete")}<div class="field">${dd.mood ? `<span>Mood ${MOOD_FACE[dd.mood]} ${dd.mood}/5</span>` : ""}${dd.energy ? `<span class="muted small">Energy ${dd.energy}/5</span>` : ""}${j.habits.length ? `<span class="muted small">${j.habits.filter(h => dd.habits[h.id]).length} of ${j.habits.length} habits</span>` : ""}</div></div>
+    ${has || (dd && dd.mood) ? `<div class="row" style="gap:16px">${rings(dayParts(dd), `${dayScore(dd)}%`, "complete")}<div class="field">${dd.mood ? `<span>Mood ${MOOD_FACE[dd.mood]} ${dd.mood}/5</span>` : ""}${dd.energy ? `<span class="muted small">Energy ${dd.energy}/5</span>` : ""}${j.habits.length ? `<span class="muted small">${j.habits.filter(h => dd.habits[h.id]).length} of ${j.habits.length} habits</span>` : ""}${dd.mindful ? `<span class="muted small">${Math.round(dd.mindful / 60) || "<1"} mindful min</span>` : ""}</div></div>
       ${dd.intention ? `<div class="quote">${esc(dd.intention)}<cite>Today I will be</cite></div>` : ""}
       ${list(dd.gratitude, "Grateful for")}
       ${tg.length ? `<div class="field"><span class="label">Targets</span>${tg.map(x => `<p class="${x.done ? "done-text" : ""}">${x.done ? "✓" : "○"} ${esc(x.t)}</p>`).join("")}</div>` : ""}
@@ -1132,7 +1184,8 @@ function tip(id, text){ const p = profile(); if (!p || S.tour || S.pendingTour |
 const TOUR = [
   { sel: ".hero .ring", title: "Three rings, one day", text: "Morning, targets and evening. Close all three and the day is complete." },
   { sel: ".ritual-card", title: "Guided rituals", text: "About three minutes each. One prompt at a time, morning and night." },
-  { sel: '[data-act=nav][data-v=calendar]', title: "Your calendar", text: "Every day of your 13 weeks at a glance. Tap any day to look back." },
+  { sel: '#sec-morning .acc-h', title: "Sections that track themselves", text: "Each part of the day shows whether it's done. Finished parts fold away and the next one opens for you." },
+  { sel: '#sec-calendar .cal-card', title: "Your calendar", text: "At the bottom of Today: every day of your 13 weeks. Tap any day to look back." },
   { sel: '[data-act=nav][data-v=habits]', title: "Habits", text: "Your daily non-negotiables, with streaks you'll want to protect." },
   { sel: '[data-act=nav][data-v=prefs]', title: "Settings", text: "Change your look, connect with your partner and set Siri reminders. Replay this tour from Help at the bottom of Settings." },
 ];
@@ -1172,9 +1225,146 @@ document.addEventListener("touchend", e => { if (swipeX == null) return; const d
   if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { const b = document.querySelector(`[data-act=calMonth][data-n="${dx < 0 ? 1 : -1}"]`); if (b) { buzz(8); b.click(); } } }, { passive: true });
 if (window.visualViewport) visualViewport.addEventListener("resize", () => { if (S.tour) Tour.paint(true); });
 
+/* ============================ collapsible Today sections, reminders, achievements ============================ */
+const CHEV = `<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+function statusBadge(st){ // st: {state:"done"|"part"|"none"|"opt", label}
+  const icon = st.state === "done" ? `<span class="sdot done" aria-hidden="true">✓</span>` : st.state === "part" ? `<span class="sdot part" aria-hidden="true" style="--p:${Math.round((st.p || .5) * 100)}%"></span>` : `<span class="sdot" aria-hidden="true"></span>`;
+  return { icon, chip: `<span class="schip ${st.state}">${esc(st.label)}</span>` };
+}
+function sectionOpen(id, st, auto){ const k = S.date + ":" + id; if (S.openMap && k in S.openMap) return S.openMap[k]; return auto; }
+function section(id, title, sub, st, body, auto){
+  const open = sectionOpen(id, st, auto); const b = statusBadge(st);
+  return `<section class="card acc ${open ? "open" : ""} ${st.state === "done" ? "is-done" : ""}" id="sec-${id}">
+    <button class="acc-h" data-act="secToggle" data-v="${id}" aria-expanded="${open}" aria-controls="secb-${id}">${b.icon}<span class="acc-t"><h2>${esc(title)}</h2><span class="muted small">${esc(sub)}</span></span>${b.chip}${CHEV}</button>
+    <div class="acc-b" id="secb-${id}" role="region" aria-label="${esc(title)}"><div class="acc-in">${body}</div></div></section>`;
+}
+function todayStatus(dd, j){
+  const g = dd.gratitude.filter(x => x.trim()).length, it = !!dd.intention.trim();
+  const tSet = dd.targets.filter(x => x.t.trim()), tDone = tSet.filter(x => x.done).length;
+  const hDone = j.habits.filter(h => dd.habits[h.id]).length;
+  const w = dd.wins.filter(x => x.trim()).length, les = !!(dd.lessons || "").trim(), mood = dd.mood > 0;
+  const blocks = Object.values(dd.schedule || {}).filter(Boolean).length;
+  const mp = (g / 3) * .6 + (it ? .4 : 0), ep = (w ? .4 : 0) + (les ? .3 : 0) + (mood ? .3 : 0);
+  return {
+    morning: { state: mp >= 1 ? "done" : mp > 0 ? "part" : "none", p: mp, label: mp >= 1 ? "Done" : `${g}/3 · ${it ? "intention ✓" : "intention"}`, sub: mp >= 1 ? `Grateful ×${g} · ${dd.intention.trim()}` : "Gratitude and today's intention" },
+    targets: { state: tSet.length && tDone === tSet.length ? "done" : tSet.length ? "part" : "none", p: tSet.length ? tDone / tSet.length : 0, label: tSet.length ? `${tDone}/${tSet.length} done` : "Not set", sub: tSet.length ? tSet.map(x => x.t).slice(0, 2).join(" · ") : "Three moves on your goals" },
+    habits: { state: j.habits.length && hDone === j.habits.length ? "done" : hDone ? "part" : "none", p: j.habits.length ? hDone / j.habits.length : 0, label: `${hDone}/${j.habits.length}`, sub: j.habits.length ? `${j.habits.length - hDone ? j.habits.length - hDone + " left" : "All done"}` : "Add habits in Habits" },
+    schedule: { state: blocks ? "part" : "opt", p: 1, label: blocks ? `${blocks} blocks` : "Optional", sub: "Time-block the day" },
+    evening: { state: ep >= .99 ? "done" : ep > 0 ? "part" : "none", p: ep, label: ep >= .99 ? "Done" : `${[w ? "wins" : "", les ? "lesson" : "", mood ? "mood" : ""].filter(Boolean).length}/3`, sub: ep >= .99 ? `${w} win${w === 1 ? "" : "s"} · mood ${MOOD_FACE[dd.mood]}` : "Wins, lessons, tomorrow, check-in" },
+  };
+}
+function autoOpen(stt){ // open the next thing that needs you, keep finished things folded
+  const h = new Date().getHours(); const order = h >= 17 ? ["evening", "habits", "targets", "morning"] : ["morning", "targets", "habits", "evening"];
+  const first = order.find(k => stt[k].state !== "done"); return k => k === first;
+}
+
+/* ---------- reminders ---------- */
+const REM_DEFAULT = { morning: { on: true, time: "07:00" }, evening: { on: true, time: "21:00" }, weekly: { on: true, day: "SU", time: "18:00" } };
+const DAYS = [["MO", "Monday"], ["TU", "Tuesday"], ["WE", "Wednesday"], ["TH", "Thursday"], ["FR", "Friday"], ["SA", "Saturday"], ["SU", "Sunday"]];
+function remindersOf(src){ const r = (src && src.reminders) || {}; return { morning: { ...REM_DEFAULT.morning, ...(r.morning || {}) }, evening: { ...REM_DEFAULT.evening, ...(r.evening || {}) }, weekly: { ...REM_DEFAULT.weekly, ...(r.weekly || {}) } }; }
+function remindersForm(r, scope){ // scope: "p" = profile (Settings), "o" = onboarding
+  const row = (k, label, desc) => `<div class="set-row"><div><b>${label}</b><p class="muted small">${desc}</p></div><div class="row" style="gap:8px">
+      ${k === "weekly" ? `<select class="in" id="rd-${scope}" data-rem="${scope}" data-k="weekly" data-f="day" aria-label="Weekly review day" style="width:auto">${DAYS.map(([v, l]) => `<option value="${v}" ${r.weekly.day === v ? "selected" : ""}>${l.slice(0, 3)}</option>`).join("")}</select>` : ""}
+      <input type="time" class="in box" id="rt-${scope}-${k}" data-rem="${scope}" data-k="${k}" data-f="time" value="${esc(r[k].time)}" aria-label="${label} time" style="width:auto;min-height:44px">
+      <input type="checkbox" class="switch" id="ro-${scope}-${k}" data-rem="${scope}" data-k="${k}" data-f="on" ${r[k].on ? "checked" : ""} aria-label="${label} reminder on"></div></div>`;
+  return `<div class="set-group">${row("morning", "Morning ritual", "Gratitude, intention, targets")}${row("evening", "Evening ritual", "Wins, lessons, mood")}${row("weekly", "Weekly review", "Plan the week ahead")}</div>`;
+}
+function icsFor(r, name){
+  const base = baseUrl(); const pad2 = n => String(n).padStart(2, "0"); const now = new Date(); const stamp = `${now.getUTCFullYear()}${pad2(now.getUTCMonth() + 1)}${pad2(now.getUTCDate())}T${pad2(now.getUTCHours())}${pad2(now.getUTCMinutes())}00Z`;
+  const startDay = today().replace(/-/g, "");
+  const ev = (id, title, time, rule, hash, desc) => { const [hh, mm] = time.split(":"); const st = `${startDay}T${hh}${mm}00`; const endM = (+hh * 60 + +mm + 10); const en = `${startDay}T${pad2(Math.floor(endM / 60) % 24)}${pad2(endM % 60)}00`;
+    return ["BEGIN:VEVENT", `UID:greatestme-${id}-${Store.uid || "me"}@greatestme`, `DTSTAMP:${stamp}`, `DTSTART:${st}`, `DTEND:${en}`, `RRULE:${rule}`, `SUMMARY:${title}`, `DESCRIPTION:${desc}\\nOpen: ${base}#${hash}`, `URL:${base}#${hash}`,
+      "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${title}`, "TRIGGER:PT0M", "END:VALARM", "END:VEVENT"].join("\r\n"); };
+  const evs = [];
+  if (r.morning.on) evs.push(ev("morning", "GreatestMe: Morning ritual", r.morning.time, "FREQ=DAILY", "morning", "Breathe\\, gratitude\\, intention\\, three targets."));
+  if (r.evening.on) evs.push(ev("evening", "GreatestMe: Evening ritual", r.evening.time, "FREQ=DAILY", "evening", "Wins\\, lessons\\, tomorrow\\, mood."));
+  if (r.weekly.on) evs.push(ev("weekly", "GreatestMe: Weekly review", r.weekly.time, `FREQ=WEEKLY;BYDAY=${r.weekly.day}`, "review", "Review the week and plan the next one."));
+  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//GreatestMe//Reminders//EN", "CALSCALE:GREGORIAN", `X-WR-CALNAME:GreatestMe${name ? " · " + name : ""}`, ...evs, "END:VCALENDAR"].join("\r\n");
+}
+async function addReminders(r){
+  const data = icsFor(r, (profile() || {}).nick || ""); const name = "GreatestMe-reminders.ics";
+  try { const dl = window.claude && window.claude.use ? await claude.use("downloads") : null; if (dl) { await dl.save({ filename: name, data }); toast("Open the file to add your reminders"); return; } } catch {}
+  try { const f = new File([data], name, { type: "text/calendar" }); if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: "GreatestMe reminders" }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "text/calendar" })); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  toast("Tap Add All to put your reminders in Calendar");
+}
+const remHelp = `<details class="small muted"><summary style="cursor:pointer">Prefer Shortcuts?</summary><p style="margin-top:6px">In the Shortcuts app: Automation → New → Time of Day → pick your time → Open URLs → paste the Morning or Evening link from Siri & Shortcuts below.</p></details>`;
+
+/* ---------- achievements ---------- */
+const BADGES = [
+  { id: "first", name: "First page", desc: "Journal your first day", icon: "✏️", test: a => a.journal >= 1 },
+  { id: "morning5", name: "Early riser", desc: "Finish 5 mornings", icon: "🌅", test: a => a.mornings >= 5 },
+  { id: "evening5", name: "Night reflector", desc: "Finish 5 evenings", icon: "🌙", test: a => a.evenings >= 5 },
+  { id: "streak7", name: "One week strong", desc: "7-day journal streak", icon: "🔥", test: a => a.best >= 7 },
+  { id: "streak21", name: "Habit formed", desc: "21-day journal streak", icon: "⚡", test: a => a.best >= 21 },
+  { id: "streak45", name: "Halfway hero", desc: "45-day journal streak", icon: "🏔️", test: a => a.best >= 45 },
+  { id: "streak91", name: "Greatest me", desc: "All 91 days", icon: "👑", test: a => a.best >= 91 },
+  { id: "habits7", name: "Clean sweep", desc: "Every habit, 7 different days", icon: "✅", test: a => a.allHabitDays >= 7 },
+  { id: "perfect", name: "Perfect week", desc: "7 full pages in a row", icon: "💎", test: a => a.perfectRun >= 7 },
+  { id: "review4", name: "Course correct", desc: "4 weekly reviews", icon: "🧭", test: a => a.reviews >= 4 },
+  { id: "milestone", name: "First flag", desc: "Hit a milestone", icon: "⚑", test: a => a.ms >= 1 },
+  { id: "goal", name: "Goal crusher", desc: "Finish every milestone of a goal", icon: "🏆", test: a => a.goalsDone >= 1 },
+  { id: "mindful10", name: "Still mind", desc: "10 mindful minutes", icon: "🫧", test: a => a.mindful >= 600 },
+];
+function achieveStats(j = J()){
+  const st = stats(j); const t = today(); let mornings = 0, evenings = 0, allHabitDays = 0, perfectRun = 0, run = 0, mindful = 0;
+  for (let i = 0; i < TOTAL_DAYS; i++) { const d = addDays(j.start, i); if (d > t) break; const dd = Store.get(dayKey(d, j)); if (!dd) { run = 0; continue; }
+    const p = dayParts(dd); if (p.m >= 1) mornings++; if (p.e >= .99) evenings++; if (j.habits.length && j.habits.every(h => dd.habits[h.id])) allHabitDays++;
+    if (dayScore(dd) === 100) { run++; perfectRun = Math.max(perfectRun, run); } else run = 0; mindful += dd.mindful || 0; }
+  const reviews = Array.from({ length: WEEKS }, (_, i) => Store.get(weekKey(i + 1, j))).filter(w => w && w.score).length;
+  const goalsDone = j.goals.filter(g => g.milestones.length && g.milestones.every(m => m.done)).length;
+  return { journal: st.journal, best: st.best, mornings, evenings, allHabitDays, perfectRun, reviews, ms: st.msDone, goalsDone, mindful };
+}
+function checkBadges(){
+  const p = profile(); if (!p || !J()) return; p.badges = p.badges || {}; const a = achieveStats(); const fresh = BADGES.filter(b => !p.badges[b.id] && b.test(a));
+  if (!fresh.length) return; fresh.forEach(b => { p.badges[b.id] = today(); }); Store.touch("profile");
+  badgePop(fresh[fresh.length - 1], fresh.length - 1);
+}
+function badgePop(b, more){
+  let el = document.getElementById("badgeHost"); if (!el) { el = document.createElement("button"); el.id = "badgeHost"; el.className = "badge-pop"; el.setAttribute("data-act", "nav"); el.setAttribute("data-v", "progress"); document.body.appendChild(el); }
+  el.innerHTML = `<span class="badge earned">${b.icon}</span><span><span class="label">Badge earned</span><b>${esc(b.name)}</b><span class="muted small">${esc(b.desc)}${more ? ` · +${more} more` : ""}</span></span>`;
+  el.setAttribute("aria-label", `Badge earned: ${b.name}. Open Progress to see your badges.`); el.hidden = false; el.classList.remove("in"); void el.offsetWidth; el.classList.add("in");
+  const r = el.getBoundingClientRect(); confetti(r.left + 30, r.top + 30, false); chime(false); buzz(20);
+  clearTimeout(badgePop.t); badgePop.t = setTimeout(() => { el.hidden = true; }, 3200);
+}
+function badgesCard(){
+  const p = profile(); const got = (p && p.badges) || {}; const n = BADGES.filter(b => got[b.id]).length;
+  return `<section class="card"><div class="card-h"><h2>Badges</h2><span class="label">${n} of ${BADGES.length}</span></div>
+    <div class="badges">${BADGES.map(b => `<div class="bd ${got[b.id] ? "earned" : ""}" title="${esc(b.desc)}"><div class="badge">${got[b.id] ? b.icon : "🔒"}</div><b>${esc(b.name)}</b><span class="muted">${esc(got[b.id] ? fmtDate(got[b.id], { month: "short", day: "numeric" }) : b.desc)}</span></div>`).join("")}</div></section>`;
+}
+
+/* ---------- Daily highlights: quote + your day, with tips drawn from your own data ---------- */
+function highlights(d, j){
+  const dd = Store.ensure(dayKey(d), newDay), p = profile(), st = stats(j), [q, who] = quoteFor(d), isToday = d === today(); const cards = [];
+  cards.push(`<div class="hl-card quote-card"><span class="label">Quote of the day</span><div class="quote">${esc(q)}<cite>${esc(who)}</cite></div></div>`);
+  if (isToday) {
+    const lit = journalled(dd);
+    cards.push(`<div class="hl-card"><span class="label">Streak</span><div class="hl-big">${FLAME}<b class="mono">${st.streak}</b><span>day${st.streak === 1 ? "" : "s"}</span></div><p class="small">${lit ? "Today's in the books. Protect it tomorrow." : st.streak ? `Write one line today to make it ${st.streak + 1}.` : "Start a streak today. One line counts."}</p></div>`);
+    const left = j.habits.filter(h => !dd.habits[h.id]);
+    if (j.habits.length) cards.push(`<div class="hl-card"><span class="label">Habits</span><div class="hl-big"><b class="mono">${j.habits.length - left.length}</b><span>of ${j.habits.length} done</span></div><p class="small">${left.length ? `Left: ${esc(left.slice(0, 3).map(h => h.name).join(", "))}${left.length > 3 ? "…" : ""}` : "Clean sweep today. That's how habits stick."}</p></div>`);
+    const w = dd.water || 0, goal = (p.waterGoal || 8);
+    cards.push(`<div class="hl-card"><span class="label">Water</span><div class="hl-big"><b class="mono">${w}</b><span>of ${goal} glasses</span></div><div class="glasses" aria-hidden="true">${Array.from({ length: goal }, (_, i) => `<i class="${i < w ? "on" : ""}"></i>`).join("")}</div>
+      <div class="row"><button class="btn sm" data-act="water" data-n="-1" aria-label="Remove a glass" ${w ? "" : "disabled"}>−</button><button class="btn sm primary" data-act="water" data-n="1">+ Glass</button></div></div>`);
+    const recent = Array.from({ length: 3 }, (_, i) => Store.get(dayKey(addDays(d, -1 - i)))).map(x => x && x.mood).filter(Boolean);
+    if (recent.length >= 2) { const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+      if (avg <= 2.4) cards.push(`<div class="hl-card"><span class="label">A note for today</span><p>The last few days felt heavy. Keep today's targets small, do the breathing step, and count any win. Momentum comes back.</p></div>`);
+      else if (avg >= 4) cards.push(`<div class="hl-card"><span class="label">You're on a roll</span><p>Your mood has been strong for ${recent.length} days. Ride it: put your hardest target first.</p></div>`); }
+    const wk = n => { let c = 0; for (let i = 0; i < 7; i++) if (journalled(Store.get(dayKey(addDays(d, -i - n * 7))))) c++; return c; };
+    const a = wk(0), b = wk(1);
+    if (st.day >= 8) cards.push(`<div class="hl-card"><span class="label">Momentum</span><div class="hl-big"><b class="mono">${a}</b><span>of 7 days this week</span></div><p class="small">${a > b ? `Up from ${b} last week. Keep climbing.` : a === b ? `Same as last week. One more day beats it.` : `Last week was ${b}. There's still time.`}</p></div>`);
+    for (let back = 7; back <= 84; back += 7) { const od = addDays(d, -back); const o = Store.get(dayKey(od)); const win = o && o.wins.find(x => x.trim());
+      if (win) { cards.push(`<div class="hl-card"><span class="label">${back / 7} week${back > 7 ? "s" : ""} ago today</span><p>You wrote: <b>"${esc(win)}"</b></p><button class="btn sm ghost" data-act="dayOpen" data-v="${od}">See that day</button></div>`); break; } }
+    const mm = Math.round((dd.mindful || 0) / 60);
+    cards.push(`<div class="hl-card"><span class="label">Mindful minutes</span>${mm ? `<div class="hl-big"><b class="mono">${mm}</b><span>today</span></div><p class="small">From your breathing in the Morning ritual.</p>` : `<p>One minute of breathing sets the tone. It's the first step of the Morning ritual.</p><button class="btn sm" data-act="ritual" data-v="morning">Breathe now</button>`}</div>`);
+  }
+  return `<section class="hl" aria-label="Daily highlights"><div class="hl-track" id="hlTrack">${cards.join("")}</div>${cards.length > 1 ? `<div class="hl-dots" aria-hidden="true">${cards.map((_, i) => `<i class="${i ? "" : "on"}"></i>`).join("")}</div>` : ""}</section>`;
+}
+document.addEventListener("scroll", e => { const t = e.target; if (!t || t.id !== "hlTrack") return; const w = t.firstElementChild ? t.firstElementChild.getBoundingClientRect().width + 12 : 1; const i = Math.round(t.scrollLeft / w);
+  t.parentElement.querySelectorAll(".hl-dots i").forEach((d, k) => d.classList.toggle("on", k === i)); }, true);
+
 /* ============================ rendering ============================ */
 let User = null;
-const NAV = [["today","Today"],["week","Week"],["goals","Goals"],["habits","Habits"],["progress","Progress"],["calendar","Calendar"]];
+const NAV = [["today","Today"],["week","Week"],["goals","Goals"],["habits","Habits"],["progress","Progress"]];
 const navItems = () => canInk() ? NAV.slice(0, 1).concat([["ink","Ink"]], NAV.slice(1)) : NAV;
 
 function render(){
@@ -1190,7 +1380,7 @@ function render(){
   if (!profile() || !J()) { root.innerHTML = BD + enterCard(onboardView()); return; }
   if (S.view === "ink" && !canInk()) S.view = "today";
   const entering = S.lastView !== S.view; S.lastView = S.view;
-  const v = { today: todayView, calendar: calendarView, prefs: prefsView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, partner: partnerView }[S.view]();
+  const v = { today: todayView, prefs: prefsView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, partner: partnerView }[S.view]();
   const items = navItems(); const nav = () => items.map(([k, l]) => `<button data-act="nav" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
   const p = profile();
   root.innerHTML = `${BD}<div class="app">
@@ -1255,40 +1445,32 @@ function todayView(){
   ${isToday ? `<div class="rituals">
     <button class="ritual-card ${mDone ? "done" : ""}" data-act="ritual" data-v="morning">${ART.sunrise.replace("<svg", '<svg class="art"')}<span class="st">${mDone ? "✓ Done" : "3 min · guided"}</span><h2>Morning ritual</h2><span class="small" style="max-width:60%">Breathe, gratitude, intention, targets</span></button>
     <button class="ritual-card ${eDone ? "done" : ""}" data-act="ritual" data-v="evening">${ART.night.replace("<svg", '<svg class="art"')}<span class="st">${eDone ? "✓ Done" : "3 min · guided"}</span><h2>Evening ritual</h2><span class="small" style="max-width:60%">Wins, lessons, tomorrow, check-in</span></button></div>` : ""}
-  ${isToday ? tip("today", "From any screen, tap the GreatestMe logo to come back here. Calendar shows every day of your 13 weeks.") : ""}
-  <div class="card"><div class="quote">${esc(q)}<cite>${esc(who)}</cite></div></div>
+  ${isToday ? tip("today", "Tap a section header to open or fold it. Your calendar is at the bottom of this page.") : ""}
+  ${highlights(d, j)}
   ${!inJ && n >= 1 ? `<div class="card"><p>This date is outside your current 13-week journey. Start a new journey in <b>Settings</b> when you're ready for the next one.</p></div>` : ""}
-  <div class="grid2">
-    <section class="card"><div class="card-h"><h2>Morning</h2><span class="label">Set the day</span></div>
-      <div class="field"><span class="label">I'm grateful for</span><div class="num-rows">${dd.gratitude.map((g, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`g${i}`, key, `gratitude.${i}`, g, i === 0 ? "Someone who showed up for me…" : "")}</div>`).join("")}</div></div>
-      <div class="field"><label class="label" for="intent">Today I will be</label>${inp("intent", key, "intention", dd.intention, "Focused, patient, present…", "in box")}</div>
-    </section>
-    <section class="card"><div class="card-h"><h2>Today's targets</h2><span class="label">3 moves on your goals</span></div>
-      ${dd.targets.map((t, i) => `<div class="target"><input type="checkbox" class="check" aria-label="Target ${i + 1} done" id="tc${i}" ${bind(key, `targets.${i}.done`)} ${t.done ? "checked" : ""}>
-        ${inp(`tt${i}`, key, `targets.${i}.t`, t.t, ["The one that matters most","Second target","Third target"][i], "in" + (t.done ? " done-text" : ""))}
+  ${(() => { const stt = todayStatus(dd, j), op = autoOpen(stt);
+    const morning = `<div class="field"><span class="label">I'm grateful for</span><div class="num-rows">${dd.gratitude.map((g, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`g${i}`, key, `gratitude.${i}`, g, i === 0 ? "Someone who showed up for me…" : "")}</div>`).join("")}</div></div>
+      <div class="field"><label class="label" for="intent">Today I will be</label>${inp("intent", key, "intention", dd.intention, "Focused, patient, present…", "in box")}</div>`;
+    const targets = `${dd.targets.map((t, i) => `<div class="target"><input type="checkbox" class="check" aria-label="Target ${i + 1} done" id="tc${i}" ${bind(key, `targets.${i}.done`)} ${t.done ? "checked" : ""}>
+        ${inp(`tt${i}`, key, `targets.${i}.t`, t.t, ["The one that matters most", "Second target", "Third target"][i] || "Another target", "in" + (t.done ? " done-text" : ""))}
         <select class="in" id="tg${i}" aria-label="Linked goal" ${bind(key, `targets.${i}.g`)}>${goalOpts(t.g)}</select></div>`).join("")}
-      <button class="btn sm ghost" style="align-self:flex-start" data-act="addTarget" data-doc="${esc(key)}">+ Add target</button>
-    </section>
-  </div>
-  <section class="card"><div class="card-h"><h2>Habits</h2><span class="label">${j.habits.filter(h => dd.habits[h.id]).length} / ${j.habits.length} done</span></div>
-    <div class="grid2" style="gap:10px">${habits}</div></section>
-  <section class="card"><details class="sched" ${Object.values(dd.schedule || {}).some(Boolean) ? "open" : ""}><summary><h2>Schedule</h2><span class="label">Time-block the day ▾</span></summary>
-    <div class="sched-grid">${hours.map(h => `<span class="t">${h > 12 ? h - 12 : h}:00 ${h >= 12 ? "pm" : "am"}</span>${inp(`s${h}`, key, `schedule.h${h}`, (dd.schedule || {})["h" + h] || "", "")}`).join("")}</div></details></section>
-  ${canInk() ? `<section class="card"><div class="row" style="justify-content:space-between"><div><h2>Handwriting page</h2><p class="muted" style="font-size:.85rem">A ruled page for this date, made for Apple Pencil.</p></div><button class="btn primary" data-act="nav" data-v="ink" data-keepdate="1">${ICON.ink.replace("<svg", '<svg width="16" height="16"')} Write by hand</button></div></section>` : ""}
-  <section class="card" id="eveningCard"><div class="card-h"><h2>Evening</h2><span class="label">Close the loop</span></div>
-    <div class="grid2">
+      <button class="btn sm ghost" style="align-self:flex-start" data-act="addTarget" data-doc="${esc(key)}">+ Add target</button>`;
+    const evening = `<div class="grid2">
       <div class="field"><span class="label">Wins today</span><div class="num-rows">${dd.wins.map((w, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`w${i}`, key, `wins.${i}`, w, i === 0 ? "Small counts. Name it." : "")}</div>`).join("")}</div></div>
-      <div class="field"><label class="label" for="les">What I learned</label>${ta("les", key, "lessons", dd.lessons, "What would you tell yourself this morning?")}</div>
-    </div>
-    <div class="grid2">
-      <div class="field"><label class="label" for="imp">Tomorrow I'll improve by</label>${inp("imp", key, "improve", dd.improve, "One adjustment", "in box")}</div>
-      <div class="field"><label class="label" for="gpm">Tonight I'm grateful for</label>${inp("gpm", key, "gratitudePM", dd.gratitudePM, "", "in box")}</div>
-    </div>
-    <div class="grid2">
-      <div class="field"><span class="label">Mood</span>${scaleBtns(key, "mood", dd.mood, 5, ["Rough","Low","Steady","Good","Great"])}</div>
-      <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained","Low","Okay","Strong","Charged"])}</div>
-    </div>
-  </section>`;
+      <div class="field"><label class="label" for="les">What I learned</label>${ta("les", key, "lessons", dd.lessons, "What would you tell yourself this morning?")}</div></div>
+      <div class="grid2"><div class="field"><label class="label" for="imp">Tomorrow I'll improve by</label>${inp("imp", key, "improve", dd.improve, "One adjustment", "in box")}</div>
+      <div class="field"><label class="label" for="gpm">Tonight I'm grateful for</label>${inp("gpm", key, "gratitudePM", dd.gratitudePM, "", "in box")}</div></div>
+      <div class="grid2"><div class="field"><span class="label">Mood</span>${scaleBtns(key, "mood", dd.mood, 5, ["Rough", "Low", "Steady", "Good", "Great"])}</div>
+      <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained", "Low", "Okay", "Strong", "Charged"])}</div></div>`;
+    const sched = `<div class="sched-grid">${hours.map(h => `<span class="t">${h > 12 ? h - 12 : h}:00 ${h >= 12 ? "pm" : "am"}</span>${inp(`s${h}`, key, `schedule.h${h}`, (dd.schedule || {})["h" + h] || "", "")}`).join("")}</div>`;
+    return section("morning", "Morning", stt.morning.sub, stt.morning, morning, op("morning"))
+      + section("targets", "Today's targets", stt.targets.sub, stt.targets, targets, op("targets"))
+      + section("habits", "Habits", stt.habits.sub, stt.habits, `<div class="grid2" style="gap:10px">${habits}</div>`, op("habits"))
+      + section("evening", "Evening", stt.evening.sub, stt.evening, evening, op("evening"))
+      + section("schedule", "Schedule", stt.schedule.sub, stt.schedule, sched, false)
+      + (canInk() ? `<section class="card"><div class="row" style="justify-content:space-between"><div><h2>Handwriting page</h2><p class="muted small">A ruled page for this date, made for Apple Pencil.</p></div><button class="btn primary" data-act="nav" data-v="ink" data-keepdate="1">${ICON.ink.replace("<svg", '<svg width="16" height="16"')} Write by hand</button></div></section>` : "")
+      + calendarSection();
+  })()}`;
 }
 
 /* ---------- Week ---------- */
@@ -1401,6 +1583,8 @@ function progressView(){
   <section class="card"><div class="card-h"><h2>Weekly scores</h2><span class="label">From weekly reviews</span></div>
     <div style="display:grid;grid-template-columns:repeat(13,1fr);gap:6px;align-items:end;height:120px">${weeks.map((s, i) => `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end"><span class="mono" style="font-size:.7rem">${s || ""}</span><div style="width:100%;border-radius:4px 4px 0 0;background:${s ? "var(--violet)" : "var(--line)"};height:${s ? s * 8 : 3}px"></div><span class="mono muted" style="font-size:.65rem">${i + 1}</span></div>`).join("")}</div>
   </section>
+  ${badgesCard()}
+  <section class="card"><div class="card-h"><h2>Mindful minutes</h2><span class="label">From your breathing</span></div><p><b class="mono" style="font-size:1.6rem">${Math.round(achieveStats(j).mindful / 60)}</b> <span class="muted">minutes this journey</span></p><p class="muted small">One minute of breathing each morning adds up.</p></section>
   <section class="card"><div class="card-h"><h2>Quarterly review</h2><span class="label">${weekOf(today()) >= 12 ? "It's time" : "Unlocks fully in week 13"}</span></div>
     <p class="muted">At the end of 13 weeks, look back before you plan the next journey.</p>
     ${j.goals.map((g, i) => `<div class="field"><span class="label">How did "${esc(g.title)}" land? (1–10)</span>${scaleBtns(rk, `review.g_${g.id}`, rv["g_" + g.id] || 0, 10)}</div>`).join("")}
@@ -1504,23 +1688,26 @@ function gateView(){
 function onboardView(){
   if (!S.onboard) { const saved = ls.get("gm-onboard:" + Store.uid); if (saved && typeof saved.step === "number") S.onboard = saved; }
   const o = S.onboard || (S.onboard = { step: 0, nick: Store.accountName || "", suite: Suite.current(), start: today(), goals: [{ title: "", why: "" }, { title: "", why: "" }, { title: "", why: "" }], habits: [] });
-  const N = 7; const steps = o.step ? `<div class="steps">${Array.from({ length: N - 1 }, (_, i) => `<i class="${i < o.step ? "on" : ""}"></i>`).join("")}</div>` : "";
+  const N = 8; const steps = o.step ? `<div class="steps">${Array.from({ length: N - 1 }, (_, i) => `<i class="${i < o.step ? "on" : ""}"></i>`).join("")}</div>` : "";
   let body = "", cta = "Continue";
   if (o.step === 0) { body = `<div class="hero-art">${ART.welcome}</div><div class="gate-brand">Greatest<b>Me</b></div><h1>Thirteen weeks to the greatest version of you.</h1><p class="muted">Set three goals. Show up every morning and every evening. Watch what ninety-one days of follow-through can do.</p>${Store.mode === "supa" ? (Accounts.list().length ? migrateCard() : `<p class="muted small">Already wrote in GreatestMe somewhere else on this phone, like Safari? Sign in there with this same account and it will offer to bring that journal in.</p>`) : ""}`; cta = Store.mode === "supa" && Accounts.list().length ? "Start a new journal instead" : "Let's begin"; }
   if (o.step === 1) body = `<span class="label">Step 1 · You</span><h1>First, what should we call you?</h1><input id="onick" class="in box big-in" value="${esc(o.nick)}" autocomplete="given-name" placeholder="Your first name">`;
   if (o.step === 2) body = `<span class="label">Step 2 · Your look</span><h1>Pick your vibe${o.nick ? ", " + esc(o.nick.split(" ")[0]) : ""}.</h1><p class="muted small">You can change it any time in Settings.</p><div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="osuite" data-v="${k}" aria-pressed="${o.suite === k}"><div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div><span class="nm">${esc(SUITES[k].name)}</span></button>`).join("")}</div>`;
-  if (o.step === 3) body = `<span class="label">Step 3 · Day 1</span><h1>When does your journey start?</h1><p class="muted">Thirteen weeks from Day 1. Starting today works. So does a fresh Monday.</p><input id="ostart" type="date" class="in box big-in" value="${esc(o.start)}"><div class="row"><button type="button" class="btn sm" data-act="ostart" data-v="${today()}">Today</button><button type="button" class="btn sm" data-act="ostart" data-v="${nextMonday()}">Next Monday</button></div>`;
+  if (o.step === 3) body = `<span class="label">Step 3 · Day 1</span><h1>When does your journey start?</h1><p class="muted">Thirteen weeks from Day 1. Starting today works. So does a fresh Monday.</p><div class="presets"><button type="button" data-act="ostart" data-v="${today()}" aria-pressed="${o.start === today()}">Today</button><button type="button" data-act="ostart" data-v="${nextMonday()}" aria-pressed="${o.start === nextMonday() && nextMonday() !== today()}">Next Monday</button></div><input id="ostart" type="date" class="in box big-in" value="${esc(o.start)}" aria-label="Day 1 date">
+    <div class="card" style="gap:4px"><span class="label">Your 13 weeks</span><b>${esc(fmtDate(o.start, { weekday: "short", month: "short", day: "numeric" }))} → ${esc(fmtDate(addDays(o.start, TOTAL_DAYS - 1), { weekday: "short", month: "short", day: "numeric", year: "numeric" }))}</b></div>`;
   if (o.step === 4) body = `<div class="hero-art" style="max-width:200px">${ART.mountain}</div><span class="label">Step 4 · Goals</span><h1>What will be true in 13 weeks?</h1><p class="muted small">One to three. Specific enough that on day 91 you'll know.</p>
     ${o.goals.map((g, i) => `<input id="og${i}" class="in box" data-og="${i}" value="${esc(g.title)}" placeholder="${["Save $5,000 for the emergency fund", "Run a sub-25 5K", "Launch the first product"][i]}${i ? " (optional)" : ""}" autocomplete="off" aria-label="Goal ${i + 1}">`).join("")}`;
   if (o.step === 5) body = `<div class="hero-art" style="max-width:180px">${ART.sprout}</div><span class="label">Step 5 · Habits</span><h1>Which daily habits carry you there?</h1><p class="muted small">Pick a few. Fewer, done daily, beats many, done sometimes.</p>
     <div class="presets">${HABIT_PRESETS.map(h => `<button type="button" data-act="oh" data-v="${esc(h)}" aria-pressed="${o.habits.includes(h)}">${esc(h)}</button>`).join("")}${o.habits.filter(h => !HABIT_PRESETS.includes(h)).map(h => `<button type="button" data-act="oh" data-v="${esc(h)}" aria-pressed="true">${esc(h)}</button>`).join("")}</div>
     <div class="row" style="flex-wrap:nowrap"><input id="ohnew" class="in box" placeholder="Add your own" autocomplete="off"><button type="button" class="btn sm" data-act="ohadd">Add</button></div>`;
-  if (o.step === 6) { const g = o.goals.filter(x => x.title.trim()); body = `<span class="label">Step 6 · Commit</span><h1>Make the promise.</h1><p class="muted">For the next 13 weeks I'll show up morning and evening for:</p>
+  if (o.step === 6) { o.reminders = remindersOf(o); body = `<span class="label">Step 6 · Reminders</span><h1>When should we nudge you?</h1><p class="muted small">Pick your times. Adding them to your iPhone Calendar gives you real alerts, even when GreatestMe is closed. You can change these in Settings.</p>
+    ${remindersForm(o.reminders, "o")}<button type="button" class="btn" data-act="addRem" data-v="o">Add reminders to my iPhone Calendar</button>${remHelp}`; }
+  if (o.step === 7) { const g = o.goals.filter(x => x.title.trim()); body = `<span class="label">Step 7 · Commit</span><h1>Make the promise.</h1><p class="muted">For the next 13 weeks I'll show up morning and evening for:</p>
     <div class="card" style="gap:8px">${g.map((x, i) => `<div class="row"><span class="goal-n">GOAL ${i + 1}</span><b>${esc(x.title)}</b></div>`).join("")}<div class="muted small">${o.habits.length} daily habit${o.habits.length === 1 ? "" : "s"} · starting ${esc(fmtDate(o.start, { weekday: "long", month: "long", day: "numeric" }))}</div></div>
     <button class="commit" id="commitBtn" aria-label="Press and hold to commit"><svg viewBox="0 0 166 166" aria-hidden="true"><circle cx="83" cy="83" r="78"/></svg>Hold to<br>commit</button><p class="muted small" style="text-align:center">Press and hold</p>`; }
   return `<div class="gate"><div class="gate-card" id="ob${o.step}">${o.step ? `<div class="row" style="justify-content:space-between"><button class="btn icon ghost" data-act="oback" aria-label="Back">${ICON.left}</button><div style="flex:1">${steps}</div></div>` : ""}${body}
     ${S.onboardErr ? `<p class="err" role="alert">${esc(S.onboardErr)}</p>` : ""}
-    ${o.step < 6 ? `<button class="btn primary lg" data-act="onext">${cta}</button>` : ""}</div></div>`;
+    ${o.step < 7 ? `<button class="btn primary lg" data-act="onext">${o.step === 6 ? "Continue" : cta}</button>` : ""}</div></div>`;
 }
 function captureOnboard(){
   const o = S.onboard; if (!o) return; setTimeout(() => ls.set("gm-onboard:" + Store.uid, S.onboard), 0);
@@ -1581,6 +1768,12 @@ async function onClick(e){
     case "signout": await Store.flush(); if (Store.mode === "supa") { ls.del(mirrorKey()); try { await sb.auth.signOut(); } catch {} } ls.del("gm:session"); location.reload(); break;
     case "migrate": await migrate(); break;
     case "calMode": S.calMode = t.dataset.v; render(); break;
+    case "water": { const k = dayKey(S.date); const dd = Store.ensure(k, newDay); const goal = profile().waterGoal || 8; const before = dd.water || 0; dd.water = Math.max(0, before + +t.dataset.n); Store.touch(k); buzz(8);
+      const tr = document.getElementById("hlTrack"); const x = tr ? tr.scrollLeft : 0; render(); const tr2 = document.getElementById("hlTrack"); if (tr2) tr2.scrollLeft = x;
+      if (dd.water === goal && before < goal) { const b = document.querySelector("[data-act=water][data-n='1']"); burstAt(b, false); toast("Water goal reached"); } break; }
+    case "secToggle": { const sec = t.closest(".acc"); const open = !sec.classList.contains("open"); sec.classList.toggle("open", open); t.setAttribute("aria-expanded", open); S.openMap = S.openMap || {}; S.openMap[S.date + ":" + t.dataset.v] = open; buzz(6);
+      if (open) { const f = sec.querySelector(".acc-in input:not([type=checkbox]),.acc-in textarea"); if (f && !Device.iOS) setTimeout(() => f.focus({ preventScroll: true }), 220); } break; }
+    case "addRem": await addReminders(remindersOf(t.dataset.v === "o" ? S.onboard : profile())); break;
     case "calMonth": { const n = +t.dataset.n; if (!n) S.calMonth = null; else { const [Y, M] = (S.calMonth || today().slice(0, 7)).split("-").map(Number); const d = new Date(Y, M - 1 + n, 1); S.calMonth = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; } render(); break; }
     case "dayOpen": S.sheetDate = t.dataset.v; S.sheet = "day"; S.sheetFocus = true; render(); break;
     case "dayStep": S.sheetDate = addDays(S.sheetDate, +t.dataset.n); render(); break;
@@ -1605,18 +1798,18 @@ async function onClick(e){
     case "copyXfer": { const ta = $("#xferOut"); try { await navigator.clipboard.writeText(ta.value); toast("Move code copied"); } catch { ta.focus(); ta.select(); toast("Code selected. Tap Copy."); } break; }
     case "saveXfer": { const ta = $("#xferOut"); toast(saveFile(ta.value, `greatestme-${today()}.json`) ? "Saved to your downloads" : "Couldn't save a file here. Copy the code instead."); break; }
     case "pickAcct": S.gate.name = t.dataset.v; render(); $("#gpass").focus(); break;
-    case "ostart": $("#ostart").value = t.dataset.v; break;
+    case "ostart": captureOnboard(); S.onboard.start = t.dataset.v; buzz(6); render(); break;
     case "oh": { captureOnboard(); const o = S.onboard; const v = t.dataset.v; o.habits = o.habits.includes(v) ? o.habits.filter(x => x !== v) : o.habits.concat(v).slice(0, 8); render(); break; }
     case "ohadd": { const v = $("#ohnew").value.trim(); if (v && !S.onboard.habits.includes(v)) S.onboard.habits.push(v); render(); break; }
     case "oback": captureOnboard(); S.onboard.step = Math.max(0, S.onboard.step - 1); S.onboardErr = ""; render(); break;
     case "osuite": S.onboard.suite = t.dataset.v; ls.set("gm-suite", t.dataset.v); Suite.apply(t.dataset.v); chime(false); render(); break;
     case "suite": profile().suite = t.dataset.v; Store.touch("profile"); Suite.apply(t.dataset.v); chime(false); render(); break;
     case "pref": Prefs.set(t.dataset.v, t.checked); if (t.checked) { t.dataset.v === "sound" ? chime(false) : confetti(undefined, undefined, false); } break;
-    case "ritual": S.ritual = { kind: t.dataset.v, step: 0 }; S.snap = snap(); S.anim = { ritual: true, step: true }; render(); break;
-    case "rnext": { const R = RITUALS[S.ritual.kind]; S.ritual.step = Math.min(R.steps.length - 1, S.ritual.step + 1); S.anim = { step: true }; render(); const f = document.querySelector(".r-step input,.r-step textarea"); if (f && !Device.iOS) f.focus({ preventScroll: true });
+    case "ritual": S.breathStart = Date.now(); S.ritual = { kind: t.dataset.v, step: 0 }; S.snap = snap(); S.anim = { ritual: true, step: true }; render(); break;
+    case "rnext": { const R = RITUALS[S.ritual.kind]; if (R.steps[S.ritual.step] === "breathe" && S.breathStart) { const secs = Math.min(300, Math.round((Date.now() - S.breathStart) / 1000)); if (secs >= 10) { const k = dayKey(today()); const d0 = Store.ensure(k, newDay); d0.mindful = (d0.mindful || 0) + secs; Store.touch(k); } S.breathStart = null; } S.ritual.step = Math.min(R.steps.length - 1, S.ritual.step + 1); S.anim = { step: true }; render(); const f = document.querySelector(".r-step input,.r-step textarea"); if (f && !Device.iOS) f.focus({ preventScroll: true });
       if (R.steps[S.ritual.step] === "done" && once("ritual-" + S.ritual.kind)) { setTimeout(() => { confetti(undefined, undefined, true); chime(true); buzz(30); }, 250); } break; }
     case "rback": S.ritual.step = Math.max(0, S.ritual.step - 1); S.anim = { step: true }; render(); break;
-    case "rclose": S.ritual = null; clearInterval(breathT); S.view = "today"; S.date = today(); render(); checkWins(); break;
+    case "rclose": setTimeout(() => { if (!S.cele) checkBadges(); }, 900); S.ritual = null; clearInterval(breathT); S.view = "today"; S.date = today(); render(); checkWins(); break;
     case "rword": { const k = dayKey(today()); const dd = Store.ensure(k, newDay); dd.intention = t.dataset.v; Store.touch(k); render(); break; }
     case "celeClose": if (e.target === t || t.tagName === "BUTTON") { S.cele = null; render(); if (S.pendingTour) { setTimeout(() => { S.pendingTour = false; if (!S.ritual && !S.sheet && !S.cele && !S.tour && S.view === "today") Tour.start(); else render(); }, 1500); } } break;
     case "onext": {
@@ -1669,7 +1862,9 @@ async function importToDevice(text){
 }
 
 document.addEventListener("input", onInput);
-document.addEventListener("change", e => { if (e.target.dataset && e.target.dataset.doc && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== "checkbox" && !S.ritual) checkWins(e.target); });
+document.addEventListener("change", e => { if (e.target.dataset && e.target.dataset.doc && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== "checkbox" && !S.ritual) { checkWins(e.target); if (S.view === "today") softRender(); } });
+document.addEventListener("change", e => { const el = e.target; if (!el.dataset || !el.dataset.rem) return; const src = el.dataset.rem === "o" ? S.onboard : profile(); if (!src) return;
+  src.reminders = remindersOf(src); src.reminders[el.dataset.k][el.dataset.f] = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.rem === "p") Store.touch("profile"); else captureOnboard(); });
 document.addEventListener("change", async e => { if (e.target.id === "gfile" && e.target.files[0]) { S.gate.fileText = await e.target.files[0].text(); S.gate.err = ""; const ta = $("#gcode"); if (ta) ta.value = S.gate.fileText; return; } if (e.target.id === "inkTpl" && Ink.data) { Ink.data.meta.tpl = e.target.value; profile().inkTpl = e.target.value; Store.touch("profile"); Ink.queue(0); render(); return; } if (e.target.id === "importFile" && e.target.files[0]) doImport(e.target.files[0]); else if (e.target.type === "checkbox" || e.target.tagName === "SELECT" || e.target.type === "date") { /* handled by input */ } });
 document.addEventListener("click", onClick);
 document.addEventListener("keydown", e => {
@@ -1694,7 +1889,7 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && Sto
 function finishOnboard(){
   const o = S.onboard; if (!o) return;
   const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits });
-  Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {}, suite: o.suite }; Store.touch("profile");
+  Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {}, suite: o.suite, reminders: remindersOf(o) }; Store.touch("profile");
   S.onboard = null; ls.del("gm-onboard:" + Store.uid); S.view = "today"; S.date = today(); S.snap = snap(); S.pendingTour = !profile().toured;
   celebrate({ art: ART.mountain, title: "Your journey begins", sub: jn.start <= today() ? "Day 1 starts now. Your first morning ritual is waiting on Today." : `Day 1 is ${fmtDate(jn.start, { weekday: "long", month: "long", day: "numeric" })}. Everything's ready for you.` });
 }

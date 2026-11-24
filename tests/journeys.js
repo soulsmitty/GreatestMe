@@ -25,11 +25,13 @@ async function createAccount(p, name, pass){
   if (await p.locator('[data-act=ackHere]').count()) await p.click('[data-act=ackHere]');
   await p.fill('#gname', name); await p.fill('#gpass', pass); await p.fill('#gpass2', pass); await p.click('button[type=submit]');
 }
+const openSec = async (p, id) => { if (!(await p.locator(`#sec-${id}.open`).count())) { await p.click(`#sec-${id} .acc-h`); await p.waitForTimeout(350); } };
 async function onboard(p, nick){
   await p.waitForSelector('#ob0'); await p.click('[data-act=onext]'); await p.fill('#onick', nick);
   for (let i = 0; i < 3; i++) await p.click('[data-act=onext]');
   await p.fill('#og0', 'Run a sub-25 5K by March'); await p.click('[data-act=onext]');
   await p.click('[data-v="Move 30 min"]'); await p.click('[data-act=onext]');
+  await p.waitForSelector('[data-rem=o]'); await p.click('[data-act=onext]');
   await p.evaluate(() => document.getElementById('commitBtn').click()); await p.waitForSelector('.cele'); await p.click('.cele button');
   await p.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }).then(() => p.keyboard.press('Escape')).catch(() => {}); await p.waitForTimeout(150);
 }
@@ -41,6 +43,16 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
 (async () => {
   const b = await chromium.launch(); const PASS = 'Xk9#mQ2v!Lp7';
 
+  // 0. Onboarding: Day 1 choices update what's shown (Next Monday regression), reminders step is part of setup.
+  const O = await page(b, { ...PHONE }, 'onboard');
+  await createAccount(O, 'Ona', PASS); await O.waitForSelector('#ob0'); await O.click('[data-act=onext]'); await O.fill('#onick', 'Ona'); await O.click('[data-act=onext]'); await O.click('[data-act=onext]');
+  const nm = await O.locator('[data-act=ostart]').nth(1).getAttribute('data-v'); await O.click('[data-act=ostart] >> nth=1');
+  ok(await O.inputValue('#ostart') === nm && await O.locator('[data-act=ostart][aria-pressed=true]').count() === 1, 'Next Monday updates the Day 1 date and shows as selected');
+  await O.click('[data-act=onext]'); await O.fill('#og0', 'Goal'); await O.click('[data-act=onext]'); await O.click('[data-act=onext]');
+  ok(await O.locator('[data-rem=o][data-f=time]').count() === 3, 'setup asks for reminder times');
+  ok(!/Apple Health|HealthKit/.test(await O.content()), 'no Apple-only features in the web app');
+  await O.context().close();
+
   // 1. First visit in an iPhone browser: steer to the Home Screen before creating a local account.
   const A = await page(b, { ...PHONE }, 'safari');
   ok(await A.locator('[data-act=ackHere]').count() === 1, 'iPhone browser: Home Screen guidance shows before account creation');
@@ -51,17 +63,29 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await A.click('[data-act=ritual][data-v=morning]'); await A.click('[data-act=rnext]'); await A.fill('#rg0', 'My son');
   for (let i = 0; i < 3; i++) await A.click('[data-act=rnext]'); await A.click('[data-act=rclose]');
   ok(await A.inputValue('#g0') === 'My son', 'morning ritual saves to Today');
-  const habit = await A.$eval('input.check[id^=h-]', e => e.id); await A.check('#' + habit); await A.waitForTimeout(300);
+  await openSec(A, 'habits'); const habit = await A.$eval('input.check[id^=h-]', e => e.id); await A.check('#' + habit); await A.waitForTimeout(300);
   ok(await A.isChecked('#' + habit), 'habit check sticks');
   await A.click('[data-act=ritual][data-v=evening]'); await A.fill('#rw0', 'Finished the run'); for (let i = 0; i < 4; i++) await A.click('[data-act=rnext]'); await A.click('[data-act=rclose]');
   ok(await A.inputValue('#w0') === 'Finished the run', 'evening ritual saves to Today');
   await A.waitForTimeout(900);
 
+  // 2-. Daily highlights gallery and water.
+  ok(await A.locator('#hlTrack .hl-card').count() >= 4, 'daily highlights gallery shows quote and your stats');
+  await A.click('[data-act=water][data-n="1"]'); await A.click('[data-act=water][data-n="1"]');
+  ok(/^2/.test((await A.locator('.hl-card:has([data-act=water]) .hl-big b').innerText()).trim()), 'water taps count up');
+
+  // 2a. Accordion folds and unfolds; a badge was earned for the first page.
+  const wasOpen = await A.locator('#sec-schedule.open').count(); await A.click('#sec-schedule .acc-h'); ok(await A.locator('#sec-schedule.open').count() !== wasOpen, 'sections fold and unfold');
+  await A.click('[data-act=nav][data-v=progress] >> visible=true'); ok(await A.locator('.bd.earned').count() >= 1, 'first-page badge earned');
+  await A.click('[data-act=nav][data-v=today] >> visible=true');
+
   // 2b. Calendar, day summary, logo home, Partner via Settings, tour replay.
-  await A.click('[data-act=nav][data-v=calendar] >> visible=true'); ok(await A.locator('.cal-grid .cd.now').count() === 1, 'calendar month shows today');
+  ok(await A.locator('#sec-morning .schip').innerText().then(t => /done|\/3/i.test(t)), 'Today sections show their completion status');
+  ok(await A.locator('.tabs [data-v=calendar], .nav [data-v=calendar]').count() === 0, 'Calendar lives on Today, not in the tab bar');
+  await A.locator('#sec-calendar').scrollIntoViewIfNeeded(); ok(await A.locator('.cal-grid .cd.now').count() === 1, 'calendar at the bottom of Today shows today');
   await A.click('.cal-grid .cd.now'); ok(/My son/.test(await A.locator('.sheet').innerText()), 'tapping a day shows what was written');
   await A.click('[data-act=dayGo]'); ok(await A.locator('.hero').count() === 1, 'open this day goes to Today');
-  await A.click('[data-act=nav][data-v=calendar] >> visible=true'); await A.click('[data-act=calMode][data-v=journey]'); ok(await A.locator('.jr').count() === 13, 'calendar shows all 13 weeks');
+  await A.click('[data-act=calMode][data-v=journey]'); ok(await A.locator('.jr').count() === 13, 'calendar shows all 13 weeks');
   await A.click('[data-act=nav][data-v=today].brand >> visible=true'); ok(await A.locator('.hero').count() === 1, 'logo goes home to Today');
   ok(await A.locator('.tabs [data-v=partner], .nav [data-v=partner]').count() === 0, 'Partner is not in the tab bar');
   await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('.main [data-act=nav][data-v=partner]'); ok(await A.locator('[data-act=toggleShare]').count() === 1, 'Partner opens from Settings');
@@ -91,10 +115,10 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
       const p = await page(b, { viewport: { width: w, height: h }, hasTouch: true, isMobile: w < 800, userAgent: PHONE.userAgent }, label + ' ' + suite);
       await p.evaluate(s => localStorage.setItem('gm-suite', JSON.stringify(s)), suite); await p.reload();
       await createAccount(p, 'Tester', 'Tester#2026');
-      for (let st = 0; st < 6; st++) { if (st === 1) await p.fill('#onick', 'Tester'); if (st === 4) await p.fill('#og0', 'A goal'); await p.waitForTimeout(60); const o = await overflow(p); ok(!o, `${label} ${suite} onboarding ${st} fits${o ? ' (' + o + ')' : ''}`); await p.click('[data-act=onext]'); }
+      for (let st = 0; st < 7; st++) { if (st === 1) await p.fill('#onick', 'Tester'); if (st === 4) await p.fill('#og0', 'A goal'); await p.waitForTimeout(60); const o = await overflow(p); ok(!o, `${label} ${suite} onboarding ${st} fits${o ? ' (' + o + ')' : ''}`); await p.click('[data-act=onext]'); }
       await p.evaluate(() => document.getElementById('commitBtn').click()); await p.click('.cele button');
       if (await p.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }).then(() => true).catch(() => false)) { const o = await overflow(p); ok(!o, `${label} ${suite} tour fits${o ? ' (' + o + ')' : ''}`); await p.keyboard.press('Escape'); }
-      for (const v of ['today', 'week', 'goals', 'habits', 'progress', 'calendar', 'prefs']) { await p.click(`[data-act=nav][data-v=${v}] >> visible=true`); await p.waitForTimeout(60); const o = await overflow(p); if (o) ok(false, `${label} ${suite} ${v} fits (${o})`); }
+      for (const v of ['today', 'week', 'goals', 'habits', 'progress', 'prefs']) { await p.click(`[data-act=nav][data-v=${v}] >> visible=true`); await p.waitForTimeout(60); const o = await overflow(p); if (o) ok(false, `${label} ${suite} ${v} fits (${o})`); }
       await p.context().close();
     }
   }
@@ -105,17 +129,17 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     const signin = async (p, email, pw) => { await p.click('[data-act=gmode][data-v=signin]').catch(() => {}); await p.fill('#semail', email); await p.fill('#spass', pw); await p.click('#supaForm button[type=submit]'); await p.waitForTimeout(700); };
     const C = await page(b, { ...PHONE }, 'acct-chrome', 'accounts');
     ok(await C.locator('#supaForm').count() === 1, 'accounts: email sign-in screen shows (no on-device form)');
-    await signup(C, 'd@example.com', PASS + ' '); await onboard(C, 'Dalton'); await C.fill('#g0', 'My son'); await C.locator('#g0').blur(); await C.waitForTimeout(1200);
+    await signup(C, 'd@example.com', PASS + ' '); await onboard(C, 'Dalton'); await openSec(C, 'morning'); await C.fill('#g0', 'My son'); await C.locator('#g0').blur(); await C.waitForTimeout(1200);
     const H = await page(b, { ...PHONE }, 'acct-homescreen', 'accounts');
     await signin(H, 'd@example.com', 'wrong-password'); ok(/don't match/i.test(await H.locator('.err').innerText()), 'accounts: wrong password gets a clear message');
     await signin(H, 'd@example.com', PASS); ok(await H.inputValue('#g0').catch(() => '') === 'My son', 'accounts: signing in somewhere else shows the same journal (pasted trailing space ignored)');
-    await H.fill('#w0', 'Hit the gym'); await H.locator('#w0').blur(); await C.waitForTimeout(2600);
+    await openSec(H, 'evening'); await H.fill('#w0', 'Hit the gym'); await H.locator('#w0').blur(); await C.waitForTimeout(2600);
     ok(await C.inputValue('#w0') === 'Hit the gym', 'accounts: changes sync live to the other place');
     await C.reload(); await C.waitForTimeout(900); ok(await C.locator('.hero').count() === 1, 'accounts: stays signed in after reopening');
-    await C.fill('#g2', 'From the iPhone'); await H.fill('#imp', 'From the iPad'); await C.locator('#g2').blur(); await H.locator('#imp').blur(); await C.waitForTimeout(3500);
+    await openSec(C, 'morning'); await openSec(H, 'evening'); await C.fill('#g2', 'From the iPhone'); await H.fill('#imp', 'From the iPad'); await C.locator('#g2').blur(); await H.locator('#imp').blur(); await C.waitForTimeout(3500);
     await H.reload(); await H.waitForTimeout(900);
     ok(await H.inputValue('#g2') === 'From the iPhone' && await H.inputValue('#imp') === 'From the iPad', 'accounts: two devices editing the same day at once keep both edits');
-    await C.fill('#g1', 'Health'); await C.evaluate(() => { const e = document.getElementById('g1'); e.setSelectionRange(2, 2); });
+    await openSec(C, 'morning'); await C.fill('#g1', 'Health'); await C.evaluate(() => { const e = document.getElementById('g1'); e.setSelectionRange(2, 2); });
     await C.evaluate(() => window.dispatchEvent(new Event('x'))); await C.keyboard.type('XX'); ok(await C.inputValue('#g1') === 'HeXXalth', 'typing stays in order where the cursor is');
     const L = await page(b, { ...PHONE }, 'acct-lyllian', 'accounts'); await signup(L, 'l@example.com', 'Purple#2026xx'); await onboard(L, 'Lyllian');
     await L.click('[data-act=nav][data-v=prefs] >> visible=true'); await L.click('.main [data-act=nav][data-v=partner]'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
