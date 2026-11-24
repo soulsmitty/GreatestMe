@@ -1,6 +1,6 @@
 window.GM_CONFIG = { supabaseUrl: 'http://fake', supabaseAnonKey: 'anon' };
 window.supabase = { createClient(){
-  const S = 'http://127.0.0.1:' + window.__FAKE_PORT; const post = (p, b) => fetch(S + p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json());
+  const S = 'http://127.0.0.1:' + window.__FAKE_PORT; const post = (p, b) => fetch(S + p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json()).catch(e => ({ data: null, error: { message: 'TypeError: ' + e.message } })); // like supabase-js: network failures come back as errors, not throws
   let session = JSON.parse(localStorage.getItem('gm-auth') || 'null'); const subs = []; const keep = () => session ? localStorage.setItem('gm-auth', JSON.stringify(session)) : localStorage.removeItem('gm-auth');
   const auth = { async getSession(){ return { data: { session } }; }, onAuthStateChange(cb){ subs.push(cb); return { data: { subscription: { unsubscribe(){} } } }; },
     async signUp({ email, password }){ const r = await post('/auth', { a: 'up', email, password }); if (r.error) return { data: {}, error: r.error }; session = { user: r.user }; keep(); return { data: { session, user: r.user }, error: null }; },

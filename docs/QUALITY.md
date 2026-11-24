@@ -22,6 +22,7 @@ These are lessons from the best apps in the category: Headspace and Calm for cal
 | Data safety | Local mirror of every document, pending changes survive closing the app, three-way merge for edits from two devices, conditional writes with retry, and handwriting snapshots flushed before you switch days. |
 | Stability | Error boundary: if a page fails to draw, the app returns to Today, and if that fails too it shows a Reload card. It never shows a blank screen. Sync redraws wait while you type or press. |
 | Undo | Removing a goal, milestone or habit happens immediately and shows **Undo** for 5 seconds. |
+| Sync status | On phones, a quiet dot appears in the top bar only when changes are waiting to sync (offline or a problem); tap it for details. It disappears once everything is synced. |
 | Quality gate | Real-user journeys in Playwright (phone, folded/unfolded Duo, iPad, desktop; local and account modes; two devices editing at once) must pass before every deploy. |
 | Accessibility | 44 px tap targets, focus rings, ARIA on rings/toasts/sheets, Reduce Motion respected, labels on every field. |
 | Themes | Each theme sets its own icon, tab icon, home screen icon and status bar color. |
@@ -39,7 +40,7 @@ Every page draws well inside a 16 ms frame.
 ## Next, in priority order
 
 1. **Error reporting you can see:** a small private log in Supabase of client errors (message + page, no journal text), so problems are fixed before anyone reports them.
-2. **Sync status you can trust at a glance:** a quiet "Saved · Offline · Syncing" dot in the header, with the last-synced time on tap.
+2. **Last-synced time:** show when the account last synced, in Settings.
 3. **Performance budget in the gate:** fail the deploy if Today takes more than 50 ms to draw or the page goes over 120 KB gzipped.
 4. **Lighthouse-style checks in CI:** contrast, labels and tap sizes in every theme.
 5. **Haptics and widgets:** these need the native app. They are already listed in `docs/NATIVE_APP.md`.

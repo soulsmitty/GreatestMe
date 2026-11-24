@@ -185,6 +185,10 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     const code = (await L.locator('.mono[style*="letter-spacing"]').innerText()).trim(); await L.click('[data-act=toggleShare]'); await L.waitForTimeout(3000);
     await go(C, 'prefs'); await C.waitForTimeout(300); if (!(await C.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG C:', (await C.evaluate(() => document.body.innerText)).slice(0, 700)); await C.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Cdebug.png' }); } await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
     ok((await C.locator('.partner h2').allInnerTexts()).includes('Lyllian'), 'accounts: partner invite code links two phones');
+    await go(L, 'today'); await L.context().setOffline(true); await L.route(/127\.0\.0\.1:8612/, r => r.abort()); await openSec(L, 'morning'); await L.fill('#intent', 'Patient'); await L.waitForTimeout(2500);
+    ok(await L.locator('#syncdot:not([hidden])').count() === 1, 'phones show a quiet dot when changes are waiting to sync');
+    await L.unroute(/127\.0\.0\.1:8612/); await L.context().setOffline(false); await L.evaluate(() => window.dispatchEvent(new Event('online'))); await L.waitForTimeout(2500);
+    ok(await L.locator('#syncdot:not([hidden])').count() === 0, 'the dot goes away once everything syncs');
   } finally { fake.kill(); }
 
   ok(errs.length === 0, 'no script errors' + (errs.length ? ': ' + errs.slice(0, 3).join(' | ') : ''));
