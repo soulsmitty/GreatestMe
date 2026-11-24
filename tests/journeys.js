@@ -87,7 +87,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await A.click('.sheet [data-act=guideTour]'); await A.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }); ok(/goal/i.test(await A.locator('.tour-card').innerText()), 'Show me around spotlights the Goals page');
   await A.keyboard.press('Escape'); await go(A, 'today'); await go(A, 'goals'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 0, 'a page guide shows only once');
   await A.click('[data-act=guide][data-v=goals] >> visible=true'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 1, 'the ? button reopens the page guide'); await A.click('.sheet [data-act=guideClose] >> nth=-1');
-  await go(A, 'prefs'); await A.click('.main [data-act=nav][data-v=method]'); ok(await A.locator('.main section.card').count() === 10, 'Settings opens the ten-chapter GreatestMe Method');
+  await go(A, 'prefs'); await A.click('.main [data-act=nav][data-v=method]'); ok(await A.locator('.main section.card').count() === 11, 'Settings opens the eleven-chapter GreatestMe Method');
   await go(A, 'today'); await openSec(A, 'evening'); await A.locator('#winDay').fill('8'); await A.waitForTimeout(800);
   ok(/8\/10/.test(await A.locator('#winDay-v').innerText()), 'Win the Day score saves on the evening page');
 
@@ -95,6 +95,12 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   const wasOpen = await A.locator('#sec-targets.open').count(); await A.click('#sec-targets .acc-h'); ok(await A.locator('#sec-targets.open').count() !== wasOpen, 'sections fold and unfold');
   ok(await A.locator('#sec-schedule').count() === 0, 'optional schedule stays out of the way until turned on');
   await go(A, 'progress'); ok(await A.locator('.bd.earned').count() >= 1, 'first-page badge earned');
+  await go(A, 'today');
+  await go(A, 'prefs'); await A.evaluate(() => document.querySelector('[data-act=schedPref]').click()); await A.waitForTimeout(300); await go(A, 'today'); await openSec(A, 'schedule'); await A.locator('#s9').fill('Deep work, goal 1'); await A.waitForTimeout(700);
+  { const [dl] = await Promise.all([A.waitForEvent('download'), A.click('[data-act=planCal]')]); const ics = fs.readFileSync(await dl.path(), 'utf8');
+    ok(/T090000/.test(ics) && /SUMMARY:Deep work\\, goal 1/.test(ics) && /TRIGGER:-PT5M/.test(ics), 'time blocks go to Calendar with an alert'); }
+  await go(A, 'habits'); await dismissGuide(A); if (!(await A.locator('.heat').count())) { await A.click('.presets button >> nth=0'); await A.waitForTimeout(300); } ok(/of about 66 days/i.test(await A.locator('.main').innerText()), 'habits show progress toward automatic');
+  await go(A, 'prefs'); await A.evaluate(() => document.querySelector('[data-act=schedPref]').click()); await A.waitForTimeout(300);
   await go(A, 'today');
 
   // 2b. Calendar, day summary, logo home, Partner via Settings, tour replay.

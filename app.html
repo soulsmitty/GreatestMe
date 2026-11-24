@@ -1357,6 +1357,32 @@ function icsFor(r, name, start, end){
   if (r.weekly.on) evs.push(ev("weekly", "GreatestMe: Weekly review", r.weekly.time, `FREQ=WEEKLY;BYDAY=${r.weekly.day}`, "review", "Review the week and plan the next one.", r.weekly.day));
   return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//GreatestMe//Reminders//EN", "CALSCALE:GREGORIAN", `X-WR-CALNAME:GreatestMe${name ? " · " + name : ""}`, ...evs, "END:VCALENDAR"].join("\r\n");
 }
+async function saveIcs(data, name, msg){
+  try { const dl = window.claude && window.claude.use ? await claude.use("downloads") : null; if (dl) { await dl.save({ filename: name, data }); toast("Open the file to add it to Calendar"); return; } } catch {}
+  if (!Device.iOS) try { const f = new File([data], name, { type: "text/calendar" }); if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: "GreatestMe" }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "text/calendar" })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast(msg);
+}
+function planIcs(d){ // the day's time blocks as one-off Calendar events with an alert five minutes before
+  const dd = Store.get(dayKey(d)) || {}, sch = dd.schedule || {}, pad2 = n => String(n).padStart(2, "0"), sd = d.replace(/-/g, "");
+  const now = new Date(), stamp = `${now.getUTCFullYear()}${pad2(now.getUTCMonth() + 1)}${pad2(now.getUTCDate())}T${pad2(now.getUTCHours())}${pad2(now.getUTCMinutes())}00Z`;
+  const icsText = v => String(v).replace(/\\/g, "\\\\").replace(/[,;]/g, m => "\\" + m).replace(/\n/g, "\\n");
+  const hrs = Object.keys(sch).filter(k => (sch[k] || "").trim()).map(k => +k.slice(1)).sort((a, b) => a - b);
+  const evs = hrs.map(h => ["BEGIN:VEVENT", `UID:greatestme-block-${sd}-${h}-${Store.uid || "me"}@greatestme`, `DTSTAMP:${stamp}`, `DTSTART:${sd}T${pad2(h)}0000`, `DTEND:${sd}T${pad2(h + 1)}0000`, `SUMMARY:${icsText(sch["h" + h].trim())}`, "DESCRIPTION:Time block from GreatestMe",
+    "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsText(sch["h" + h].trim())}`, "TRIGGER:-PT5M", "END:VALARM", "END:VEVENT"].join("\r\n"));
+  return { count: evs.length, data: ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//GreatestMe//Plan//EN", "CALSCALE:GREGORIAN", ...evs, "END:VCALENDAR"].join("\r\n") };
+}
+function weekUpdate(w){ // the weekly progress note you send to your accountability partner
+  const j = J(), start = addDays(j.start, (w - 1) * 7), days = Array.from({ length: 7 }, (_, i) => addDays(start, i)).filter(d => d <= today());
+  const dds = days.map(d => Store.get(dayKey(d))).filter(Boolean), wd = Store.get(weekKey(w)) || {};
+  const avg = k => { const xs = dds.map(x => +x[k]).filter(Boolean); return xs.length ? (xs.reduce((a, b) => a + b, 0) / xs.length).toFixed(1) : null; };
+  const journaledN = dds.filter(x => [...(x.gratitude || []), ...(x.wins || []), x.intention, x.lessons].some(v => (v || "").trim())).length;
+  const hp = dds.length * j.habits.length, hd = dds.reduce((a, x) => a + j.habits.filter(h => (x.habits || {})[h.id]).length, 0);
+  const ms = j.goals.flatMap(g => g.milestones.filter(m => +m.week === w)); const lines = [`GreatestMe · Week ${w} of ${WEEKS}`, `Journaled ${journaledN}/7 days${hp ? ` · habits ${Math.round(hd / hp * 100)}%` : ""}${ms.length ? ` · milestones ${ms.filter(m => m.done).length}/${ms.length}` : ""}`];
+  const a1 = avg("winDay"), a2 = avg("planReal"); if (a1 || a2) lines.push(`Win the Day ${a1 || "–"} · Plan to Reality ${a2 || "–"}`);
+  if ((wd.wins || "").trim()) lines.push(`Wins: ${wd.wins.trim()}`); if ((wd.adjust || "").trim()) lines.push(`Next week I'll change: ${wd.adjust.trim()}`);
+  lines.push("Keep me honest this week.");
+  return lines.join("\n");
+}
 async function addReminders(r){
   const src = S.onboard || null; const st = src ? src.start : (J() && J().start); const data = icsFor(r, (profile() || {}).nick || (src && src.nick) || "", st, st ? addDays(st, TOTAL_DAYS - 1) : null); const name = "GreatestMe-reminders.ics";
   try { const dl = window.claude && window.claude.use ? await claude.use("downloads") : null; if (dl) { await dl.save({ filename: name, data }); toast("Open the file to add your reminders"); return; } } catch {}
@@ -1372,7 +1398,7 @@ const BADGES = [
   { id: "morning5", name: "Early riser", desc: "Finish 5 mornings", icon: "🌅", test: a => a.mornings >= 5 },
   { id: "evening5", name: "Night reflector", desc: "Finish 5 evenings", icon: "🌙", test: a => a.evenings >= 5 },
   { id: "streak7", name: "One week strong", desc: "7-day journal streak", icon: "🔥", test: a => a.best >= 7 },
-  { id: "streak21", name: "Habit formed", desc: "21-day journal streak", icon: "⚡", test: a => a.best >= 21 },
+  { id: "streak21", name: "Three weeks strong", desc: "21-day journal streak", icon: "⚡", test: a => a.best >= 21 },
   { id: "streak45", name: "Halfway hero", desc: "45-day journal streak", icon: "🏔️", test: a => a.best >= 45 },
   { id: "streak91", name: "Greatest me", desc: "All 91 days", icon: "👑", test: a => a.best >= 91 },
   { id: "habits7", name: "Clean sweep", desc: "Every habit, 7 different days", icon: "✅", test: a => a.allHabitDays >= 7 },
@@ -1492,6 +1518,7 @@ const METHOD = [
   { t: "Plan and review every week", go: "week", b: "Once a week, set one target per goal and three priorities. At the end of the week, look back: biggest wins, lessons, what got in the way, and one change. Rate the week. Fifteen minutes here saves hours of drifting." },
   { t: "Build habits that carry you", go: "habits", b: "Choose a few daily non-negotiables that make everything else easier: water, movement, reading, sleep. Check them off daily and let the streaks and heatmap pull you forward." },
   { t: "The 20-mile march", go: "today", b: "In Great by Choice, Jim Collins tells of two teams racing to the South Pole. One pushed hard on good days and rested on bad ones. The other marched about twenty miles every day, whatever the weather, and won. Your goals work the same way: a steady, doable amount every day beats bursts of effort. That's why one line still counts and why the rings ask for small things." },
+  { t: "The science, in your pocket", go: "goals", b: "Written goals: in Gail Matthews' study at Dominican University, people who wrote their goals down, committed to actions and sent a weekly progress note to a friend achieved the most. So GreatestMe has you write SMART goals, name your accountability, and send a weekly update from your review. Time blocking: a plan with a time attached is more likely to happen, so your Schedule blocks go straight into Calendar with alerts. Reflection: looking back is how experience becomes learning, which is why every evening and every week ends with a review. Habits: research by Phillippa Lally at UCL found new habits took about 66 days on average to feel automatic, not 21, so each habit shows its progress toward that mark. Balance: goals across health, relationships and work hold up better than work alone." },
   { t: "Missed a day?", go: "today", b: "Pick up where you left off. No guilt, no starting over. One line keeps the streak; one missed day is a blip, two is a pattern. Practice days before Day 1 are a free warm-up." },
   { t: "Finish strong: the quarterly review", go: "progress", b: "At the end of 13 weeks, score each goal, write your proudest moments and what you learned about yourself, decide what to keep, stop and start, and choose what the next 13 weeks are for." },
 ];
@@ -1505,7 +1532,7 @@ function guideSheet(){
 }
 function methodView(){
   return `<button class="back" data-act="nav" data-v="prefs">${ICON.left} Settings</button>
-  <div class="head"><div><span class="label">Your guide to the next 13 weeks</span><h1 class="title-bar" style="margin-top:4px">The GreatestMe Method</h1><p class="sub">Everything the journal is built on, in ten short reads.</p></div></div>
+  <div class="head"><div><span class="label">Your guide to the next 13 weeks</span><h1 class="title-bar" style="margin-top:4px">The GreatestMe Method</h1><p class="sub">Everything the journal is built on, in eleven short reads.</p></div></div>
   ${METHOD.map((c, i) => `<section class="card"><div class="card-h"><h2><span class="goal-n" style="margin-right:8px">${String(i + 1).padStart(2, "0")}</span>${esc(c.t)}</h2></div><p>${esc(c.b)}</p><button class="btn sm" style="align-self:flex-start" data-act="nav" data-v="${c.go}">Open ${esc({ goals: "Goals", today: "Today", week: "Week", habits: "Habits", progress: "Progress" }[c.go])}</button></section>`).join("")}`;
 }
 function maybeGuide(){ // first visit to a page shows its guide once
@@ -1618,7 +1645,8 @@ function todayView(){
       <div class="grid2">${rangeField("winDay", key, "winDay", dd.winDay, "Win the Day", "How well did today go overall?")}${rangeField("planReal", key, "planReal", dd.planReal, "Plan to Reality", "How closely did the day match your plan?")}</div>
       <div class="grid2"><div class="field"><span class="label">Mood</span>${scaleBtns(key, "mood", dd.mood, 5, ["Rough", "Low", "Steady", "Good", "Great"])}</div>
       <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained", "Low", "Okay", "Strong", "Charged"])}</div></div>`;
-    const sched = `<div class="sched-grid">${hours.map(h => `<span class="t">${h > 12 ? h - 12 : h}:00 ${h >= 12 ? "pm" : "am"}</span>${inp(`s${h}`, key, `schedule.h${h}`, (dd.schedule || {})["h" + h] || "", "")}`).join("")}</div>`;
+    const sched = `<div class="sched-grid">${hours.map(h => `<span class="t">${h > 12 ? h - 12 : h}:00 ${h >= 12 ? "pm" : "am"}</span>${inp(`s${h}`, key, `schedule.h${h}`, (dd.schedule || {})["h" + h] || "", "")}`).join("")}</div>
+      <div class="row"><button class="btn sm" data-act="planCal" data-d="${d}">Add my blocks to Calendar</button><span class="muted small">Each block gets an alert five minutes before.</span></div>`;
     return section("morning", "Morning", stt.morning.sub, stt.morning, morning, op("morning"))
       + section("targets", "Today's targets", stt.targets.sub, stt.targets, targets, op("targets"))
       + section("habits", "Habits", stt.habits.sub, stt.habits, `<div class="grid2" style="gap:10px">${habits}</div>`, op("habits"))
@@ -1662,6 +1690,7 @@ function weekView(){
       <div class="field"><label class="label" for="wr4">Next week I'll change</label>${ta("wr4", key, "adjust", wd.adjust, "")}</div>
     </div>
     <div class="field"><span class="label">Rate the week</span>${scaleBtns(key, "score", wd.score, 10)}</div>
+    <div class="row"><button class="btn sm" data-act="weekShare" data-w="${w}">Send my weekly update</button><span class="muted small">People who send a weekly progress note to a friend reach more of their goals.</span></div>
   </section>`;
 }
 
@@ -1708,7 +1737,8 @@ function habitsView(){
   </section>
   ${j.habits.map(h => { const st = habitStreak(h); let c = 0; const weeks = Array.from({ length: WEEKS }, (_, w) => `<div class="wk">${Array.from({ length: 7 }, (_, d) => { const i = w * 7 + d; const day = addDays(j.start, i); const dd = Store.get(dayKey(day)); const on = dd && dd.habits[h.id]; if (on) c++; return `<i class="${i >= n ? "future" : on ? "on" : ""}" title="${esc(fmtDate(day, { month: "short", day: "numeric" }))}"></i>`; }).join("")}</div>`).join(""); return `
   <section class="card"><div class="card-h"><h3>${esc(h.name)}</h3><div class="row"><span class="chip good">${st.s} day streak</span><span class="chip">Best ${st.best}</span><span class="mono muted" style="font-size:.85rem">${c}/${n || 0} days</span></div></div>
-    <div class="heat" aria-label="13-week history, one column per week">${weeks}</div></section>`; }).join("")}`;
+    <div class="heat" aria-label="13-week history, one column per week">${weeks}</div>
+    <div class="field"><span class="label">Becoming automatic · ${Math.min(c, 66)} of about 66 days</span>${bar(Math.round(Math.min(c, 66) / 66 * 100), "good")}</div></section>`; }).join("")}`;
 }
 
 /* ---------- Progress ---------- */
@@ -1899,6 +1929,8 @@ async function onClick(e){
     case "day": { const n = +t.dataset.n; S.date = n === 0 ? today() : addDays(S.date, n); render(); break; }
     case "week": { const n = +t.dataset.n; S.week = n === 0 ? weekOf(today()) : clamp((S.week || weekOf(today())) + n, 1, WEEKS); render(); break; }
     case "scale": { const doc = Store.get(t.dataset.doc); const n = +t.dataset.n; setPath(doc, t.dataset.f, getPath(doc, t.dataset.f) === n ? 0 : n); Store.touch(t.dataset.doc); buzz(8); render(); if (!S.ritual) checkWins(); break; }
+    case "planCal": { const { count, data } = planIcs(t.dataset.d); if (!count) { toast("Write something in a time block first"); break; } await saveIcs(data, `GreatestMe-plan-${t.dataset.d}.ics`, `Tap Add All to put ${count} block${count === 1 ? "" : "s"} in Calendar`); break; }
+    case "weekShare": { const text = weekUpdate(+t.dataset.w); try { if (navigator.share) { await navigator.share({ text }); break; } } catch (e) { if (e && e.name === "AbortError") break; } try { await navigator.clipboard.writeText(text); toast("Update copied. Paste it to your partner"); } catch { toast("Couldn't copy on this device"); } break; }
     case "addTarget": { const doc = Store.get(t.dataset.doc); doc.targets.push({ t: "", g: "", done: false }); Store.touch(t.dataset.doc); render(); break; }
     case "habit": { const k = dayKey(t.dataset.d); const dd = Store.ensure(k, newDay); dd.habits[t.dataset.h] = !dd.habits[t.dataset.h]; Store.touch(k); const cid = t.id; S.pop = cid; render(); checkWins(document.getElementById(cid)); break; }
     case "ms": { const g = j.goals.find(x => x.id === t.dataset.g); const m = g && g.milestones.find(x => x.id === t.dataset.m); if (m) { m.done = !m.done; Store.touch("journey-" + j.id); S.pop = t.id; render(); checkWins(document.getElementById(t.id)); } break; }
