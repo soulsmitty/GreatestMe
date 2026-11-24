@@ -100,6 +100,8 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   { const [dl] = await Promise.all([A.waitForEvent('download'), A.click('[data-act=planCal]')]); const ics = fs.readFileSync(await dl.path(), 'utf8');
     ok(/T090000/.test(ics) && /SUMMARY:Deep work\\, goal 1/.test(ics) && /TRIGGER:-PT5M/.test(ics), 'time blocks go to Calendar with an alert'); }
   await go(A, 'habits'); await dismissGuide(A); if (!(await A.locator('.heat').count())) { await A.click('.presets button >> nth=0'); await A.waitForTimeout(300); } ok(/of about 66 days/i.test(await A.locator('.main').innerText()), 'habits show progress toward automatic');
+  { const n0 = await A.locator('[data-act=delHabit]').count(); await A.click('[data-act=delHabit] >> nth=0'); const n1 = await A.locator('[data-act=delHabit]').count();
+    await A.click('.toast-undo'); await A.waitForTimeout(200); ok(n1 === n0 - 1 && await A.locator('[data-act=delHabit]').count() === n0, 'removing a habit is instant and Undo brings it back'); }
   await go(A, 'prefs'); await A.evaluate(() => document.querySelector('[data-act=schedPref]').click()); await A.waitForTimeout(300);
   await go(A, 'today');
 

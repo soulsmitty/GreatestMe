@@ -80,3 +80,7 @@ Row Level Security limits every journal row to its owner; partners can read only
 ## Develop
 
 Edit `app.html`, then `./build.sh` and open `index.html` in a browser. No dependencies.
+
+## Quality
+
+See [docs/QUALITY.md](docs/QUALITY.md) for the quality bar, measured speed, and what comes next. Native-only features are in [docs/NATIVE_APP.md](docs/NATIVE_APP.md).

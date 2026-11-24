@@ -261,6 +261,7 @@ details.sched summary::-webkit-details-marker{display:none}
 .avatar.sm{width:34px;height:34px;font-size:.9rem}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--canvas);padding:10px 18px;border-radius:14px;font-weight:700;z-index:60;font-size:.9rem;box-shadow:var(--shadow-lift)}
 .toast.anim{animation:toast .35s cubic-bezier(.3,1.4,.5,1)}
+.toast{display:flex;align-items:center;gap:14px}.toast-undo{border:0;background:none;color:var(--acc);font:inherit;font-weight:800;padding:6px 4px;min-height:36px;cursor:pointer;filter:brightness(1.25)}
 @media (min-width:821px){.toast{bottom:28px}}
 @keyframes toast{from{transform:translate(-50%,20px);opacity:0}}
 .save{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
@@ -1596,10 +1597,15 @@ function renderPage(){
   if (S.pendingTour && !S.cele && !S.ritual && !S.sheet && S.view === "today") { clearTimeout(tryTour.t); tryTour.t = setTimeout(tryTour, 1200); }
 }
 function celeView(){ const c = S.cele; return `<div class="cele ${S.anim && S.anim.cele ? "anim" : ""}" data-act="celeClose"><div class="cele-card" role="dialog" aria-modal="true" aria-label="${esc(c.title)}">${c.art || ""}${c.num != null ? `<div class="num">${+c.num}</div>` : ""}<h1>${esc(c.title)}</h1><p class="muted">${esc(c.sub || "")}</p><button class="btn primary lg" data-act="celeClose" style="width:100%">Keep going</button></div></div>`; }
-function toast(msg){
+function toast(msg, undo){ // undo: optional function; shows an Undo button for a few seconds
   let el = document.getElementById("toastHost"); if (!el) { el = document.createElement("div"); el.id = "toastHost"; el.className = "toast"; el.setAttribute("role", "status"); el.setAttribute("aria-live", "polite"); document.body.appendChild(el); }
-  el.textContent = msg; el.hidden = false; el.classList.remove("anim"); void el.offsetWidth; el.classList.add("anim");
-  clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 2400);
+  el.textContent = msg; if (undo) { const b = document.createElement("button"); b.className = "toast-undo"; b.textContent = "Undo"; b.onclick = () => { el.hidden = true; clearTimeout(toast.t); undo(); }; el.appendChild(b); }
+  el.hidden = false; el.classList.remove("anim"); void el.offsetWidth; el.classList.add("anim");
+  clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, undo ? 5000 : 2400);
+}
+function removeWithUndo(list, i, docKey, label){ // delete right away, offer Undo (no "tap again" step)
+  const [item] = list.splice(i, 1); Store.touch(docKey); render();
+  toast(`${label} removed`, () => { list.splice(Math.min(i, list.length), 0, item); Store.touch(docKey); render(); });
 }
 
 const bind = (key, path, extra = "") => `data-doc="${esc(key)}" data-f="${esc(path)}" ${extra}`;
@@ -1943,13 +1949,13 @@ async function onClick(e){
     case "habit": { const k = dayKey(t.dataset.d); const dd = Store.ensure(k, newDay); dd.habits[t.dataset.h] = !dd.habits[t.dataset.h]; Store.touch(k); const cid = t.id; S.pop = cid; render(); checkWins(document.getElementById(cid)); break; }
     case "ms": { const g = j.goals.find(x => x.id === t.dataset.g); const m = g && g.milestones.find(x => x.id === t.dataset.m); if (m) { m.done = !m.done; Store.touch("journey-" + j.id); S.pop = t.id; render(); checkWins(document.getElementById(t.id)); } break; }
     case "addGoal": if (j.goals.length < 3) { j.goals.push({ id: uid(), title: "", why: "", measure: "", reward: "", milestones: [] }); Store.touch("journey-" + j.id); render(); const el = $(`#gt${j.goals.length - 1}`); el && el.focus(); } break;
-    case "delGoal": if (t.dataset.confirm === "1") { j.goals = j.goals.filter(g => g.id !== t.dataset.g); Store.touch("journey-" + j.id); render(); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to remove"; t.classList.add("ember"); } break;
+    case "delGoal": { const i = j.goals.findIndex(g => g.id === t.dataset.g); if (i >= 0) removeWithUndo(j.goals, i, "journey-" + j.id, "Goal"); break; }
     case "addMs": { const g = j.goals.find(x => x.id === t.dataset.g); const last = g.milestones.at(-1); g.milestones.push({ id: uid(), text: "", week: last ? Math.min(WEEKS, +last.week + 1) : weekOf(today()), done: false }); Store.touch("journey-" + j.id); render(); break; }
     case "seedMs": { const g = j.goals.find(x => x.id === t.dataset.g); [2, 4, 6, 8, 10, 12, 13].forEach((w, i) => g.milestones.push({ id: uid(), text: w === 13 ? "Goal achieved" : `Checkpoint ${i + 1}`, week: w, done: false })); Store.touch("journey-" + j.id); render(); break; }
-    case "delMs": { const g = j.goals.find(x => x.id === t.dataset.g); g.milestones = g.milestones.filter(m => m.id !== t.dataset.m); Store.touch("journey-" + j.id); render(); break; }
+    case "delMs": { const g = j.goals.find(x => x.id === t.dataset.g); const i = g ? g.milestones.findIndex(m => m.id === t.dataset.m) : -1; if (i >= 0) removeWithUndo(g.milestones, i, "journey-" + j.id, "Milestone"); break; }
     case "addHabit": addHabit($("#newHabit").value); break;
     case "presetHabit": addHabit(t.dataset.v); break;
-    case "delHabit": if (t.dataset.confirm === "1") { j.habits = j.habits.filter(h => h.id !== t.dataset.h); Store.touch("journey-" + j.id); render(); } else { t.dataset.confirm = "1"; t.classList.add("ember"); t.setAttribute("aria-label", "Tap again to remove"); t.title = "Tap again to remove"; } break;
+    case "delHabit": { const i = j.habits.findIndex(h => h.id === t.dataset.h); if (i >= 0) removeWithUndo(j.habits, i, "journey-" + j.id, "Habit"); break; }
     case "toggleShare": { const p = profile(); p.share = !p.share; Store.touch("profile"); render(); Partner.publish(); toast(p.share ? "Sharing turned on" : "Sharing turned off"); break; }
     case "cheer": { const p = profile(); p.cheers = p.cheers || {}; p.cheers[t.dataset.id] = Date.now(); Store.touch("profile"); await Partner.publish(); toast("Cheer sent"); break; }
     case "sheet": S.sheet = t.dataset.v; render(); break;
