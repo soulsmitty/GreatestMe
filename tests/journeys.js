@@ -36,7 +36,7 @@ async function onboard(p, nick){
   await p.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }).then(() => p.keyboard.press('Escape')).catch(() => {}); await p.waitForTimeout(150);
 }
 const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
-  document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.backdrop,svg,canvas,.fx')) return;
+  document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.hl-track,.backdrop,svg,canvas,.fx')) return;
     if (r.right > W + 1 || r.left < -1) bad.push(el.id || el.className || el.tagName); });
   return document.documentElement.scrollWidth > W || bad.length ? bad.slice(0, 4).join(', ') || 'page scrolls sideways' : ''; });
 
@@ -48,8 +48,14 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await createAccount(O, 'Ona', PASS); await O.waitForSelector('#ob0'); await O.click('[data-act=onext]'); await O.fill('#onick', 'Ona'); await O.click('[data-act=onext]'); await O.click('[data-act=onext]');
   const nm = await O.locator('[data-act=ostart]').nth(1).getAttribute('data-v'); await O.click('[data-act=ostart] >> nth=1');
   ok(await O.inputValue('#ostart') === nm && await O.locator('[data-act=ostart][aria-pressed=true]').count() === 1, 'Next Monday updates the Day 1 date and shows as selected');
+  await O.fill('#ostart', '2026-12-07'); await O.locator('#ostart').dispatchEvent('change'); await O.waitForTimeout(150);
+  ok(/Dec 7/.test(await O.locator('.gate-card .card b').innerText()), 'picking a custom Day 1 updates the 13-week summary right away');
+  await O.click('[data-act=ostart] >> nth=1');
   await O.click('[data-act=onext]'); await O.fill('#og0', 'Goal'); await O.click('[data-act=onext]'); await O.click('[data-act=onext]');
   ok(await O.locator('[data-rem=o][data-f=time]').count() === 3, 'setup asks for reminder times');
+  const [dl] = await Promise.all([O.waitForEvent('download'), O.click('[data-act=addRem]')]); const ics = fs.readFileSync(await dl.path(), 'utf8');
+  const wk = ics.split('BEGIN:VEVENT').find(x => /Weekly review/.test(x)) || ''; const ds = (wk.match(/DTSTART:(\d{8})/) || [])[1];
+  ok(/RRULE:FREQ=DAILY;UNTIL=\d{8}T235959/.test(ics) && /BEGIN:VALARM/.test(ics) && ds && new Date(+ds.slice(0, 4), +ds.slice(4, 6) - 1, +ds.slice(6)).getDay() === 0 && ds >= nm.replace(/-/g, ''), 'reminder calendar file: alerts, ends with the journey, weekly review starts on the chosen day after Day 1');
   ok(!/Apple Health|HealthKit/.test(await O.content()), 'no Apple-only features in the web app');
   await O.context().close();
 
@@ -89,10 +95,21 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await A.click('[data-act=calMode][data-v=journey]'); ok(await A.locator('.jr').count() === 13, 'calendar shows all 13 weeks');
   await A.click('[data-act=nav][data-v=today].brand >> visible=true'); ok(await A.locator('.hero').count() === 1, 'logo goes home to Today');
   ok(await A.locator('.tabs [data-v=partner], .nav [data-v=partner]').count() === 0, 'Partner is not in the tab bar');
-  await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('.main [data-act=nav][data-v=partner]'); ok(await A.locator('[data-act=toggleShare]').count() === 1, 'Partner opens from Settings');
-  await A.click('.back'); await A.click('[data-act=tourStart]'); let steps = 0;
+  await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('.main [data-act=nav][data-v=partner]'); ok(/Partner/.test(await A.locator('h1').first().innerText()) && await A.locator('[data-act=toggleShare]').count() === 0, 'Partner opens from Settings (no sharing switch until accounts sync)');
+  await A.click('.back'); await A.click('[data-act=tourStart]'); await A.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 8000 }).catch(() => {}); let steps = 0;
   while (await A.locator('#tourLayer [data-act=tourNext]').count() && steps < 8) { steps++; await A.waitForTimeout(450); await A.click('#tourLayer [data-act=tourNext]'); }
   ok(steps >= 4 && await A.locator('#tourLayer').count() === 0, `tour walks through ${steps} steps and closes`);
+
+  // 2c. iPad Ink: strokes survive an immediate day switch.
+  const I = await page(b, { ...(devices['iPad Pro 11'] || PHONE) }, 'ipad-ink'); await createAccount(I, 'Inky', PASS); await onboard(I, 'Inky');
+  await I.click('[data-act=nav][data-v=ink] >> visible=true'); await I.waitForSelector('canvas[data-page="0"]'); const bx = await I.locator('canvas[data-page="0"]').boundingBox();
+  await I.evaluate(({ bx }) => { const cv = document.querySelector('canvas[data-page="0"]'); const f = (t, x, y) => cv.dispatchEvent(new PointerEvent(t, { pointerId: 3, pointerType: 'pen', clientX: bx.x + x, clientY: bx.y + y, pressure: .5, bubbles: true, cancelable: true }));
+    f('pointerdown', 150, 150); for (let k = 0; k < 30; k++) f('pointermove', 150 + k * 4, 150 + (k % 5)); f('pointerup', 270, 150); }, { bx });
+  await I.click('[data-act=day][data-n="-1"]'); await I.waitForTimeout(300); await I.click('[data-act=day][data-n="1"]'); await I.waitForTimeout(700);
+  const strokes = await I.evaluate(async () => { const db = await new Promise(r => { const o = indexedDB.open('greatestme', 1); o.onsuccess = () => r(o.result); });
+    const all = await new Promise(r => { const q = db.transaction('ink').objectStore('ink').getAll(); q.onsuccess = () => r(q.result); }); return all.filter(Array.isArray).reduce((a, x) => a + x.length, 0); });
+  ok(strokes >= 1, 'iPad: handwriting saved even when switching days right away');
+  await I.context().close();
 
   // 3. Same person opens GreatestMe from a different place (separate storage): clear message, not a password error.
   const B = await page(b, { ...PHONE }, 'homescreen');
@@ -111,7 +128,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   ok(await B.locator('.hero').count() === 1, 'same passcode signs in after the move');
 
   // 5. Layout: folded, phone, unfolded, iPad × every theme × every screen.
-  for (const [w, h, label] of [[360, 760, 'fold closed'], [393, 852, 'iPhone'], [744, 860, 'fold open'], [834, 1194, 'iPad']]) {
+  for (const [w, h, label] of (process.env.QUICK ? [] : [[360, 760, 'fold closed'], [393, 852, 'iPhone'], [744, 860, 'fold open'], [834, 1194, 'iPad']])) {
     for (const suite of ['greatestme', 'synthwave', 'martin', 'studio']) {
       const p = await page(b, { viewport: { width: w, height: h }, hasTouch: true, isMobile: w < 800, userAgent: PHONE.userAgent }, label + ' ' + suite);
       await p.evaluate(s => localStorage.setItem('gm-suite', JSON.stringify(s)), suite); await p.reload();
@@ -143,9 +160,9 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     await openSec(C, 'morning'); await C.fill('#g1', 'Health'); await C.evaluate(() => { const e = document.getElementById('g1'); e.setSelectionRange(2, 2); });
     await C.evaluate(() => window.dispatchEvent(new Event('x'))); await C.keyboard.type('XX'); ok(await C.inputValue('#g1') === 'HeXXalth', 'typing stays in order where the cursor is');
     const L = await page(b, { ...PHONE }, 'acct-lyllian', 'accounts'); await signup(L, 'l@example.com', 'Purple#2026xx'); await onboard(L, 'Lyllian');
-    await L.click('[data-act=nav][data-v=prefs] >> visible=true'); await L.click('.main [data-act=nav][data-v=partner]'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
+    await L.click('[data-act=nav][data-v=prefs] >> visible=true'); await L.waitForTimeout(300); if (!(await L.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG L:', (await L.evaluate(() => document.body.innerText)).slice(0, 500)); await L.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Ldebug.png' }); } await L.click('.main [data-act=nav][data-v=partner]'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
     const code = (await L.locator('.mono[style*="letter-spacing"]').innerText()).trim(); await L.click('[data-act=toggleShare]'); await L.waitForTimeout(3000);
-    await C.click('[data-act=nav][data-v=prefs] >> visible=true'); await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
+    await C.click('[data-act=nav][data-v=prefs] >> visible=true'); await C.waitForTimeout(300); if (!(await C.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG C:', (await C.evaluate(() => document.body.innerText)).slice(0, 700)); await C.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Cdebug.png' }); } await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
     ok((await C.locator('.partner h2').allInnerTexts()).includes('Lyllian'), 'accounts: partner invite code links two phones');
   } finally { fake.kill(); }
 

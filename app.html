@@ -279,7 +279,7 @@ details.sched summary::-webkit-details-marker{display:none}
 .ring .ctr b{font-family:var(--f-mono);font-size:1.25rem;letter-spacing:-.04em}
 .ring .ctr span{font-size:.62rem;font-family:var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .hero h1{font-size:clamp(1.3rem,4.6vw,1.9rem)}
-@media (max-width:520px){.hero .ring .ctr span{display:none}.hero .ring .ctr b{font-size:.95rem}.hero .hi{padding-right:92px}.hero{grid-template-columns:1fr}.hero .ring{position:absolute;right:16px;top:16px;width:84px;height:84px}.ring .ctr b{font-size:1.1rem}.hero .scene{width:150px;opacity:.55}}
+@media (max-width:520px){.hero .ring .ctr span{display:none}.hero .ring .ctr b{font-size:.95rem}.hero .hi{padding-right:92px}.hero{grid-template-columns:1fr}.hero .ring{position:absolute;right:16px;top:16px;width:84px;height:84px}.ring .ctr b{font-size:1.1rem}.hero .scene{width:120px;opacity:.4}}
 .week7{display:flex;gap:6px}
 .week7 .d{display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
 .week7 .d i{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;background:var(--solid)}
@@ -299,6 +299,8 @@ details.sched summary::-webkit-details-marker{display:none}
 .ritual-card svg.art{position:absolute;right:-6px;bottom:-8px;width:110px;opacity:.95}
 .ritual-card .st{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
 .ritual-card.done .st{color:var(--good)}
+:root[data-suite="martin"] .ritual-card .st{color:#fff;font-weight:700}
+.hero .hi{z-index:1}
 :root[data-suite="martin"] .ritual-card:nth-child(1){background:#00A6A6;color:#fff}
 :root[data-suite="martin"] .ritual-card:nth-child(2){background:#7B2CBF;color:#fff}
 @media (max-width:420px){.rituals{grid-template-columns:1fr}}
@@ -692,12 +694,7 @@ const dayDoc = d => Store.get(dayKey(d));
 const quoteFor = d => QUOTES[(diffDays("2026-01-01", d) % QUOTES.length + QUOTES.length) % QUOTES.length];
 
 function journalled(dd){ if (!dd) return false; return [...dd.gratitude, ...dd.wins, dd.intention, dd.lessons, dd.improve].some(x => (x || "").trim()) || dd.targets.some(t => (t.t || "").trim()); }
-function dayScore(dd){
-  if (!dd) return 0; const j = J(); let have = 0, need = 0;
-  const parts = [dd.gratitude.some(x=>x.trim()), !!dd.intention.trim(), dd.targets.some(t=>t.t.trim()), dd.wins.some(x=>x.trim()), !!(dd.lessons||"").trim(), dd.mood > 0];
-  parts.forEach(p => { need++; if (p) have++; });
-  return Math.round(have / need * 100);
-}
+function dayScore(dd){ if (!dd) return 0; const p = dayParts(dd); return Math.round((p.m + p.t + p.e) / 3 * 100); }
 function stats(j = J()){
   const t = today(); const upto = clamp(dayNum(t, j), 0, TOTAL_DAYS);
   let journal = 0, hDone = 0, hPoss = 0, tDone = 0, tSet = 0; const moods = [], energy = [];
@@ -791,6 +788,8 @@ function routeHash(){
   const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", calendar:"today", duo:"partner", partner:"partner", preferences:"prefs" };
   if (!map[h]) return;
   S.view = map[h]; if (S.view === "today" || S.view === "ink") S.date = today(); if (S.view === "week") S.week = null; S.sheet = null;
+  if (h === "morning" || h === "evening") { S.breathStart = Date.now(); S.ritual = { kind: h, step: 0 }; S.snap = snap(); S.anim = { ritual: true, step: true }; render(); return; }
+  if (h === "win") { S.openMap = S.openMap || {}; S.openMap[today() + ":evening"] = true; }
   render();
   if (h === "calendar") { setTimeout(() => { const el = document.getElementById("sec-calendar"); el && el.scrollIntoView({ block: "start" }); }, 60); return; }
   const focus = { morning: "g0", evening: "w0", win: "w0" }[h];
@@ -846,7 +845,7 @@ const Ink = {
   dk: null, data: null, loading: false, tool: "pen", color: INK_COLORS[0], size: 2, finger: false, undo: [], redo: [], live: null, timers: {}, status: "",
   key(d){ return `${J().id}-${d}`; },
   async open(d){
-    const dk = this.key(d); if (this.dk === dk && (this.data || this.loading)) return;
+    const dk = this.key(d); if (this.dk === dk && (this.data || this.loading)) return; this.flushAll();
     this.dk = dk; this.data = null; this.undo = []; this.redo = []; this.loading = true;
     try { const r = await InkStore.load(dk); if (this.dk !== dk) { return; }
       const meta = r.meta || { tpl: profile().inkTpl || "college", n: 1 };
@@ -857,13 +856,14 @@ const Ink = {
   },
   mount(){
     if (!this.data) { this.open(S.date); return; }
+    (this.ros || []).forEach(r => r.disconnect()); this.ros = [];
     document.querySelectorAll("canvas[data-page]").forEach(cv => this.setup(cv));
   },
   setup(cv){
     const i = +cv.dataset.page; const page = cv.parentElement;
     const fit = () => { const w = page.clientWidth || 600; const dpr = Math.min(window.devicePixelRatio || 1, 3);
       cv.style.height = (w * PH / PW) + "px"; cv.width = Math.round(w * dpr); cv.height = Math.round(w * PH / PW * dpr); this.draw(cv, i); };
-    fit(); if (window.ResizeObserver) { const ro = new ResizeObserver(() => { if (Math.abs(cv.width - page.clientWidth * Math.min(devicePixelRatio || 1, 3)) > 4) fit(); }); ro.observe(page); }
+    fit(); if (window.ResizeObserver) { const ro = new ResizeObserver(() => { if (Math.abs(cv.width - page.clientWidth * Math.min(devicePixelRatio || 1, 3)) > 4) fit(); }); ro.observe(page); this.ros = (this.ros || []).concat(ro); }
     const pt = e => { const r = cv.getBoundingClientRect(); return [ (e.clientX - r.left) * PW / r.width, (e.clientY - r.top) * PH / r.height, e.pointerType === "pen" ? (e.pressure || .5) : .5 ]; };
     const accepts = e => e.pointerType === "pen" || e.pointerType === "mouse" || (e.pointerType === "touch" && this.finger);
     const block = e => { const stylus = [...(e.touches || [])].some(t => t.touchType === "stylus"); if (stylus || this.finger) e.preventDefault(); };
@@ -903,19 +903,21 @@ const Ink = {
     else if (tpl === "dots") { c.fillStyle = "#B8BEC9"; for (let y = 24; y < PH; y += 24) for (let x = 24; x < PW; x += 24) { c.beginPath(); c.arc(x, y, 1.1, 0, 7); c.fill(); } }
     else if (tpl === "grid") { c.strokeStyle = "#D5DCE6"; c.beginPath(); for (let v = 24; v < PW; v += 24) { c.moveTo(v + .5, 0); c.lineTo(v + .5, PH); } for (let v = 24; v < PH; v += 24) { c.moveTo(0, v + .5); c.lineTo(PW, v + .5); } c.stroke(); }
   },
-  draw(cv, i){ const c = this.ctx(cv); this.paper(c, this.data.meta.tpl);
+  draw(cv, i){ if (!this.data || !this.data.pages[i] || !cv.isConnected) return; const c = this.ctx(cv); this.paper(c, this.data.meta.tpl);
     for (const e of this.data.pages[i]) { const s = { t: e.t, c: e.c, w: e.w, p: this.decode(e) }; for (let a = 0; a < s.p.length - 1; a++) this.seg(cv, s, a); } },
   erase(cv, i, [x, y]){ const pg = this.data.pages[i]; const r = 9 + this.size * 2; let hit = false;
     for (let k = pg.length - 1; k >= 0; k--) if (this.decode(pg[k]).some(([a, b]) => Math.abs(a - x) < r && Math.abs(b - y) < r)) { pg.splice(k, 1); hit = true; }
     if (hit) this.draw(cv, i); },
   snapshot(i){ this.undo.push({ i, s: this.data.pages[i].slice() }); if (this.undo.length > 60) this.undo.shift(); },
   step(from, to){ const h = from.pop(); if (!h) return; to.push({ i: h.i, s: this.data.pages[h.i].slice() }); this.data.pages[h.i] = h.s; const cv = document.querySelector(`canvas[data-page="${h.i}"]`); if (cv) this.draw(cv, h.i); this.queue(h.i); this.bar(); },
-  queue(i){ const dk = this.dk; Store.setStatus("saving"); clearTimeout(this.timers[i]); this.timers[i] = setTimeout(() => this.persist(dk, i), 700); },
-  async persist(dk, i){ if (dk !== this.dk) return; const val = { s: this.data.pages[i] };
-    const size = JSON.stringify(val).length;
-    if (size > 240000) { this.status = "This page is full. Add a page to keep writing."; this.bar(); }
-    try { await InkStore.save(dk, "p" + i, val); await InkStore.save(dk, "meta", { tpl: this.data.meta.tpl, n: this.data.pages.length }); Store.setStatus("saved"); }
+  queue(i){ if (!this.data) return; const k = `${this.dk}|${i}`; this.pending = this.pending || {};
+    this.pending[k] = { dk: this.dk, i, s: this.data.pages[i].slice(), tpl: this.data.meta.tpl, n: this.data.pages.length };
+    Store.setStatus("saving"); clearTimeout(this.timers[k]); this.timers[k] = setTimeout(() => this.persist(k), 700); },
+  async persist(k){ const v = this.pending && this.pending[k]; if (!v) return; delete this.pending[k]; clearTimeout(this.timers[k]); delete this.timers[k];
+    const val = { s: v.s }; if (JSON.stringify(val).length > 240000 && v.dk === this.dk) { this.status = "This page is full. Add a page to keep writing."; this.bar(); }
+    try { await InkStore.save(v.dk, "p" + v.i, val); await InkStore.save(v.dk, "meta", { tpl: v.tpl, n: v.n }); Store.setStatus("saved"); }
     catch (e) { Store.setStatus("error", e && e.code); } },
+  flushAll(){ Object.keys(this.pending || {}).forEach(k => this.persist(k)); },
   bar(){ const u = $("#inkUndo"), r = $("#inkRedo"), st = $("#inkStatus"); if (u) u.disabled = !this.undo.length; if (r) r.disabled = !this.redo.length; if (st) st.textContent = this.status; },
 };
 function inkView(){
@@ -1051,6 +1053,7 @@ const RITUALS = {
 };
 function greeting(){ const h = new Date().getHours(); return h < 5 ? "Still up" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; }
 function sceneNow(){ const h = new Date().getHours(); return h >= 5 && h < 12 ? ART.sunrise : h < 17 && h >= 12 ? ART.day : ART.night; }
+function closeRitual(){ setTimeout(() => { if (!S.cele) checkBadges(); }, 900); S.ritual = null; clearInterval(breathT); S.view = "today"; S.date = today(); render(); checkWins(); }
 function ritualView(){
   const r = S.ritual, R = RITUALS[r.kind], step = R.steps[r.step], d = today(), key = dayKey(d), dd = Store.ensure(key, newDay), p = profile();
   const nick = esc((p.nick || "").split(" ")[0]);
@@ -1065,8 +1068,8 @@ function ritualView(){
   if (step === "mood") body = `<span class="kicker">Check in</span><h1>How did today feel?</h1><div class="field"><span class="label">Mood</span><div class="scale faces" role="group">${["😣", "🙁", "😐", "🙂", "😄"].map((f, i) => `<button data-act="scale" data-doc="${key}" data-f="mood" data-n="${i + 1}" aria-pressed="${dd.mood === i + 1}" aria-label="Mood ${i + 1} of 5">${f}</button>`).join("")}</div></div>
     <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained", "Low", "Okay", "Strong", "Charged"])}</div>`;
   if (step === "done") { const st = stats(); const parts = dayParts(dd);
-    body = `<div style="display:grid;place-items:center;gap:14px;text-align:center">${rings(parts, `${dayScore(dd)}%`, "today")}<span class="kicker">${R.title} complete</span><h1>${r.kind === "morning" ? `You're set, ${nick}. Go make it count.` : `Day closed. Proud of you, ${nick}.`}</h1>
-      <span class="flame ${journalled(dd) ? "lit" : "out"}">${FLAME}${st.streak} day streak</span></div>`; }
+    body = `<div style="display:grid;place-items:center;gap:14px;text-align:center">${rings(parts, `${dayScore(dd)}%`, "today")}<span class="kicker">${R.title} complete</span><h1>${!journalled(dd) ? `Nothing written yet, and that's okay. Come back any time today.` : r.kind === "morning" ? `You're set, ${nick}. Go make it count.` : `Day closed. Proud of you, ${nick}.`}</h1>
+      ${dayNum(d) < 1 ? `<span class="muted small">Practice day · your streak starts ${esc(fmtDate(J().start, { month: "short", day: "numeric" }))}</span>` : `<span class="flame ${journalled(dd) ? "lit" : "out"}">${FLAME}${st.streak} day streak</span>`}</div>`; }
   const last = r.step === R.steps.length - 1;
   return `<div class="ritual ${S.anim && S.anim.ritual ? "anim" : ""}" role="dialog" aria-modal="true" aria-label="${R.title} ritual"><div class="backdrop"><div class="sun"></div></div>
     <div class="r-top"><button class="btn icon ghost" data-act="rclose" aria-label="Close">${ICON.x}</button><div class="r-prog">${R.steps.map((_, i) => `<i class="${i <= r.step ? "on" : ""}"></i>`).join("")}</div></div>
@@ -1083,7 +1086,7 @@ function prefsView(){
   const pv = k => `<div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div>`;
   return `
   <div class="head"><div><span class="label">Make it yours</span><h1 class="title-bar" style="margin-top:4px">Settings</h1></div></div>
-  ${tip("settings", "Your look follows your account to every device. Sounds and celebrations are set per phone.")}
+  ${Store.mode === "supa" ? tip("settings", "Your look follows your account to every device. Sounds and celebrations are set per phone.") : ""}
   <section class="card"><div class="row" style="gap:14px;flex-wrap:nowrap"><div class="avatar">${esc((p.nick || "?").trim().charAt(0))}</div><div style="min-width:0;flex:1"><input id="nick" class="in" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" aria-label="Your name" style="font-weight:700;font-size:1.1rem"><p class="muted small">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you." : Store.mode === "supa" ? `Signed in as ${esc(Store.accountName)}. Your journal syncs to every device you sign in on.` : `On-device account: ${esc(Store.accountName)}. Entries stay in this browser.`}</p></div></div></section>
   <section class="card"><div class="card-h"><h2>Look</h2><span class="label">Saved to you</span></div>
     <div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="suite" data-v="${k}" aria-pressed="${cur === k}">${pv(k)}<span class="nm">${esc(SUITES[k].name)}${cur === k ? `<span class="chip good">On</span>` : ""}</span></button>`).join("")}</div>
@@ -1098,7 +1101,7 @@ function prefsView(){
     <p class="muted small">Cheer each other on. Your partner sees your streak, rates, goal progress and one win you choose. Never your journal.</p>
     <button class="btn" style="align-self:flex-start" data-act="nav" data-v="partner">${ICON.partner.replace("<svg", '<svg width="16" height="16"')} ${Store.mode === "supa" && !(S.links || []).length ? "Connect with your partner" : "Open Partner"}</button></section>
   <section class="card"><div class="card-h"><h2>Help</h2></div><div class="row"><button class="btn" data-act="tourStart">Take the tour</button><button class="btn ghost" data-act="tipsReset">Show tips again</button></div></section>
-  <details class="more"><summary class="btn">More settings</summary><div class="more-in">
+  <details class="more" ${S.moreOpen ? "open" : ""}><summary class="btn">More settings</summary><div class="more-in">
   <section class="card"><div class="card-h"><h2>Feel</h2><span class="label">This phone only</span></div><div class="set-group">
     <label class="set-row"><div><b>Time-block schedule</b><p class="muted small">Adds an hour-by-hour planner to Today.</p></div><input type="checkbox" class="switch" data-act="schedPref" ${p.schedule ? "checked" : ""}></label>
     <label class="set-row"><div><b>Sounds</b><p class="muted small">A soft chime when you close a loop. Off until you turn it on.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="sound" ${pr.sound ? "checked" : ""}></label>
@@ -1112,9 +1115,9 @@ function prefsView(){
     ${DEEP.map(([h, l]) => `<div class="linkrow"><div><b class="small">${esc(l)}</b><br><code>${esc(baseUrl() + "#" + h)}</code></div><button class="btn sm" data-act="copy" data-v="${esc(baseUrl() + "#" + h)}">Copy</button></div>`).join("")}
   </section>
   <section class="card"><div class="card-h"><h2>Journeys</h2><button class="btn sm" data-act="sheet" data-v="newJourney">+ New journey</button></div>
-    ${journeys.map(x => `<div class="set-row"><div><b>${esc(x.title)}</b><div class="muted mono small">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
+    ${journeys.map(x => `<div class="set-row"><div><b>${esc(x.title)}</b><div class="muted small">${esc(fmtDate(x.start, { month: "short", day: "numeric", year: "numeric" }))} → ${esc(fmtDate(endDate(x), { month: "short", day: "numeric", year: "numeric" }))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
     <div class="field"><label class="label" for="jstart">Day 1 of this journey</label><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"><span class="muted small">Careful: changing Day 1 moves every day number and streak in this journey.</span></div></section>
-  <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "supa" ? "Your journal syncs to your account automatically. Save a copy if you want one of your own." : Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal is saved on this phone only, in the place you're using now. Move my journal gives you a code to carry it somewhere else, password included."}</p><div class="row"><button class="btn sm" data-act="export">${Store.mode === "local" ? "Move my journal" : "Save a copy"}</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
+  <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "supa" ? "Your journal syncs to your account automatically. Save a copy if you want one of your own." : Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal is saved on this phone only, in the place you're using now. Move my journal gives you a code to carry it somewhere else, password included."}</p><div class="row"><button class="btn sm" data-act="export">${Store.mode === "local" ? "Move my journal" : "Save a copy"}</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut">${S.xfer ? `<textarea id="xferOut" class="in" readonly style="min-height:96px;font-family:var(--f-mono);font-size:12px">${esc(S.xfer)}</textarea><div class="row"><button class="btn sm primary" data-act="copyXfer">Copy move code</button></div>` : ""}</div></section>
   <section class="card"><div class="card-h"><h2>Ideas & requests</h2></div><p class="muted small">${window.claude ? "Want something changed or added? Leave a comment on this page and send it to Claude. Requests get built into the app for both of you." : "Have an idea or something bugging you? Text it to Dalton and it gets built in for both of you."}</p></section>
   </div></details>
   ${Store.mode === "supa" && Accounts.list().length ? migrateCard() : ""}
@@ -1155,7 +1158,7 @@ function calendarView(){
   } else {
     const rows = Array.from({ length: WEEKS }, (_, w) => {
       const ws = addDays(j.start, w * 7); const wd = Store.get(weekKey(w + 1)); const ms = j.goals.flatMap(g => g.milestones.filter(m => +m.week === w + 1)); const msDone = ms.filter(m => m.done).length;
-      const cur = weekOf(t) === w + 1 && dayNum(t) >= 1;
+      const cur = weekOf(t) === w + 1 && dayNum(t) >= 1 && dayNum(t) <= TOTAL_DAYS;
       return `<div class="jr ${cur ? "cur" : ""}"><button class="wk-l" data-act="weekOpen" data-n="${w + 1}" aria-label="Open week ${w + 1}"><b>W${w + 1}</b><span>${esc(fmtDate(ws, { month: "short", day: "numeric" }))}</span></button>
         <div class="jr-days">${Array.from({ length: 7 }, (_, i) => { const d = addDays(ws, i); const dd = Store.get(dayKey(d)); const sc = d > t ? -1 : dayScore(dd);
           return `<button class="hd ${d === t ? "now" : ""} ${sc < 0 ? "fut" : ""}" style="--lv:${sc < 0 ? 0 : (sc / 100).toFixed(2)}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}, ${sc < 0 ? "upcoming" : sc + "% complete"}"></button>`; }).join("")}</div>
@@ -1193,8 +1196,9 @@ const TOUR = [
   { sel: '#sec-morning .acc-h', title: "Sections that track themselves", text: "Each part of the day shows whether it's done. Finished parts fold away and the next one opens for you." },
   { sel: '#sec-calendar .cal-card', title: "Your calendar", text: "At the bottom of Today: every day of your 13 weeks. Tap any day to look back." },
   { sel: '[data-act=nav][data-v=habits]', title: "Habits", text: "Your daily non-negotiables, with streaks you'll want to protect." },
-  { sel: '[data-act=nav][data-v=prefs]', title: "Settings", text: "Change your look, connect with your partner and set Siri reminders. Replay this tour from Help at the bottom of Settings." },
+  { sel: '[data-act=nav][data-v=prefs]', title: "Settings", text: "Change your look, set your reminders and connect with your partner. Replay this tour from Help in Settings." },
 ];
+function tryTour(){ if (!S.pendingTour || S.tour) return; if (!S.ritual && !S.sheet && !S.cele && S.view === "today") { S.pendingTour = false; Tour.start(); } }
 const Tour = {
   start(){ S.tour = { step: 0 }; S.view = "today"; S.date = today(); S.sheet = null; window.scrollTo(0, 0); document.documentElement.style.overflow = "hidden"; render(); },
   end(){ S.tour = null; document.documentElement.style.overflow = ""; const a = document.querySelector(".app"); if (a) a.inert = false; const p = profile(); if (p && !p.toured) { p.toured = Date.now(); Store.touch("profile"); } document.querySelectorAll("#tourLayer").forEach(x => x.remove()); render(); },
@@ -1242,7 +1246,7 @@ function section(id, title, sub, st, body, auto){
   const open = sectionOpen(id, st, auto); const b = statusBadge(st);
   return `<section class="card acc ${open ? "open" : ""} ${st.state === "done" ? "is-done" : ""}" id="sec-${id}">
     <button class="acc-h" data-act="secToggle" data-v="${id}" aria-expanded="${open}" aria-controls="secb-${id}">${b.icon}<span class="acc-t"><h2>${esc(title)}</h2><span class="muted small">${esc(sub)}</span></span>${b.chip}${CHEV}</button>
-    <div class="acc-b" id="secb-${id}" role="region" aria-label="${esc(title)}"><div class="acc-in">${body}</div></div></section>`;
+    <div class="acc-b" id="secb-${id}" role="region" aria-label="${esc(title)}" ${open ? "" : "inert"}><div class="acc-in">${body}</div></div></section>`;
 }
 function todayStatus(dd, j){
   const g = dd.gratitude.filter(x => x.trim()).length, it = !!dd.intention.trim();
@@ -1275,26 +1279,28 @@ function remindersForm(r, scope){ // scope: "p" = profile (Settings), "o" = onbo
       <input type="checkbox" class="switch" id="ro-${scope}-${k}" data-rem="${scope}" data-k="${k}" data-f="on" ${r[k].on ? "checked" : ""} aria-label="${label} reminder on"></div></div>`;
   return `<div class="set-group">${row("morning", "Morning ritual", "Gratitude, intention, targets")}${row("evening", "Evening ritual", "Wins, lessons, mood")}${row("weekly", "Weekly review", "Plan the week ahead")}</div>`;
 }
-function icsFor(r, name){
+function icsFor(r, name, start, end){
   const base = baseUrl(); const pad2 = n => String(n).padStart(2, "0"); const now = new Date(); const stamp = `${now.getUTCFullYear()}${pad2(now.getUTCMonth() + 1)}${pad2(now.getUTCDate())}T${pad2(now.getUTCHours())}${pad2(now.getUTCMinutes())}00Z`;
-  const startDay = today().replace(/-/g, "");
-  const ev = (id, title, time, rule, hash, desc) => { const [hh, mm] = time.split(":"); const st = `${startDay}T${hh}${mm}00`; const endM = (+hh * 60 + +mm + 10); const en = `${startDay}T${pad2(Math.floor(endM / 60) % 24)}${pad2(endM % 60)}00`;
-    return ["BEGIN:VEVENT", `UID:greatestme-${id}-${Store.uid || "me"}@greatestme`, `DTSTAMP:${stamp}`, `DTSTART:${st}`, `DTEND:${en}`, `RRULE:${rule}`, `SUMMARY:${title}`, `DESCRIPTION:${desc}\\nOpen: ${base}#${hash}`, `URL:${base}#${hash}`,
+  const first = start && start > today() ? start : today(); const until = (end || addDays(first, TOTAL_DAYS - 1)).replace(/-/g, "") + "T235959";
+  const ev = (id, title, time, rule, hash, desc, onDay) => { let day = first; if (onDay) { const want = DAYS.findIndex(x => x[0] === onDay); while (((parse(day).getDay() + 6) % 7) !== want) day = addDays(day, 1); }
+    const sd = day.replace(/-/g, ""); const [hh, mm] = time.split(":"); const st = `${sd}T${hh}${mm}00`; const endM = Math.min(23 * 60 + 59, +hh * 60 + +mm + 10); const en = `${sd}T${pad2(Math.floor(endM / 60))}${pad2(endM % 60)}00`;
+    const where = Device.standalone ? "Open GreatestMe from your Home Screen." : `Open: ${base}#${hash}`;
+    return ["BEGIN:VEVENT", `UID:greatestme-${id}-${Store.uid || "me"}@greatestme`, `DTSTAMP:${stamp}`, `DTSTART:${st}`, `DTEND:${en}`, `RRULE:${rule};UNTIL=${until}`, `SUMMARY:${title}`, `DESCRIPTION:${desc}\\n${where}`, ...(Device.standalone ? [] : [`URL:${base}#${hash}`]),
       "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${title}`, "TRIGGER:PT0M", "END:VALARM", "END:VEVENT"].join("\r\n"); };
   const evs = [];
   if (r.morning.on) evs.push(ev("morning", "GreatestMe: Morning ritual", r.morning.time, "FREQ=DAILY", "morning", "Breathe\\, gratitude\\, intention\\, three targets."));
   if (r.evening.on) evs.push(ev("evening", "GreatestMe: Evening ritual", r.evening.time, "FREQ=DAILY", "evening", "Wins\\, lessons\\, tomorrow\\, mood."));
-  if (r.weekly.on) evs.push(ev("weekly", "GreatestMe: Weekly review", r.weekly.time, `FREQ=WEEKLY;BYDAY=${r.weekly.day}`, "review", "Review the week and plan the next one."));
+  if (r.weekly.on) evs.push(ev("weekly", "GreatestMe: Weekly review", r.weekly.time, `FREQ=WEEKLY;BYDAY=${r.weekly.day}`, "review", "Review the week and plan the next one.", r.weekly.day));
   return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//GreatestMe//Reminders//EN", "CALSCALE:GREGORIAN", `X-WR-CALNAME:GreatestMe${name ? " · " + name : ""}`, ...evs, "END:VCALENDAR"].join("\r\n");
 }
 async function addReminders(r){
-  const data = icsFor(r, (profile() || {}).nick || ""); const name = "GreatestMe-reminders.ics";
+  const src = S.onboard || null; const st = src ? src.start : (J() && J().start); const data = icsFor(r, (profile() || {}).nick || (src && src.nick) || "", st, st ? addDays(st, TOTAL_DAYS - 1) : null); const name = "GreatestMe-reminders.ics";
   try { const dl = window.claude && window.claude.use ? await claude.use("downloads") : null; if (dl) { await dl.save({ filename: name, data }); toast("Open the file to add your reminders"); return; } } catch {}
-  try { const f = new File([data], name, { type: "text/calendar" }); if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: "GreatestMe reminders" }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+  if (!Device.iOS) try { const f = new File([data], name, { type: "text/calendar" }); if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: "GreatestMe reminders" }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "text/calendar" })); a.download = name; document.body.appendChild(a); a.click(); a.remove();
   toast("Tap Add All to put your reminders in Calendar");
 }
-const remHelp = `<details class="small muted"><summary style="cursor:pointer">Prefer Shortcuts?</summary><p style="margin-top:6px">In the Shortcuts app: Automation → New → Time of Day → pick your time → Open URLs → paste the Morning or Evening link from Siri & Shortcuts below.</p></details>`;
+const remHelp = `<details class="small muted"><summary style="cursor:pointer">Prefer Shortcuts?</summary><p style="margin-top:6px">In the Shortcuts app: Automation → New → Time of Day → pick your time → Open URLs → paste the Morning or Evening link from Settings → More settings → Siri & Shortcuts.</p></details>`;
 
 /* ---------- achievements ---------- */
 const BADGES = [
@@ -1345,7 +1351,8 @@ function highlights(d, j){
   cards.push(`<div class="hl-card quote-card"><span class="label">Quote of the day</span><div class="quote">${esc(q)}<cite>${esc(who)}</cite></div></div>`);
   if (isToday) {
     const lit = journalled(dd);
-    cards.push(`<div class="hl-card"><span class="label">Streak</span><div class="hl-big">${FLAME}<b class="mono">${st.streak}</b><span>day${st.streak === 1 ? "" : "s"}</span></div><p class="small">${lit ? "Today's in the books. Protect it tomorrow." : st.streak ? `Write one line today to make it ${st.streak + 1}.` : "Start a streak today. One line counts."}</p></div>`);
+    if (dayNum(d) < 1) cards.push(`<div class="hl-card"><span class="label">Practice days</span><p>Your streak starts on Day 1, ${esc(fmtDate(j.start, { weekday: "long", month: "short", day: "numeric" }))}. Try the rituals now so they feel easy by then.</p></div>`);
+    else cards.push(`<div class="hl-card"><span class="label">Streak</span><div class="hl-big">${FLAME}<b class="mono">${st.streak}</b><span>day${st.streak === 1 ? "" : "s"}</span></div><p class="small">${lit ? "Today's in the books. Protect it tomorrow." : st.streak ? `Write one line today to make it ${st.streak + 1}.` : "Start a streak today. One line counts."}</p></div>`);
     const left = j.habits.filter(h => !dd.habits[h.id]);
     if (j.habits.length) cards.push(`<div class="hl-card"><span class="label">Habits</span><div class="hl-big"><b class="mono">${j.habits.length - left.length}</b><span>of ${j.habits.length} done</span></div><p class="small">${left.length ? `Left: ${esc(left.slice(0, 3).map(h => h.name).join(", "))}${left.length > 3 ? "…" : ""}` : "Clean sweep today. That's how habits stick."}</p></div>`);
     const w = dd.water || 0, goal = (p.waterGoal || 8);
@@ -1360,7 +1367,7 @@ function highlights(d, j){
     if (st.day >= 8) cards.push(`<div class="hl-card"><span class="label">Momentum</span><div class="hl-big"><b class="mono">${a}</b><span>of 7 days this week</span></div><p class="small">${a > b ? `Up from ${b} last week. Keep climbing.` : a === b ? `Same as last week. One more day beats it.` : `Last week was ${b}. There's still time.`}</p></div>`);
     for (let back = 7; back <= 84; back += 7) { const od = addDays(d, -back); const o = Store.get(dayKey(od)); const win = o && o.wins.find(x => x.trim());
       if (win) { cards.push(`<div class="hl-card"><span class="label">${back / 7} week${back > 7 ? "s" : ""} ago today</span><p>You wrote: <b>"${esc(win)}"</b></p><button class="btn sm ghost" data-act="dayOpen" data-v="${od}">See that day</button></div>`); break; } }
-    const mm = Math.round((dd.mindful || 0) / 60);
+    const mm = dd.mindful ? Math.max(1, Math.round(dd.mindful / 60)) : 0;
     cards.push(`<div class="hl-card"><span class="label">Mindful minutes</span>${mm ? `<div class="hl-big"><b class="mono">${mm}</b><span>today</span></div><p class="small">From your breathing in the Morning ritual.</p>` : `<p>One minute of breathing sets the tone. It's the first step of the Morning ritual.</p><button class="btn sm" data-act="ritual" data-v="morning">Breathe now</button>`}</div>`);
   }
   return `<section class="hl" aria-label="Daily highlights"><div class="hl-track" id="hlTrack">${cards.join("")}</div>${cards.length > 1 ? `<div class="hl-dots" aria-hidden="true">${cards.map((_, i) => `<i class="${i ? "" : "on"}"></i>`).join("")}</div>` : ""}</section>`;
@@ -1410,6 +1417,7 @@ function render(){
   if (S.sheet && S.sheetFocus) { S.sheetFocus = false; const c = document.querySelector(".sheet [data-act=close]"); if (c) c.focus({ preventScroll: true }); }
   if (!S.sheet && S.refocus) { const r = document.querySelector(S.refocus); S.refocus = null; if (r) r.focus({ preventScroll: true }); }
   if (S.tour) Tour.paint();
+  if (S.pendingTour && !S.cele && !S.ritual && !S.sheet && S.view === "today") { clearTimeout(tryTour.t); tryTour.t = setTimeout(tryTour, 1200); }
 }
 function celeView(){ const c = S.cele; return `<div class="cele ${S.anim && S.anim.cele ? "anim" : ""}" data-act="celeClose"><div class="cele-card" role="dialog" aria-modal="true" aria-label="${esc(c.title)}">${c.art || ""}${c.num != null ? `<div class="num">${+c.num}</div>` : ""}<h1>${esc(c.title)}</h1><p class="muted">${esc(c.sub || "")}</p><button class="btn primary lg" data-act="celeClose" style="width:100%">Keep going</button></div></div>`; }
 function toast(msg){
@@ -1490,7 +1498,7 @@ function weekView(){
     <button class="btn sm" data-act="week" data-n="0">This week</button>
     <button class="btn icon" aria-label="Next week" data-act="week" data-n="1" ${w >= WEEKS ? "disabled" : ""}>${ICON.right}</button></div></div>
   ${strip(j)}
-  <section class="card"><div class="card-h"><h2>Weekly plan</h2><span class="label">Plan Sunday, execute daily</span></div>
+  <section class="card"><div class="card-h"><h2>Weekly plan</h2><span class="label">Plan on ${esc(fmtDate(J().start, { weekday: "long" }))}s, execute daily</span></div>
     ${j.goals.length ? j.goals.map((g, i) => `<div class="field"><label class="label" for="wf${i}">Goal ${i + 1} · ${esc(g.title)}: this week's target</label>${inp(`wf${i}`, key, `focus.${g.id}`, wd.focus[g.id] || "", "What gets done this week to move this goal?", "in box")}</div>`).join("") : `<p class="muted">Add goals to plan weekly targets against them.</p>`}
     <div class="field"><span class="label">Top priorities</span><div class="num-rows">${wd.priorities.map((p, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`wp${i}`, key, `priorities.${i}`, p, "")}</div>`).join("")}</div></div>
   </section>
@@ -1590,7 +1598,7 @@ function progressView(){
   </section>
   ${badgesCard()}
   <section class="card"><div class="card-h"><h2>Mindful minutes</h2><span class="label">From your breathing</span></div><p><b class="mono" style="font-size:1.6rem">${Math.round(achieveStats(j).mindful / 60)}</b> <span class="muted">minutes this journey</span></p><p class="muted small">One minute of breathing each morning adds up.</p></section>
-  <section class="card"><div class="card-h"><h2>Quarterly review</h2><span class="label">${weekOf(today()) >= 12 ? "It's time" : "Unlocks fully in week 13"}</span></div>
+  <section class="card"><div class="card-h"><h2>Quarterly review</h2><span class="label">${weekOf(today()) >= 12 && dayNum(today()) >= 1 ? "It's time" : "Best done in week 13"}</span></div>
     <p class="muted">At the end of 13 weeks, look back before you plan the next journey.</p>
     ${j.goals.map((g, i) => `<div class="field"><span class="label">How did "${esc(g.title)}" land? (1–10)</span>${scaleBtns(rk, `review.g_${g.id}`, rv["g_" + g.id] || 0, 10)}</div>`).join("")}
     <div class="grid2">
@@ -1620,7 +1628,7 @@ function partnerView(){
   <button class="back" data-act="nav" data-v="prefs">${ICON.left} Settings</button>
   <div class="head"><div><span class="label">Accountability, not access</span><h1 class="title-bar" style="margin-top:4px">Partner</h1><p class="sub">Your journal stays private. If you turn sharing on, your partner sees only your streak, habit and target rates, goal titles with progress, and the one win you choose to share.</p></div></div>
   <section class="card"><div class="row" style="justify-content:space-between"><div><h2>Share my progress</h2><p class="muted" style="font-size:.88rem">${p.share ? "Sharing is on." : "Sharing is off. Nothing leaves your journal."}</p></div>
-    <button class="btn ${p.share ? "" : "primary"}" data-act="toggleShare">${p.share ? "Turn off" : "Turn on"}</button></div>
+    ${Store.mode === "local" ? "" : `<button class="btn ${p.share ? "" : "primary"}" data-act="toggleShare">${p.share ? "Turn off" : "Turn on"}</button>`}</div>
     ${p.share ? `<div class="field"><label class="label" for="swin">Win to share</label><input id="swin" class="in box" data-doc="profile" data-f="sharedWin" value="${esc(p.sharedWin || "")}" placeholder="Something you want them to see" maxlength="200" autocomplete="off"></div>` : ""}
   </section>
   ${Store.mode === "supa" ? `<section class="card"><div class="card-h"><h2>Your partners</h2><span class="label">${(S.links || []).length} linked</span></div>
@@ -1644,7 +1652,7 @@ function sheetView(){
   }
   return `<div class="sheet-bg" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">${body}</div></div>`;
 }
-function nextMonday(){ const d = new Date(); const dow = d.getDay(); if (dow !== 1) d.setDate(d.getDate() + ((8 - dow) % 7)); return iso(d); }
+function nextMonday(){ const d = new Date(); const dow = d.getDay(); d.setDate(d.getDate() + (dow === 1 ? 7 : (8 - dow) % 7)); return iso(d); }
 
 /* ---------- Gate (local sign-in) ---------- */
 function placeName(){ const ua = navigator.userAgent; const dev = Device.iPad ? "iPad" : /iPhone/.test(ua) ? "iPhone" : "device";
@@ -1726,9 +1734,10 @@ function onInput(e){
   const key = el.dataset.doc, f = el.dataset.f; const doc = Store.get(key); if (!doc) return;
   let v = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.num) v = +v;
   if (key.startsWith("journey-") && f === "start" && !v) return;
+  if (f === "waterGoal") v = clamp(Math.round(+v || 8), 1, 20);
   setPath(doc, f, v); Store.touch(key);
   if (el.type === "checkbox") S.pop = el.id;
-  if (el.type === "checkbox" || el.tagName === "SELECT" || el.type === "date") render();
+  if (el.type === "checkbox" || el.tagName === "SELECT") render();
   if (el.type === "checkbox") checkWins(document.getElementById(el.id));
 }
 async function onClick(e){
@@ -1774,10 +1783,10 @@ async function onClick(e){
     case "migrate": await migrate(); break;
     case "calMode": S.calMode = t.dataset.v; render(); break;
     case "schedPref": profile().schedule = t.checked; Store.touch("profile"); break;
-    case "water": { const k = dayKey(S.date); const dd = Store.ensure(k, newDay); const goal = profile().waterGoal || 8; const before = dd.water || 0; dd.water = Math.max(0, before + +t.dataset.n); Store.touch(k); buzz(8);
+    case "water": { const k = dayKey(S.date); const dd = Store.ensure(k, newDay); const goal = profile().waterGoal || 8; const before = dd.water || 0; dd.water = clamp(before + +t.dataset.n, 0, 30); Store.touch(k); buzz(8);
       const tr = document.getElementById("hlTrack"); const x = tr ? tr.scrollLeft : 0; render(); const tr2 = document.getElementById("hlTrack"); if (tr2) tr2.scrollLeft = x;
       if (dd.water === goal && before < goal) { const b = document.querySelector("[data-act=water][data-n='1']"); burstAt(b, false); toast("Water goal reached"); } break; }
-    case "secToggle": { const sec = t.closest(".acc"); const open = !sec.classList.contains("open"); sec.classList.toggle("open", open); t.setAttribute("aria-expanded", open); S.openMap = S.openMap || {}; S.openMap[S.date + ":" + t.dataset.v] = open; buzz(6);
+    case "secToggle": { const sec = t.closest(".acc"); const open = !sec.classList.contains("open"); sec.classList.toggle("open", open); t.setAttribute("aria-expanded", open); sec.querySelector(".acc-b").inert = !open; S.openMap = S.openMap || {}; S.openMap[S.date + ":" + t.dataset.v] = open; buzz(6);
       if (open) { const f = sec.querySelector(".acc-in input:not([type=checkbox]),.acc-in textarea"); if (f && !Device.iOS) setTimeout(() => f.focus({ preventScroll: true }), 220); } break; }
     case "addRem": await addReminders(remindersOf(t.dataset.v === "o" ? S.onboard : profile())); break;
     case "calMonth": { const n = +t.dataset.n; if (!n) S.calMonth = null; else { const [Y, M] = (S.calMonth || today().slice(0, 7)).split("-").map(Number); const d = new Date(Y, M - 1 + n, 1); S.calMonth = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; } render(); break; }
@@ -1815,14 +1824,14 @@ async function onClick(e){
     case "rnext": { const R = RITUALS[S.ritual.kind]; if (R.steps[S.ritual.step] === "breathe" && S.breathStart) { const secs = Math.min(300, Math.round((Date.now() - S.breathStart) / 1000)); if (secs >= 10) { const k = dayKey(today()); const d0 = Store.ensure(k, newDay); d0.mindful = (d0.mindful || 0) + secs; Store.touch(k); } S.breathStart = null; } S.ritual.step = Math.min(R.steps.length - 1, S.ritual.step + 1); S.anim = { step: true }; render(); const f = document.querySelector(".r-step input,.r-step textarea"); if (f && !Device.iOS) f.focus({ preventScroll: true });
       if (R.steps[S.ritual.step] === "done" && once("ritual-" + S.ritual.kind)) { setTimeout(() => { confetti(undefined, undefined, true); chime(true); buzz(30); }, 250); } break; }
     case "rback": S.ritual.step = Math.max(0, S.ritual.step - 1); S.anim = { step: true }; render(); break;
-    case "rclose": setTimeout(() => { if (!S.cele) checkBadges(); }, 900); S.ritual = null; clearInterval(breathT); S.view = "today"; S.date = today(); render(); checkWins(); break;
+    case "rclose": closeRitual(); break;
     case "rword": { const k = dayKey(today()); const dd = Store.ensure(k, newDay); dd.intention = t.dataset.v; Store.touch(k); render(); break; }
-    case "celeClose": if (e.target === t || t.tagName === "BUTTON") { S.cele = null; render(); if (S.pendingTour) { setTimeout(() => { S.pendingTour = false; if (!S.ritual && !S.sheet && !S.cele && !S.tour && S.view === "today") Tour.start(); else render(); }, 1500); } } break;
+    case "celeClose": if (e.target === t || t.tagName === "BUTTON") { S.cele = null; render(); if (S.pendingTour) setTimeout(tryTour, 1500); } break;
     case "onext": {
       captureOnboard(); const o = S.onboard; S.onboardErr = "";
       if (o.step === 1 && !o.nick.trim()) { S.onboardErr = "Add a name so your journal knows who it belongs to."; render(); break; }
       if (o.step === 4 && !o.goals.some(g => g.title.trim())) { S.onboardErr = "Add at least one goal. You can refine it later."; render(); break; }
-      o.step++; render(); const f = document.querySelector(".gate-card input"); if (f && o.step !== 3) f.focus({ preventScroll: true }); break;
+      o.step++; render(); const f = document.querySelector(".gate-card input"); if (f && (o.step === 1 || o.step === 4)) f.focus({ preventScroll: true }); break;
     }
   }
 }
@@ -1840,7 +1849,7 @@ async function doExport(){
     const dl = window.claude && window.claude.use ? await claude.use("downloads") : null;
     if (dl) { await dl.save({ filename: name, data }); toast("Backup ready"); return; }
   } catch (e) { if (e && e.code && e.code !== "unavailable") { toast("Backup cancelled"); return; } }
-  const out = $("#exportOut");
+  S.xfer = data; render(); const out = $("#exportOut");
   if (out) out.innerHTML = `<p class="muted small">Your move code. Copy it, open GreatestMe where you want your journal (another browser, the Home Screen app, another device), choose <b>Bring my journal here</b> on the sign-in screen and paste it.</p><textarea id="xferOut" class="in" readonly style="min-height:96px;font-family:var(--f-mono);font-size:12px">${esc(data)}</textarea><div class="row"><button class="btn sm primary" data-act="copyXfer">Copy move code</button>${window.claude ? "" : `<button class="btn sm" data-act="saveXfer">Save as a file</button>`}</div>`;
 }
 function saveFile(data, name){ try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); return true; } catch { return false; } }
@@ -1868,6 +1877,8 @@ async function importToDevice(text){
 }
 
 document.addEventListener("input", onInput);
+document.addEventListener("change", e => { if (e.target.type === "date") { if (e.target.id === "ostart") { captureOnboard(); } render(); return; } });
+document.addEventListener("toggle", e => { if (e.target.classList && e.target.classList.contains("more")) S.moreOpen = e.target.open; }, true);
 document.addEventListener("change", e => { if (e.target.dataset && e.target.dataset.doc && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== "checkbox" && !S.ritual) { checkWins(e.target); if (S.view === "today") softRender(); } });
 document.addEventListener("change", e => { const el = e.target; if (!el.dataset || !el.dataset.rem) return; const src = el.dataset.rem === "o" ? S.onboard : profile(); if (!src) return;
   src.reminders = remindersOf(src); src.reminders[el.dataset.k][el.dataset.f] = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.rem === "p") Store.touch("profile"); else captureOnboard(); });
@@ -1877,6 +1888,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "newHabit") { e.preventDefault(); addHabit(e.target.value); }
   if (e.key === "Enter" && e.target.id === "ohnew") { e.preventDefault(); $('[data-act="ohadd"]').click(); }
   if (e.key === "Escape" && S.tour) { Tour.end(); return; }
+  if (e.key === "Escape" && S.ritual) { closeRitual(); return; }
   if (e.key === "Escape" && (S.sheet || S.cele || S.ritual)) { S.sheet = null; S.cele = null; S.ritual = null; render(); }
 });
 document.addEventListener("submit", async e => {
@@ -1889,8 +1901,8 @@ document.addEventListener("submit", async e => {
     ls.set("gm:session", { id: acct.id }); await startLocal(acct);
   } catch (err) { if (err.noacct) { g.noacct = name.trim(); g.err = ""; } else { g.noacct = ""; g.err = err.message || "Something went wrong."; } render(); }
 });
-window.addEventListener("pagehide", () => { if (Store.dirty.size) Store.flush(); });
-document.addEventListener("visibilitychange", () => { if (document.hidden && Store.dirty.size) Store.flush(); });
+window.addEventListener("pagehide", () => { Ink.flushAll(); if (Store.dirty.size) Store.flush(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden) { Ink.flushAll(); if (Store.dirty.size) Store.flush(); } });
 
 function finishOnboard(){
   const o = S.onboard; if (!o) return;
@@ -1931,14 +1943,17 @@ const Sync = {
   start(){
     try { this.ch = sb.channel("docs-" + Store.uid).on("postgres_changes", { event: "*", schema: "public", table: "docs", filter: "user_id=eq." + Store.uid }, p => {
       if (p.eventType === "DELETE") { const k = p.old && p.old.key; if (k && Store.docs[k] && !Store.dirty.has(k)) { delete Store.docs[k]; softRender(); } return; }
-      if (p.new && p.new.key && p.new.key.startsWith("ink|")) { if (S.view === "ink" && Ink.dk && p.new.key.startsWith("ink|" + Ink.dk + "|") && !Ink.live && !Object.keys(Ink.timers).some(i => Ink.timers[i])) { Ink.dk = null; softRender(); } return; }
+      if (p.new && p.new.key && p.new.key.startsWith("ink|")) { if (S.view === "ink" && Ink.dk && p.new.key.startsWith("ink|" + Ink.dk + "|") && !Ink.live && !Object.keys(Ink.pending || {}).length) { Ink.dk = null; softRender(); } return; }
       this.apply([p.new]); }).subscribe(); } catch {}
     document.addEventListener("visibilitychange", () => { if (!document.hidden && Store.mode === "supa") { this.pull(); Partner.refresh(); } });
     window.addEventListener("online", () => { if (Store.mode === "supa") { Store.flush(); this.pull(); } });
   },
 };
 /* re-render without yanking someone out of a field they're typing in */
-function softRender(){ const a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest("#root")) { S.needsRender = true; return; } render(); }
+let pressing = false;
+document.addEventListener("pointerdown", () => { pressing = true; }, true);
+["pointerup", "pointercancel"].forEach(ev => document.addEventListener(ev, () => { pressing = false; if (S.needsRender) setTimeout(() => { if (!pressing && S.needsRender && !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { S.needsRender = false; render(); } }, 80); }, true));
+function softRender(){ const a = document.activeElement; if (pressing || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest("#root"))) { S.needsRender = true; return; } render(); }
 document.addEventListener("focusout", () => setTimeout(() => { if (S.needsRender && !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { S.needsRender = false; render(); } }, 50));
 
 const Base = {}; const clone = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
