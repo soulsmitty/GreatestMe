@@ -1,5 +1,4 @@
 <title>GreatestMe</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@600;800&family=Bungee&family=Alfa+Slab+One&family=Permanent+Marker&family=VT323&family=Abril+Fatface&family=Oswald:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@600;800&family=Bungee&family=Alfa+Slab+One&family=Permanent+Marker&family=VT323&family=Abril+Fatface&family=Oswald:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap"></noscript>
@@ -32,7 +31,7 @@
   --glow-a:rgb(124 58 237 / .55); --glow-b:rgb(236 72 153 / .32); --glow-c:rgb(47 123 246 / .28); --paper:#FAF8F3; color-scheme:dark}
 /* Synthwave: always dark */
 :root[data-suite]:not([data-suite="greatestme"]){--ring-t:var(--acc2)}
-:root[data-suite="synthwave"],.pv[data-suite="synthwave"]{ /* SOLEN neon: blue (#00869D turned up) > pink > purple > orange */
+:root[data-suite="synthwave"],.pv[data-suite="synthwave"]{ /* neon: blue first, then pink, purple and orange */
   --canvas:#020B14; --surface:rgb(6 20 38 / .82); --solid:#08182C; --raised:rgb(0 217 245 / .08); --line:rgb(0 217 245 / .3); --ink:#EEFBFF; --muted:#A9C4E0; --faint:#6A86A8;
   --acc:#00D9F5; --acc2:#FF2E86; --good:#B15CFF; --bad:#FF4D6D; --on-acc:#01121C; --warn:#FFA53C;
   --ring-m:#00D9F5; --ring-t:#FF2E86; --ring-e:#B15CFF;
@@ -89,7 +88,7 @@
   --shadow-card:0 1px 0 rgb(255 255 255 / .04) inset,0 10px 30px rgb(0 0 0 / .45); --shadow-lift:0 16px 50px rgb(0 0 0 / .55);
   --glass:blur(16px); --r:16px; --glow-a:rgb(212 175 55 / .16); --glow-b:rgb(110 155 255 / .2); --glow-c:rgb(61 220 151 / .08); --paper:#FAF8F3;
   --f-display:"Plus Jakarta Sans", system-ui, sans-serif; --h-case:none; --h-weight:800; --h-shadow:none; color-scheme:dark}
-/* Coastal: Dalton's #00869D with a warm coral complement (bright) */
+/* Coastal: deep ocean teal #00869D with a warm coral complement (bright) */
 :root[data-suite="coastal"],.pv[data-suite="coastal"]{
   --canvas:#EEF8F9; --surface:rgb(255 255 255 / .8); --solid:#FFFFFF; --raised:#F5FBFC; --line:rgb(0 134 157 / .16); --ink:#062A31; --muted:#4B6B72; --faint:#7E9AA0;
   --acc:#00869D; --acc2:#F2714B; --good:#1FA971; --bad:#E5484D; --on-acc:#FFFFFF; --warn:#F2A33A;
@@ -979,8 +978,7 @@ const Device = {
 };
 window.addEventListener("pointerdown", e => { if (e.pointerType === "pen") Device.penSeen = true; }, { capture: true, passive: true });
 function canInk(){ const p = profile(); if (p && p.ink === "off") return false; if (p && p.ink === "on") return true; return Device.iPad || Device.penSeen; }
-const ARTIFACT_URL = "https://claude.ai/artifact/RJPQtHABp9CxhXiWbFcWZn";
-const baseUrl = () => window.claude ? ARTIFACT_URL : location.href.split("#")[0];
+const baseUrl = () => location.href.split("#")[0];
 const DEEP = [["today","Today's page"],["morning","Morning: gratitude and targets"],["evening","Evening: wins and lessons"],["habits","Habits"],["week","This week and weekly review"],["ink","Handwriting page (iPad)"],["calendar","Calendar"],["progress","Progress"],["partner","Partner (accountability)"]];
 function routeHash(){
   let h = ""; try { h = (location.hash || "").slice(1).toLowerCase(); } catch {}
@@ -1156,7 +1154,7 @@ const SUITES = {
   livingsingle:{ name: "Living Single", note: "Brooklyn brownstones in plum, mustard and coral.", color: "#6B2D5C", modes: false, bar: "#F7EBDD", group: "Retro & shows" },
   chicago:    { name: "Chicago",    note: "Bulls red and black by day, Bears navy and orange in dark mode, over the lakefront skyline.", color: "#CE1141", modes: true, bar: "#F6F2F2", group: "Cities" },
   atlanta:    { name: "Atlanta",    note: "Hawks red and volt by day, Falcons black, red and silver in dark mode, over the downtown skyline.", color: "#E03A3E", modes: true, bar: "#F7F4F0", group: "Cities" },
-  synthwave:  { name: "Synthwave",  note: "SOLEN neon: Miami-night blue, hot pink, purple and sunset orange over the grid.", color: "#00D9F5", modes: false, bar: "#020B14", group: "Retro & shows" },
+  synthwave:  { name: "Synthwave",  note: "Miami-night neon: electric blue, hot pink, purple and sunset orange over the grid.", color: "#00D9F5", modes: false, bar: "#020B14", group: "Retro & shows" },
   martin:     { name: "Martin",     note: "'90s sitcom colour, loud and proud.", color: "#7B2CBF", modes: false, bar: "#FFF1D6", group: "Retro & shows" },
   differentworld: { name: "Different World", note: "Hillman College burgundy and white. Class is in session.", color: "#561424", modes: false, bar: "#561424", group: "Retro & shows" },
   heritage:   { name: "Heritage",   note: "Black History Month: red, black and green with kente gold.", color: "#F2C94C", modes: false, bar: "#0B0A08", group: "Seasons & heritage", tag: "February" },
@@ -1223,7 +1221,7 @@ function setIcons(name){ // the tab icon and the home screen icon follow the the
   if (iconsFor === name) return; iconsFor = name;
   const head = document.head, link = (rel, attrs) => { let el = head.querySelector(`link[rel="${rel}"]`); if (!el) { el = document.createElement("link"); el.rel = rel; head.appendChild(el); } Object.assign(el, attrs); return el; };
   link("icon", { type: "image/svg+xml", href: "data:image/svg+xml," + encodeURIComponent(markSvg(name)) });
-  if (location.protocol.startsWith("http")) { link("apple-touch-icon", { href: `icon-180-${name}.png` }); link("manifest", { href: `manifest-${name}.webmanifest` }); }
+  if (location.protocol.startsWith("http")) { link("apple-touch-icon", { href: `icons/icon-180-${name}.png` }); link("manifest", { href: `icons/manifest-${name}.webmanifest` }); }
 }
 function applyAccent(){ Suite.apply(); }
 const Prefs = {

@@ -42,4 +42,4 @@ The web app is the product today. Apple-only experiences are deliberately kept o
 4. HealthKit State of Mind + Mindful Minutes.
 5. PencilKit ink, Live Activity, Sign in with Apple.
 
-Requires: Apple Developer Program, a Mac with Xcode, TestFlight to share with Lyllian.
+Requires: Apple Developer Program, a Mac with Xcode, TestFlight for testing.

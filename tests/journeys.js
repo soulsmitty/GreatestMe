@@ -64,7 +64,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   // 1. First visit in an iPhone browser: steer to the Home Screen before creating a local account.
   const A = await page(b, { ...PHONE }, 'safari');
   ok(await A.locator('[data-act=ackHere]').count() === 1, 'iPhone browser: Home Screen guidance shows before account creation');
-  await createAccount(A, 'Lyllian', PASS); await onboard(A, 'Lyllian');
+  await createAccount(A, 'Jordan', PASS); await onboard(A, 'Jordan');
   ok(await A.locator('.hero').count() === 1, 'onboarding ends on Today');
 
   // 2. Daily use: morning ritual, habit check, evening ritual.
@@ -143,16 +143,16 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
 
   // 3. Same person opens GreatestMe from a different place (separate storage): clear message, not a password error.
   const B = await page(b, { ...PHONE }, 'homescreen');
-  await B.click('[data-act=gmode][data-v=signin]'); await B.fill('#gname', 'Lyllian'); await B.fill('#gpass', PASS); await B.click('button[type=submit]');
+  await B.click('[data-act=gmode][data-v=signin]'); await B.fill('#gname', 'Jordan'); await B.fill('#gpass', PASS); await B.click('button[type=submit]');
   const msg = await B.locator('[role=alert]').first().innerText();
-  ok(/no Lyllian account/i.test(msg) && /password is probably fine/i.test(msg), 'other place: explains where the account lives instead of blaming the password');
+  ok(/no Jordan account/i.test(msg) && /password is probably fine/i.test(msg), 'other place: explains where the account lives instead of blaming the password');
 
   // 4. Move the journal over with a transfer code; same passcode works; wrong passcode gets its own message.
   await go(A, 'prefs'); await A.click('.more > summary'); await A.click('[data-act=export]'); const code = await A.inputValue('#xferOut');
   await B.click('[data-act=gmode][data-v=import] >> nth=0'); await B.fill('#gcode', code); await B.click('[data-act=gimport]'); await B.waitForTimeout(400);
   ok(await B.inputValue('#g0').catch(() => '') === 'My son', 'transfer code brings the journal over');
   await go(B, 'prefs'); await B.click('[data-act=signout]'); await B.waitForTimeout(400);
-  await B.fill('#gname', 'Lyllian'); await B.fill('#gpass', 'nope'); await B.click('button[type=submit]');
+  await B.fill('#gname', 'Jordan'); await B.fill('#gpass', 'nope'); await B.click('button[type=submit]');
   ok(/doesn't match/i.test(await B.locator('.err').innerText()), 'wrong passcode gets a clear message');
   await B.fill('#gpass', PASS); await B.click('button[type=submit]'); await B.waitForTimeout(300);
   ok(await B.locator('.hero').count() === 1, 'same passcode signs in after the move');
@@ -177,7 +177,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     const signin = async (p, email, pw) => { await p.click('[data-act=gmode][data-v=signin]').catch(() => {}); await p.fill('#semail', email); await p.fill('#spass', pw); await p.click('#supaForm button[type=submit]'); await p.waitForTimeout(700); };
     const C = await page(b, { ...PHONE }, 'acct-chrome', 'accounts');
     ok(await C.locator('#supaForm').count() === 1, 'accounts: email sign-in screen shows (no on-device form)');
-    await signup(C, 'd@example.com', PASS + ' '); await onboard(C, 'Dalton'); await openSec(C, 'morning'); await C.fill('#g0', 'My son'); await C.locator('#g0').blur(); await C.waitForTimeout(1200);
+    await signup(C, 'd@example.com', PASS + ' '); await onboard(C, 'Sam'); await openSec(C, 'morning'); await C.fill('#g0', 'My son'); await C.locator('#g0').blur(); await C.waitForTimeout(1200);
     const H = await page(b, { ...PHONE }, 'acct-homescreen', 'accounts');
     await signin(H, 'd@example.com', 'wrong-password'); ok(/don't match/i.test(await H.locator('.err').innerText()), 'accounts: wrong password gets a clear message');
     await signin(H, 'd@example.com', PASS); ok(await H.inputValue('#g0').catch(() => '') === 'My son', 'accounts: signing in somewhere else shows the same journal (pasted trailing space ignored)');
@@ -189,11 +189,11 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     ok(await H.inputValue('#g2') === 'From the iPhone' && await H.inputValue('#imp') === 'From the iPad', 'accounts: two devices editing the same day at once keep both edits');
     await openSec(C, 'morning'); await C.fill('#g1', 'Health'); await C.evaluate(() => { const e = document.getElementById('g1'); e.setSelectionRange(2, 2); });
     await C.evaluate(() => window.dispatchEvent(new Event('x'))); await C.keyboard.type('XX'); ok(await C.inputValue('#g1') === 'HeXXalth', 'typing stays in order where the cursor is');
-    const L = await page(b, { ...PHONE }, 'acct-lyllian', 'accounts'); await signup(L, 'l@example.com', 'Purple#2026xx'); await onboard(L, 'Lyllian');
+    const L = await page(b, { ...PHONE }, 'acct-jordan', 'accounts'); await signup(L, 'l@example.com', 'Purple#2026xx'); await onboard(L, 'Jordan');
     await go(L, 'prefs'); await L.waitForTimeout(300); if (!(await L.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG L:', (await L.evaluate(() => document.body.innerText)).slice(0, 500)); await L.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Ldebug.png' }); } await L.click('.main [data-act=nav][data-v=partner]'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
     const code = (await L.locator('.mono[style*="letter-spacing"]').innerText()).trim(); await L.click('[data-act=toggleShare]'); await L.waitForTimeout(3000);
     await go(C, 'prefs'); await C.waitForTimeout(300); if (!(await C.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG C:', (await C.evaluate(() => document.body.innerText)).slice(0, 700)); await C.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Cdebug.png' }); } await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
-    ok((await C.locator('.partner h2').allInnerTexts()).includes('Lyllian'), 'accounts: partner invite code links two phones');
+    ok((await C.locator('.partner h2').allInnerTexts()).includes('Jordan'), 'accounts: partner invite code links two phones');
     await go(L, 'today'); await L.context().setOffline(true); await L.route(/127\.0\.0\.1:8612/, r => r.abort()); await openSec(L, 'morning'); await L.fill('#intent', 'Patient'); await L.waitForTimeout(2500);
     ok(await L.locator('#syncdot:not([hidden])').count() === 1, 'phones show a quiet dot when changes are waiting to sync');
     await L.unroute(/127\.0\.0\.1:8612/); await L.context().setOffline(false); await L.evaluate(() => window.dispatchEvent(new Event('online'))); await L.waitForTimeout(2500);

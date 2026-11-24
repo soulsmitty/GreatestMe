@@ -20,8 +20,8 @@ Add a journey here whenever a real person hits a problem.
 
 A reviewer pass walks the change as:
 
-- **Lyllian** — non-technical, iPhone Duo (5.4" folded, 7.6" unfolded), never touches GitHub.
-- **Dalton** — iPhone 15 Pro + iPad with Apple Pencil, Chrome + Google Password Manager, Home Screen apps.
+- **Everyday user:** non-technical, on a foldable phone (folded and unfolded), never touches GitHub.
+- **Power user:** iPhone plus iPad with Apple Pencil, a password manager, and Home Screen apps.
 
 Questions it must answer:
 
