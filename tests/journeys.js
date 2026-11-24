@@ -162,7 +162,8 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
 
   // 5. Layout: folded, phone, unfolded, iPad × every theme × every screen.
   for (const [w, h, label] of (process.env.QUICK ? [] : [[360, 760, 'fold closed'], [393, 852, 'iPhone'], [744, 860, 'fold open'], [834, 1194, 'iPad']])) {
-    for (const suite of ['greatestme', 'synthwave', 'martin', 'studio', 'differentworld', 'heritage', 'freshprince', 'matrix', 'chicago']) {
+    // every look on the narrowest screen (where layouts break first); the widest-type looks on the rest, to stay inside the deploy time limit
+    for (const suite of w === 360 ? ['greatestme', 'synthwave', 'martin', 'studio', 'differentworld', 'heritage', 'freshprince', 'matrix', 'chicago'] : ['greatestme', 'martin', 'differentworld']) {
       const p = await page(b, { viewport: { width: w, height: h }, hasTouch: true, isMobile: w < 800, userAgent: PHONE.userAgent }, label + ' ' + suite);
       await p.evaluate(s => localStorage.setItem('gm-suite', JSON.stringify(s)), suite); await p.reload();
       await createAccount(p, 'Tester', 'Tester#2026');
