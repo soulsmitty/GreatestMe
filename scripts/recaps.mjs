@@ -11,7 +11,7 @@ if (!URL_ || !KEY) { console.log("Recaps are not configured yet (missing SUPABAS
 if (!DRY && !process.env.SMTP_PASSWORD) { console.log("Recaps are not configured yet (missing SMTP_PASSWORD). Skipping."); process.exit(0); }
 
 const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
-const api = async (path, opts = {}) => { const r = await fetch(`${URL_}${path}`, { ...opts, headers: { ...H, ...(opts.headers || {}) } }); if (!r.ok) throw new Error(`${r.status} ${path}: ${(await r.text()).slice(0, 200)}`); return r.status === 204 ? null : r.json(); };
+const api = async (path, opts = {}) => { const r = await fetch(`${URL_}${path}`, { ...opts, headers: { ...H, ...(opts.headers || {}) } }); if (!r.ok) throw new Error(`${r.status} ${path}: ${(await r.text()).slice(0, 200)}`); const body = await r.text(); return body ? JSON.parse(body) : null; }; // inserts answer 201 with an empty body
 const mailer = DRY ? null : nodemailer.createTransport({ host: process.env.SMTP_HOST || "mail.privateemail.com", port: +(process.env.SMTP_PORT || 465), secure: (process.env.SMTP_PORT || "465") === "465", auth: { user: process.env.SMTP_USER || "hello@teamsolen.com", pass: process.env.SMTP_PASSWORD } });
 const FROM = process.env.EMAIL_FROM || "GreatestMe <hello@teamsolen.com>";
 
