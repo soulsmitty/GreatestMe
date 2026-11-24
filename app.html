@@ -19,6 +19,7 @@
   --f-body:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --h-case:none; --h-track:-.025em; --h-weight:800; --h-shadow:none;
+  --ring-m:var(--acc); --ring-t:#EC4899; --ring-e:var(--good);
   --bg:var(--canvas); --violet:var(--acc); --violet-soft:var(--acc-soft); --ember:var(--acc2); --ember-soft:var(--acc2-soft); --warn:#F59E0B;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -30,6 +31,7 @@
   --acc:#A78BFA; --acc2:#5B9CFF; --on-acc:#160C33; --shadow-card:0 1px 0 rgb(255 255 255 / .04) inset,0 10px 30px rgb(0 0 0 / .35); --shadow-lift:0 16px 50px rgb(0 0 0 / .5);
   --glow-a:rgb(124 58 237 / .55); --glow-b:rgb(236 72 153 / .32); --glow-c:rgb(47 123 246 / .28); --paper:#FAF8F3; color-scheme:dark}
 /* Synthwave: always dark */
+:root[data-suite]:not([data-suite="greatestme"]){--ring-t:var(--acc2)}
 :root[data-suite="synthwave"],.pv[data-suite="synthwave"]{
   --canvas:#0B0320; --surface:rgb(24 6 48 / .78); --solid:#1A0838; --raised:rgb(255 46 151 / .08); --line:rgb(255 46 151 / .38); --ink:#FBEFFF; --muted:#C9A7E8; --faint:#9479B5;
   --acc:#FF2E97; --acc2:#00E5FF; --good:#3CFFA0; --bad:#FF4D6D; --on-acc:#14021F; --warn:#FFD319;
@@ -268,6 +270,8 @@ details.sched summary::-webkit-details-marker{display:none}
 .hero .hi{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
 .hero .greet{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .hero .ring{position:relative;width:118px;height:118px;flex:none}
+.ring{position:relative;width:104px;height:104px;flex:none}
+.ring .ctr{pointer-events:none}
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring .trk{fill:none;stroke:var(--line);stroke-width:9}
 .ring .arc{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)}
@@ -420,6 +424,66 @@ details.sched summary::-webkit-details-marker{display:none}
 .ink-page canvas{display:block;width:100%;touch-action:pan-y pinch-zoom;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .ink-page.finger canvas{touch-action:none}
 .ink-page .pg{position:absolute;right:12px;bottom:8px;font-family:var(--f-mono);font-size:10px;color:#8A8F99}
+/* calendar */
+.cal-card{gap:12px}
+.cal-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cal-top h2{font-size:1.15rem}
+.cal-sum{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.cal-sum b{color:var(--ink);font-size:1rem}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.dow{text-align:center;font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;color:var(--faint)}
+.cd{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px 5px;border-radius:12px;border:1px solid var(--line);background:var(--solid);min-height:74px;min-width:0;transition:transform .12s,border-color .2s}
+.cd:active{transform:scale(.95)}
+.cd:focus-visible{outline:2px solid var(--acc)}
+.cd.blank{border:0;background:none;cursor:default}
+.cd .dn{font-family:var(--f-mono);font-size:.78rem;font-weight:600}
+.cd.now{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+.cd.now .dn{color:var(--acc)}
+.cd.out{opacity:.45}
+.cd.fut{background:transparent;border-style:dashed}
+.cd .mini{flex:none}
+.cd .meta{display:flex;align-items:center;gap:3px;min-height:12px;width:100%;justify-content:center}
+.cd .mood{font-size:.75rem;line-height:1}
+.cd .hb{width:60%;height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.cd .hb i{display:block;height:100%;background:var(--good)}
+.cd .flag{position:absolute;top:-5px;right:-4px;font-style:normal;font-family:var(--f-mono);font-size:8px;font-weight:700;background:var(--acc);color:var(--on-acc);border-radius:6px;padding:1px 4px;box-shadow:0 0 0 2px var(--canvas)}
+.cd .flag.end{background:var(--acc2)}
+@media (min-width:600px){.cd{min-height:92px}.cd .mini{width:38px;height:38px}}
+.legend span:nth-child(2) i{background:var(--ring-t)!important}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.legend .bar-i{width:14px;height:4px;border-radius:4px;background:var(--good)}
+.legend .lv{border-radius:3px;background:color-mix(in srgb,var(--good) calc(var(--lv) * 100%),var(--line))}
+.legend .ws{border-radius:4px;background:var(--acc)}
+.jgrid{display:flex;flex-direction:column;gap:6px}
+.jr{display:grid;grid-template-columns:56px minmax(0,1fr) 64px;gap:8px;align-items:center;padding:4px;border-radius:10px}
+.jr.cur{background:var(--acc-soft)}
+.wk-l{all:unset;cursor:pointer;display:flex;flex-direction:column;line-height:1.1;font-size:.72rem;color:var(--muted);padding:2px 4px;border-radius:8px}
+.wk-l b{font-family:var(--f-mono);color:var(--ink);font-size:.85rem}
+.wk-l:focus-visible{outline:2px solid var(--acc)}
+.jr-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.hd{all:unset;box-sizing:border-box;cursor:pointer;aspect-ratio:1;border-radius:7px;max-height:40px;background:color-mix(in srgb,var(--good) calc(var(--lv) * 100%),var(--line))}
+.hd.fut{background:transparent;border:1px dashed var(--line)}
+.hd.now{outline:2px solid var(--acc);outline-offset:1px}
+.hd:focus-visible{outline:2px solid var(--ink)}
+.jr-r{display:flex;gap:4px;align-items:center;width:64px;justify-content:flex-end;flex-wrap:wrap}
+.hd{position:relative}.hd::after{content:"";position:absolute;inset:-4px}
+.ms-flag.over{color:var(--warn)}
+@media (max-width:400px){.wk-l span{display:none}.jr{grid-template-columns:34px minmax(0,1fr) 56px}.jr-r{width:56px}}
+.ms-flag{font-family:var(--f-mono);font-size:.72rem;color:var(--acc2)}
+.ms-flag.done{color:var(--good)}
+.wscore{font-family:var(--f-mono);font-size:.75rem;font-weight:700;background:var(--acc);color:var(--on-acc);border-radius:7px;padding:2px 6px}
+/* tips + tour */
+.tip{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:var(--r-sm);background:var(--acc-soft);color:var(--ink);font-size:.86rem}
+.tip svg{color:var(--acc);flex:none}
+.tip span{flex:1;min-width:0}
+#tourLayer{position:fixed;inset:0;z-index:90;touch-action:none}
+#tourLayer .spot{position:fixed;border-radius:18px;box-shadow:0 0 0 9999px rgb(8 5 20 / .62);transition:all .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.tour-card{position:fixed;background:var(--solid);color:var(--ink);border:var(--border-w) solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow-lift);transition:top .3s cubic-bezier(.2,.8,.2,1),left .3s}
+.tour-card.in{animation:fadeIn .25s ease}
+button.brand{border:0;background:none;color:inherit;cursor:pointer;text-align:left}
+button.brand:focus-visible{outline:2px solid var(--acc);border-radius:10px}
+.back{display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;padding:6px 0}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -453,6 +517,7 @@ const ICON = {
   undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>',
   redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg>',
   hand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V6a1.5 1.5 0 0 1 3 0v8a7 7 0 0 1-7 7c-2.5 0-4-1-5.5-3L3 15a1.5 1.5 0 0 1 2.5-1.6L8 16"/></svg>',
+  calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/><circle cx="8" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/><circle cx="16" cy="14" r="1" fill="currentColor"/><circle cx="8" cy="18" r="1" fill="currentColor"/></svg>',
   today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   week:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
   goals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
@@ -672,11 +737,11 @@ window.addEventListener("pointerdown", e => { if (e.pointerType === "pen") Devic
 function canInk(){ const p = profile(); if (p && p.ink === "off") return false; if (p && p.ink === "on") return true; return Device.iPad || Device.penSeen; }
 const ARTIFACT_URL = "https://claude.ai/artifact/RJPQtHABp9CxhXiWbFcWZn";
 const baseUrl = () => window.claude ? ARTIFACT_URL : location.href.split("#")[0];
-const DEEP = [["today","Today's page"],["morning","Morning: gratitude and targets"],["evening","Evening: wins and lessons"],["habits","Habits"],["week","This week and weekly review"],["ink","Handwriting page (iPad)"],["progress","Progress"],["partner","Partner (accountability)"]];
+const DEEP = [["today","Today's page"],["morning","Morning: gratitude and targets"],["evening","Evening: wins and lessons"],["habits","Habits"],["week","This week and weekly review"],["ink","Handwriting page (iPad)"],["calendar","Calendar"],["progress","Progress"],["partner","Partner (accountability)"]];
 function routeHash(){
   let h = ""; try { h = (location.hash || "").slice(1).toLowerCase(); } catch {}
   if (!h || !profile() || !J()) return;
-  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", duo:"partner", partner:"partner", preferences:"prefs" };
+  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", calendar:"calendar", duo:"partner", partner:"partner", preferences:"prefs" };
   if (!map[h]) return;
   S.view = map[h]; if (S.view === "today" || S.view === "ink") S.date = today(); if (S.view === "week") S.week = null; S.sheet = null;
   render();
@@ -910,7 +975,7 @@ function dayParts(dd){
   return { m, t, e: Math.min(1, e) };
 }
 function rings(parts, center, sub){
-  const R = [[52, parts.m, "var(--acc)"], [39, parts.t, "var(--acc2)"], [26, parts.e, "var(--good)"]];
+  const R = [[52, parts.m, "var(--ring-m)"], [39, parts.t, "var(--ring-t)"], [26, parts.e, "var(--ring-e)"]];
   return `<div class="ring" role="img" aria-label="Morning ${Math.round(parts.m * 100)}%, targets ${Math.round(parts.t * 100)}%, evening ${Math.round(parts.e * 100)}%"><svg viewBox="0 0 120 120">${R.map(([r, v, col]) => { const C = 2 * Math.PI * r;
     return `<circle class="trk" cx="60" cy="60" r="${r}" style="stroke-width:10;opacity:.6"/><circle class="arc" cx="60" cy="60" r="${r}" style="stroke:${col};stroke-width:10;stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C * (1 - v)).toFixed(1)};--c:${C.toFixed(1)}"/>`; }).join("")}</svg>
     <div class="ctr"><div><b>${center}</b><br><span>${sub}</span></div></div></div>`;
@@ -969,12 +1034,16 @@ function prefsView(){
   const pv = k => `<div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div>`;
   return `
   <div class="head"><div><span class="label">Make it yours</span><h1 class="title-bar" style="margin-top:4px">Settings</h1></div></div>
+  ${tip("settings", "Your look follows your account to every device. Sounds and celebrations are set per phone.")}
   <section class="card"><div class="row" style="gap:14px;flex-wrap:nowrap"><div class="avatar">${esc((p.nick || "?").trim().charAt(0))}</div><div style="min-width:0;flex:1"><input id="nick" class="in" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" aria-label="Your name" style="font-weight:700;font-size:1.1rem"><p class="muted small">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you." : Store.mode === "supa" ? `Signed in as ${esc(Store.accountName)}. Your journal syncs to every device you sign in on.` : `On-device account: ${esc(Store.accountName)}. Entries stay in this browser.`}</p></div></div></section>
   <section class="card"><div class="card-h"><h2>Look</h2><span class="label">Saved to you</span></div>
     <div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="suite" data-v="${k}" aria-pressed="${cur === k}">${pv(k)}<span class="nm">${esc(SUITES[k].name)}${cur === k ? `<span class="chip good">On</span>` : ""}</span></button>`).join("")}</div>
     <p class="muted small">${esc(SUITES[cur].note)}</p>
     ${SUITES[cur].modes ? `<div class="set-row"><div><b>Appearance</b><p class="muted small">Auto follows your iPhone or iPad.</p></div><div class="toggle3" role="group" aria-label="Appearance">${["auto", "light", "dark"].map(t => `<button data-act="theme" data-v="${t}" aria-pressed="${Theme.get() === t}">${t}</button>`).join("")}</div></div>` : ""}
   </section>
+  <section class="card"><div class="card-h"><h2>Partner</h2><span class="label">${p.share ? "Sharing on" : "Sharing off"}</span></div>
+    <p class="muted small">Cheer each other on. Your partner sees your streak, rates, goal progress and one win you choose. Never your journal.</p>
+    <button class="btn" style="align-self:flex-start" data-act="nav" data-v="partner">${ICON.partner.replace("<svg", '<svg width="16" height="16"')} ${Store.mode === "supa" && !(S.links || []).length ? "Connect with your partner" : "Open Partner"}</button></section>
   <section class="card"><div class="card-h"><h2>Feel</h2><span class="label">This phone only</span></div><div class="set-group">
     <label class="set-row"><div><b>Sounds</b><p class="muted small">A soft chime when you close a loop. Off until you turn it on.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="sound" ${pr.sound ? "checked" : ""}></label>
     <label class="set-row"><div><b>Celebrations</b><p class="muted small">Confetti for streaks, full pages and milestones.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="confetti" ${pr.confetti ? "checked" : ""}></label>
@@ -988,14 +1057,124 @@ function prefsView(){
     ${journeys.map(x => `<div class="set-row"><div><b>${esc(x.title)}</b><div class="muted mono small">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
     <div class="field"><label class="label" for="jstart">Day 1 of this journey</label><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"><span class="muted small">Careful: changing Day 1 moves every day number and streak in this journey.</span></div></section>
   <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "supa" ? "Your journal syncs to your account automatically. Save a copy if you want one of your own." : Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal is saved on this phone only, in the place you're using now. Move my journal gives you a code to carry it somewhere else, password included."}</p><div class="row"><button class="btn sm" data-act="export">${Store.mode === "local" ? "Move my journal" : "Save a copy"}</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
+  <section class="card"><div class="card-h"><h2>Help</h2></div><div class="row"><button class="btn" data-act="tourStart">Take the tour</button><button class="btn ghost" data-act="tipsReset">Show tips again</button></div></section>
   <section class="card"><div class="card-h"><h2>Ideas & requests</h2></div><p class="muted small">${window.claude ? "Want something changed or added? Leave a comment on this page and send it to Claude. Requests get built into the app for both of you." : "Have an idea or something bugging you? Text it to Dalton and it gets built in for both of you."}</p></section>
   ${Store.mode === "supa" && Accounts.list().length ? migrateCard() : ""}
   ${Store.mode === "supa" ? `<div class="row"><button class="btn" data-act="sheet" data-v="pass">Change password</button><button class="btn" data-act="signout">Sign out</button></div>` : Store.mode === "local" ? `<button class="btn" style="align-self:flex-start" data-act="signout">Sign out</button>` : ""}`;
 }
 
+/* ============================ Calendar, day summary, tour, tips ============================ */
+const MOOD_FACE = ["", "😣", "🙁", "😐", "🙂", "😄"];
+function miniRing(dd, size = 30){
+  const p = dayParts(dd), R = [[15, p.m, "var(--ring-m)"], [11, p.t, "var(--ring-t)"], [7, p.e, "var(--ring-e)"]];
+  return `<svg class="mini" viewBox="0 0 36 36" width="${size}" height="${size}" aria-hidden="true">${R.map(([r, v, c]) => { const C = 2 * Math.PI * r;
+    return `<circle cx="18" cy="18" r="${r}" fill="none" stroke="var(--line)" stroke-width="3"/>${v > 0 ? `<circle cx="18" cy="18" r="${r}" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - v)).toFixed(1)}" transform="rotate(-90 18 18)"/>` : ""}`; }).join("")}</svg>`;
+}
+function dayLabel(d){ const j = J(), n = dayNum(d, j); return n >= 1 && n <= TOTAL_DAYS ? `Day ${n} · Week ${weekOf(d, j)}` : n < 1 ? `${1 - n} day${n === 0 ? "" : "s"} before Day 1` : "After this journey"; }
+function calendarView(){
+  const j = J(), t = today(), mode = S.calMode || "month";
+  const seg = `<div class="seg" style="min-width:210px" role="group" aria-label="Calendar view">${[["month", "Month"], ["journey", "13 weeks"]].map(([k, l]) => `<button data-act="calMode" data-v="${k}" aria-pressed="${mode === k}">${l}</button>`).join("")}</div>`;
+  let body = "";
+  if (mode === "month") {
+    const ym = S.calMonth || t.slice(0, 7); const [Y, M] = ym.split("-").map(Number); const first = `${ym}-01`;
+    const dim = new Date(Y, M, 0).getDate(); const lead = (parse(first).getDay() + 6) % 7; const days = Array.from({ length: dim }, (_, i) => `${ym}-${pad(i + 1)}`);
+    let journaled = 0, moods = [], best = 0, run = 0;
+    days.forEach(d => { const dd = Store.get(dayKey(d)); if (d <= t && journalled(dd)) { journaled++; run++; best = Math.max(best, run); } else if (d <= t) run = 0; if (dd && dd.mood) moods.push(dd.mood); });
+    const avg = moods.length ? (moods.reduce((a, b) => a + b, 0) / moods.length) : 0;
+    const cells = Array.from({ length: lead }, () => `<span class="cd blank" aria-hidden="true"></span>`).concat(days.map(d => {
+      const dd = Store.get(dayKey(d)); const n = dayNum(d, j); const inJ = n >= 1 && n <= TOTAL_DAYS; const fut = d > t;
+      const hDone = dd ? j.habits.filter(h => dd.habits[h.id]).length : 0;
+      const marks = `${n === 1 ? `<i class="flag" title="Day 1">1</i>` : ""}${n === TOTAL_DAYS ? `<i class="flag end" title="Day 91">91</i>` : ""}`;
+      return `<button class="cd ${d === t ? "now" : ""} ${inJ ? "" : "out"} ${fut ? "fut" : ""} ${journalled(dd) ? "on" : ""}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}${journalled(dd) ? ", journaled" : ""}${dd && dd.mood ? ", mood " + dd.mood + " of 5" : ""}">
+        <span class="dn">${parse(d).getDate()}</span>${marks}${fut || !inJ ? "" : miniRing(dd)}
+        <span class="meta">${dd && dd.mood ? `<span class="mood">${MOOD_FACE[dd.mood]}</span>` : ""}${j.habits.length && !fut && inJ ? `<span class="hb"><i style="width:${Math.round(hDone / j.habits.length * 100)}%"></i></span>` : ""}</span></button>`; }));
+    body = `<section class="card cal-card">
+      <div class="cal-top"><button class="btn icon" data-act="calMonth" data-n="-1" aria-label="Previous month">${ICON.left}</button><div class="row" style="gap:8px;justify-content:center"><h2 aria-live="polite">${esc(parse(first).toLocaleDateString(undefined, { month: "long", year: "numeric" }))}</h2>${ym !== t.slice(0, 7) ? `<button class="btn sm" data-act="calMonth" data-n="0">Today</button>` : ""}</div><button class="btn icon" data-act="calMonth" data-n="1" aria-label="Next month">${ICON.right}</button></div>
+      <div class="cal-sum"><span><b class="mono">${journaled}</b> days journaled</span><span><b class="mono">${best}</b> best run</span><span><b class="mono">${avg ? avg.toFixed(1) : "–"}</b> avg mood</span></div>
+      <div class="cal-grid" id="calGrid">${["M", "T", "W", "T", "F", "S", "S"].map(x => `<span class="dow" aria-hidden="true">${x}</span>`).join("")}${cells.join("")}</div>
+      <div class="legend"><span><i style="background:var(--acc)"></i>Morning</span><span><i style="background:var(--acc2)"></i>Targets</span><span><i style="background:var(--good)"></i>Evening</span><span><i class="bar-i"></i>Habits</span></div>
+      </section>${tip("cal", "Tap any day to see what you wrote. Swipe the month sideways to move between months.")}`;
+  } else {
+    const rows = Array.from({ length: WEEKS }, (_, w) => {
+      const ws = addDays(j.start, w * 7); const wd = Store.get(weekKey(w + 1)); const ms = j.goals.flatMap(g => g.milestones.filter(m => +m.week === w + 1)); const msDone = ms.filter(m => m.done).length;
+      const cur = weekOf(t) === w + 1 && dayNum(t) >= 1;
+      return `<div class="jr ${cur ? "cur" : ""}"><button class="wk-l" data-act="weekOpen" data-n="${w + 1}" aria-label="Open week ${w + 1}"><b>W${w + 1}</b><span>${esc(fmtDate(ws, { month: "short", day: "numeric" }))}</span></button>
+        <div class="jr-days">${Array.from({ length: 7 }, (_, i) => { const d = addDays(ws, i); const dd = Store.get(dayKey(d)); const sc = d > t ? -1 : dayScore(dd);
+          return `<button class="hd ${d === t ? "now" : ""} ${sc < 0 ? "fut" : ""}" style="--lv:${sc < 0 ? 0 : (sc / 100).toFixed(2)}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}, ${sc < 0 ? "upcoming" : sc + "% complete"}"></button>`; }).join("")}</div>
+        <div class="jr-r">${ms.length ? `<span class="ms-flag ${msDone === ms.length ? "done" : (weekOf(t) > w + 1 && dayNum(t) >= 1) ? "over" : ""}" title="${msDone === ms.length || !(weekOf(t) > w + 1) ? `${msDone} of ${ms.length} milestones` : `${ms.length - msDone} overdue`}">⚑ ${msDone}/${ms.length}</span>` : ""}${wd && wd.score ? `<span class="wscore" title="Weekly review score">${wd.score}</span>` : ""}</div></div>`; }).join("");
+    body = `<section class="card cal-card"><div class="card-h"><h2>Your 13 weeks</h2><span class="label">${esc(fmtDate(j.start, { month: "short", day: "numeric" }))} → ${esc(fmtDate(endDate(j), { month: "short", day: "numeric" }))}</span></div>
+      <div class="jgrid">${rows}</div>
+      <div class="legend"><span><i class="lv" style="--lv:.15"></i>Started</span><span><i class="lv" style="--lv:.6"></i>Most of it</span><span><i class="lv" style="--lv:1"></i>Full page</span><span>⚑ Milestones</span><span><i class="ws"></i>Week score</span></div></section>`;
+  }
+  return `<div class="head"><div><span class="label">${esc(j.title)} · ${esc(dayLabel(t))}</span><h1 class="title-bar" style="margin-top:4px">Calendar</h1></div>${seg}</div>
+  ${body}${mode === "journey" ? tip("cal13", "Tap a week label to open that week's plan and review. Tap a square to see that day.") : ""}`;
+}
+function daySheet(){
+  const d = S.sheetDate, j = J(), dd = Store.get(dayKey(d)), has = journalled(dd);
+  const list = (arr, title) => { const xs = (arr || []).filter(x => (x || "").trim()); return xs.length ? `<div class="field"><span class="label">${title}</span>${xs.map(x => `<p>• ${esc(x)}</p>`).join("")}</div>` : ""; };
+  const tg = dd ? dd.targets.filter(x => x.t.trim()) : [];
+  const after = dayNum(d, j) > TOTAL_DAYS;
+  return `<div class="card-h"><div><span class="label">${esc(dayLabel(d))}</span><h2 id="sheetTitle" style="margin-top:4px">${esc(fmtDate(d))}</h2></div><div class="row" style="gap:4px"><button class="btn icon ghost" data-act="dayStep" data-n="-1" aria-label="Previous day">${ICON.left}</button><button class="btn icon ghost" data-act="dayStep" data-n="1" aria-label="Next day">${ICON.right}</button><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div></div>
+    ${has || (dd && dd.mood) ? `<div class="row" style="gap:16px">${rings(dayParts(dd), `${dayScore(dd)}%`, "complete")}<div class="field">${dd.mood ? `<span>Mood ${MOOD_FACE[dd.mood]} ${dd.mood}/5</span>` : ""}${dd.energy ? `<span class="muted small">Energy ${dd.energy}/5</span>` : ""}${j.habits.length ? `<span class="muted small">${j.habits.filter(h => dd.habits[h.id]).length} of ${j.habits.length} habits</span>` : ""}</div></div>
+      ${dd.intention ? `<div class="quote">${esc(dd.intention)}<cite>Today I will be</cite></div>` : ""}
+      ${list(dd.gratitude, "Grateful for")}
+      ${tg.length ? `<div class="field"><span class="label">Targets</span>${tg.map(x => `<p class="${x.done ? "done-text" : ""}">${x.done ? "✓" : "○"} ${esc(x.t)}</p>`).join("")}</div>` : ""}
+      ${list(dd.wins, "Wins")}${dd.lessons ? `<div class="field"><span class="label">Lessons</span><p>${esc(dd.lessons)}</p></div>` : ""}${dd.improve ? `<div class="field"><span class="label">Tomorrow I'll improve</span><p>${esc(dd.improve)}</p></div>` : ""}`
+    : `<div class="empty" style="padding:16px">${ART.empty}<span>${d > today() ? "This day hasn't happened yet. You can still plan its targets." : "Nothing written this day."}</span></div>`}
+    <div class="row">${after && !has ? `<button class="btn primary" data-act="sheet" data-v="newJourney">Start your next 13 weeks</button>` : `<button class="btn primary" data-act="dayGo" data-v="${d}">${d > today() ? "Plan this day" : has ? "Open this day" : "Fill it in"}</button>`}${canInk() ? `<button class="btn" data-act="dayInk" data-v="${d}">${ICON.ink.replace("<svg", '<svg width="16" height="16"')} Handwriting</button>` : ""}</div>`;
+}
+
+/* tips: one-line hints, dismissed per person */
+function tip(id, text){ const p = profile(); if (!p || S.tour || S.pendingTour || (p.tips && p.tips[id])) return "";
+  return `<div class="tip" role="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><span>${esc(text)}</span><button class="btn icon ghost" data-act="tipX" data-v="${esc(id)}" aria-label="Dismiss tip">${ICON.x}</button></div>`; }
+
+/* guided tour */
+const TOUR = [
+  { sel: ".hero .ring", title: "Three rings, one day", text: "Morning, targets and evening. Close all three and the day is complete." },
+  { sel: ".ritual-card", title: "Guided rituals", text: "About three minutes each. One prompt at a time, morning and night." },
+  { sel: '[data-act=nav][data-v=calendar]', title: "Your calendar", text: "Every day of your 13 weeks at a glance. Tap any day to look back." },
+  { sel: '[data-act=nav][data-v=habits]', title: "Habits", text: "Your daily non-negotiables, with streaks you'll want to protect." },
+  { sel: '[data-act=nav][data-v=prefs]', title: "Settings", text: "Change your look, connect with your partner and set Siri reminders. Replay this tour from Help at the bottom of Settings." },
+];
+const Tour = {
+  start(){ S.tour = { step: 0 }; S.view = "today"; S.date = today(); S.sheet = null; window.scrollTo(0, 0); document.documentElement.style.overflow = "hidden"; render(); },
+  end(){ S.tour = null; document.documentElement.style.overflow = ""; const a = document.querySelector(".app"); if (a) a.inert = false; const p = profile(); if (p && !p.toured) { p.toured = Date.now(); Store.touch("profile"); } document.querySelectorAll("#tourLayer").forEach(x => x.remove()); render(); },
+  paint(settling){
+    let l = document.getElementById("tourLayer"); if (!S.tour) { document.querySelectorAll("#tourLayer").forEach(x => x.remove()); return; }
+    const st = TOUR[S.tour.step]; const el = [...document.querySelectorAll(st.sel)].find(x => x.getClientRects().length && x.offsetParent !== null);
+    if (!el) { if (S.tour.step < TOUR.length - 1) { S.tour.step++; return this.paint(); } return this.end(); }
+    if (!settling) el.scrollIntoView({ block: "center" });
+    if (!l) { l = document.createElement("div"); l.id = "tourLayer"; l.innerHTML = `<div class="spot"></div><div class="tour-card" role="dialog" aria-modal="true"></div>`; document.body.appendChild(l); }
+    requestAnimationFrame(() => {
+      if (!S.tour || !l.isConnected) return;
+      const r = el.getBoundingClientRect(); const pad = 8;
+      const spot = l.querySelector(".spot"), card = l.querySelector(".tour-card");
+      Object.assign(spot.style, { left: r.left - pad + "px", top: r.top - pad + "px", width: r.width + pad * 2 + "px", height: r.height + pad * 2 + "px" });
+      if (card.dataset.step !== String(S.tour.step)) {
+        card.dataset.step = S.tour.step; card.setAttribute("aria-label", st.title); card.classList.remove("in"); void card.offsetWidth; card.classList.add("in");
+        card.innerHTML = `<span class="label">${S.tour.step + 1} of ${TOUR.length}</span><h2>${esc(st.title)}</h2><p class="muted">${esc(st.text)}</p>
+          <div class="row" style="justify-content:space-between">${S.tour.step === TOUR.length - 1 ? "<span></span>" : `<button class="btn ghost sm" data-act="tourSkip">Skip tour</button>`}<button class="btn primary" data-act="tourNext">${S.tour.step === TOUR.length - 1 ? "Let's go" : "Next"}</button></div>`;
+        const btn = card.querySelector("[data-act=tourNext]"); if (btn) btn.focus({ preventScroll: true });
+      }
+      const W = Math.min(340, innerWidth - 32); const left = Math.max(16, Math.min(innerWidth - W - 16, r.left + r.width / 2 - W / 2));
+      card.style.width = W + "px"; card.style.left = left + "px"; card.style.top = ""; card.style.bottom = "";
+      const ch = card.offsetHeight; const below = r.bottom + 18 + ch <= innerHeight - 16; const above = r.top - 18 - ch >= 16;
+      card.style.top = (below ? r.bottom + 18 : above ? r.top - 18 - ch : Math.max(16, innerHeight - 16 - ch)) + "px";
+      if (!settling) { clearTimeout(this._settle); this._settle = setTimeout(() => this.paint(true), 380); }
+    });
+  },
+};
+window.addEventListener("resize", () => { if (S.tour) Tour.paint(true); });
+window.addEventListener("scroll", () => { if (S.tour) Tour.paint(true); }, { passive: true });
+let swipeX = null, swipeY = 0;
+document.addEventListener("touchstart", e => { const g = e.target.closest && e.target.closest("#calGrid"); swipeX = g ? e.touches[0].clientX : null; swipeY = g ? e.touches[0].clientY : 0; }, { passive: true });
+document.addEventListener("touchend", e => { if (swipeX == null) return; const dx = e.changedTouches[0].clientX - swipeX, dy = e.changedTouches[0].clientY - swipeY; swipeX = null;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { const b = document.querySelector(`[data-act=calMonth][data-n="${dx < 0 ? 1 : -1}"]`); if (b) { buzz(8); b.click(); } } }, { passive: true });
+if (window.visualViewport) visualViewport.addEventListener("resize", () => { if (S.tour) Tour.paint(true); });
+
 /* ============================ rendering ============================ */
 let User = null;
-const NAV = [["today","Today"],["week","Week"],["goals","Goals"],["habits","Habits"],["progress","Progress"],["partner","Partner"]];
+const NAV = [["today","Today"],["week","Week"],["goals","Goals"],["habits","Habits"],["progress","Progress"],["calendar","Calendar"]];
 const navItems = () => canInk() ? NAV.slice(0, 1).concat([["ink","Ink"]], NAV.slice(1)) : NAV;
 
 function render(){
@@ -1011,15 +1190,15 @@ function render(){
   if (!profile() || !J()) { root.innerHTML = BD + enterCard(onboardView()); return; }
   if (S.view === "ink" && !canInk()) S.view = "today";
   const entering = S.lastView !== S.view; S.lastView = S.view;
-  const v = { today: todayView, prefs: prefsView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, partner: partnerView }[S.view]();
+  const v = { today: todayView, calendar: calendarView, prefs: prefsView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, partner: partnerView }[S.view]();
   const items = navItems(); const nav = () => items.map(([k, l]) => `<button data-act="nav" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
   const p = profile();
   root.innerHTML = `${BD}<div class="app">
-    <aside class="rail"><div class="brand"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></div><nav class="nav">${nav()}</nav>
+    <aside class="rail"><button class="brand" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button><nav class="nav">${nav()}</nav>
       <div class="rail-foot"><div id="savestate" class="save" style="padding:0 8px"></div>
       <button class="me" data-act="nav" data-v="prefs" aria-label="Settings" ${S.view === "prefs" ? 'aria-current="page"' : ""}><span class="avatar sm">${esc((p.nick || "?").trim().charAt(0))}</span><span style="flex:1;min-width:0"><b style="display:block">${esc(p.nick || "")}</b><span class="muted small">Settings</span></span>${ICON.gear.replace("<svg", '<svg width="18" height="18"')}</button></div></aside>
     <main class="main"><div class="col ${entering ? "enter" : ""}">
-      <div class="mtop"><div class="brand" style="padding:0"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></div><button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear}</button></div>
+      <div class="mtop"><button class="brand" style="padding:0" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button><button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear}</button></div>
       ${v}
     </div></main>
     <nav class="tabs" style="--tabs:${items.length}">${nav()}</nav>
@@ -1030,7 +1209,11 @@ function render(){
   Store.setStatus(Store.status);
   if (S.view === "ink") Ink.mount();
   if (active) { const el = document.getElementById(active); if (el) { el.focus({ preventScroll: true }); if (caret) try { el.setSelectionRange(caret[0], caret[1]); } catch {} } }
-  window.scrollTo(0, scrollY);
+  window.scrollTo(0, entering ? 0 : scrollY);
+  const appEl = document.querySelector(".app"); if (appEl) appEl.inert = !!(S.sheet || S.cele || S.ritual || S.tour);
+  if (S.sheet && S.sheetFocus) { S.sheetFocus = false; const c = document.querySelector(".sheet [data-act=close]"); if (c) c.focus({ preventScroll: true }); }
+  if (!S.sheet && S.refocus) { const r = document.querySelector(S.refocus); S.refocus = null; if (r) r.focus({ preventScroll: true }); }
+  if (S.tour) Tour.paint();
 }
 function celeView(){ const c = S.cele; return `<div class="cele ${S.anim && S.anim.cele ? "anim" : ""}" data-act="celeClose"><div class="cele-card" role="dialog" aria-modal="true" aria-label="${esc(c.title)}">${c.art || ""}${c.num != null ? `<div class="num">${+c.num}</div>` : ""}<h1>${esc(c.title)}</h1><p class="muted">${esc(c.sub || "")}</p><button class="btn primary lg" data-act="celeClose" style="width:100%">Keep going</button></div></div>`; }
 function toast(msg){
@@ -1072,6 +1255,7 @@ function todayView(){
   ${isToday ? `<div class="rituals">
     <button class="ritual-card ${mDone ? "done" : ""}" data-act="ritual" data-v="morning">${ART.sunrise.replace("<svg", '<svg class="art"')}<span class="st">${mDone ? "✓ Done" : "3 min · guided"}</span><h2>Morning ritual</h2><span class="small" style="max-width:60%">Breathe, gratitude, intention, targets</span></button>
     <button class="ritual-card ${eDone ? "done" : ""}" data-act="ritual" data-v="evening">${ART.night.replace("<svg", '<svg class="art"')}<span class="st">${eDone ? "✓ Done" : "3 min · guided"}</span><h2>Evening ritual</h2><span class="small" style="max-width:60%">Wins, lessons, tomorrow, check-in</span></button></div>` : ""}
+  ${isToday ? tip("today", "From any screen, tap the GreatestMe logo to come back here. Calendar shows every day of your 13 weeks.") : ""}
   <div class="card"><div class="quote">${esc(q)}<cite>${esc(who)}</cite></div></div>
   ${!inJ && n >= 1 ? `<div class="card"><p>This date is outside your current 13-week journey. Start a new journey in <b>Settings</b> when you're ready for the next one.</p></div>` : ""}
   <div class="grid2">
@@ -1244,6 +1428,7 @@ function partnerView(){
       ${me ? `<button class="btn ${iCheered ? "" : "ember"}" style="align-self:flex-start" data-act="cheer" data-id="${esc(pt.id)}" ${iCheered ? "disabled" : ""}>${iCheered ? "Cheer sent" : "Send a cheer"}</button>` : ""}
     </section>`; }).join("") : `<div class="empty">${Store.mode === "cloud" ? "When your partner opens GreatestMe and turns on sharing, their progress shows up here." : Store.mode === "supa" ? "Link with your partner using an invite code above. Once they turn on sharing, their progress shows up here." : "Partner works once your accounts sync between phones. For now your journal stays on this phone only."}</div>`;
   return `
+  <button class="back" data-act="nav" data-v="prefs">${ICON.left} Settings</button>
   <div class="head"><div><span class="label">Accountability, not access</span><h1 class="title-bar" style="margin-top:4px">Partner</h1><p class="sub">Your journal stays private. If you turn sharing on, your partner sees only your streak, habit and target rates, goal titles with progress, and the one win you choose to share.</p></div></div>
   <section class="card"><div class="row" style="justify-content:space-between"><div><h2>Share my progress</h2><p class="muted" style="font-size:.88rem">${p.share ? "Sharing is on." : "Sharing is off. Nothing leaves your journal."}</p></div>
     <button class="btn ${p.share ? "" : "primary"}" data-act="toggleShare">${p.share ? "Turn off" : "Turn on"}</button></div>
@@ -1259,7 +1444,7 @@ function partnerView(){
 /* ---------- Sheets ---------- */
 function sheetView(){
   const p = profile(); const j = J(); let body = "";
-  if (S.sheet === "pass") {
+  if (S.sheet === "day") { body = daySheet(); } else if (S.sheet === "pass") {
     body = `<div class="card-h"><h2>Change password</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div><input id="newPass" type="password" class="in box" autocomplete="new-password" placeholder="New password (8+ characters)"><button class="btn primary" data-act="chpass">Save password</button>`;
   } else if (S.sheet === "newJourney") {
     body = `<div class="card-h"><h2>Start a new journey</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div>
@@ -1268,7 +1453,7 @@ function sheetView(){
       <div class="field"><label class="label" for="njs">Start date</label><input id="njs" type="date" class="in box" value="${esc(nextMonday())}"></div>
       <button class="btn primary" data-act="createJourney">Create journey</button>`;
   }
-  return `<div class="sheet-bg" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="sheet-bg" data-act="closebg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">${body}</div></div>`;
 }
 function nextMonday(){ const d = new Date(); const dow = d.getDay(); if (dow !== 1) d.setDate(d.getDate() + ((8 - dow) % 7)); return iso(d); }
 
@@ -1317,6 +1502,7 @@ function gateView(){
 
 /* ---------- Onboarding ---------- */
 function onboardView(){
+  if (!S.onboard) { const saved = ls.get("gm-onboard:" + Store.uid); if (saved && typeof saved.step === "number") S.onboard = saved; }
   const o = S.onboard || (S.onboard = { step: 0, nick: Store.accountName || "", suite: Suite.current(), start: today(), goals: [{ title: "", why: "" }, { title: "", why: "" }, { title: "", why: "" }], habits: [] });
   const N = 7; const steps = o.step ? `<div class="steps">${Array.from({ length: N - 1 }, (_, i) => `<i class="${i < o.step ? "on" : ""}"></i>`).join("")}</div>` : "";
   let body = "", cta = "Continue";
@@ -1337,7 +1523,7 @@ function onboardView(){
     ${o.step < 6 ? `<button class="btn primary lg" data-act="onext">${cta}</button>` : ""}</div></div>`;
 }
 function captureOnboard(){
-  const o = S.onboard; if (!o) return;
+  const o = S.onboard; if (!o) return; setTimeout(() => ls.set("gm-onboard:" + Store.uid, S.onboard), 0);
   const n = $("#onick"); if (n) o.nick = n.value; const s = $("#ostart"); if (s && s.value) o.start = s.value;
   document.querySelectorAll("[data-og]").forEach(el => { o.goals[+el.dataset.og].title = el.value; });
 }
@@ -1376,7 +1562,7 @@ async function onClick(e){
     case "toggleShare": { const p = profile(); p.share = !p.share; Store.touch("profile"); render(); Partner.publish(); toast(p.share ? "Sharing turned on" : "Sharing turned off"); break; }
     case "cheer": { const p = profile(); p.cheers = p.cheers || {}; p.cheers[t.dataset.id] = Date.now(); Store.touch("profile"); await Partner.publish(); toast("Cheer sent"); break; }
     case "sheet": S.sheet = t.dataset.v; render(); break;
-    case "close": case "closebg": S.sheet = null; render(); break;
+    case "close": case "closebg": if (S.sheet === "day") S.refocus = `[data-act=dayOpen][data-v="${S.sheetDate}"]`; S.sheet = null; render(); break;
     case "switchJ": profile().active = t.dataset.id; Store.touch("profile"); S.sheet = null; S.date = today(); S.week = null; render(); break;
     case "createJourney": { const start = $("#njs").value || nextMonday(); const nj = createJourney({ title: $("#njt").value.trim() || "Journey", start, goals: [], habits: j.habits.map(h => h.name) }); profile().active = nj.id; Store.touch("profile"); S.sheet = null; S.view = "goals"; render(); toast("New journey created. Set your goals."); break; }
     case "export": await doExport(); break;
@@ -1394,6 +1580,18 @@ async function onClick(e){
     case "inkClear": if (Ink.data) { if (t.dataset.confirm === "1") { const i = Ink.data.pages.length - 1; Ink.snapshot(i); Ink.data.pages[i] = []; Ink.queue(i); render(); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to clear"; t.classList.add("ember"); } } break;
     case "signout": await Store.flush(); if (Store.mode === "supa") { ls.del(mirrorKey()); try { await sb.auth.signOut(); } catch {} } ls.del("gm:session"); location.reload(); break;
     case "migrate": await migrate(); break;
+    case "calMode": S.calMode = t.dataset.v; render(); break;
+    case "calMonth": { const n = +t.dataset.n; if (!n) S.calMonth = null; else { const [Y, M] = (S.calMonth || today().slice(0, 7)).split("-").map(Number); const d = new Date(Y, M - 1 + n, 1); S.calMonth = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; } render(); break; }
+    case "dayOpen": S.sheetDate = t.dataset.v; S.sheet = "day"; S.sheetFocus = true; render(); break;
+    case "dayStep": S.sheetDate = addDays(S.sheetDate, +t.dataset.n); render(); break;
+    case "dayGo": S.sheet = null; S.view = "today"; S.date = t.dataset.v; try { history.replaceState(null, "", "#today"); } catch {} render(); window.scrollTo(0, 0); break;
+    case "dayInk": S.sheet = null; S.view = "ink"; S.date = t.dataset.v; render(); window.scrollTo(0, 0); break;
+    case "weekOpen": S.view = "week"; S.week = +t.dataset.n; render(); window.scrollTo(0, 0); break;
+    case "tipX": { const p = profile(); p.tips = p.tips || {}; p.tips[t.dataset.v] = 1; Store.touch("profile"); render(); break; }
+    case "tipsReset": { const p = profile(); p.tips = {}; Store.touch("profile"); toast("Tips will show again"); render(); break; }
+    case "tourStart": Tour.start(); break;
+    case "tourNext": if (S.tour.step < TOUR.length - 1) { S.tour.step++; Tour.paint(); } else { Tour.end(); } break;
+    case "tourSkip": Tour.end(); break;
     case "oauth": { const { error } = await sb.auth.signInWithOAuth({ provider: t.dataset.v, options: { redirectTo: location.href.split("#")[0] } }); if (error) { S.gate.err = supaErr(error); render(); } break; }
     case "pinvite": try { S.inviteCode = await PartnerSupa.invite(); render(); } catch (err) { toast("Couldn't make a code. Check your connection."); } break;
     case "paccept": { const c = ($("#pcode").value || "").trim(); if (!c) break; try { await PartnerSupa.accept(c); S.inviteErr = ""; toast("You're linked. Cheer each other on."); } catch (err) { S.inviteErr = err.message; render(); } break; }
@@ -1420,7 +1618,7 @@ async function onClick(e){
     case "rback": S.ritual.step = Math.max(0, S.ritual.step - 1); S.anim = { step: true }; render(); break;
     case "rclose": S.ritual = null; clearInterval(breathT); S.view = "today"; S.date = today(); render(); checkWins(); break;
     case "rword": { const k = dayKey(today()); const dd = Store.ensure(k, newDay); dd.intention = t.dataset.v; Store.touch(k); render(); break; }
-    case "celeClose": if (e.target === t || t.tagName === "BUTTON") { S.cele = null; render(); } break;
+    case "celeClose": if (e.target === t || t.tagName === "BUTTON") { S.cele = null; render(); if (S.pendingTour) { setTimeout(() => { S.pendingTour = false; if (!S.ritual && !S.sheet && !S.cele && !S.tour && S.view === "today") Tour.start(); else render(); }, 1500); } } break;
     case "onext": {
       captureOnboard(); const o = S.onboard; S.onboardErr = "";
       if (o.step === 1 && !o.nick.trim()) { S.onboardErr = "Add a name so your journal knows who it belongs to."; render(); break; }
@@ -1477,6 +1675,7 @@ document.addEventListener("click", onClick);
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "newHabit") { e.preventDefault(); addHabit(e.target.value); }
   if (e.key === "Enter" && e.target.id === "ohnew") { e.preventDefault(); $('[data-act="ohadd"]').click(); }
+  if (e.key === "Escape" && S.tour) { Tour.end(); return; }
   if (e.key === "Escape" && (S.sheet || S.cele || S.ritual)) { S.sheet = null; S.cele = null; S.ritual = null; render(); }
 });
 document.addEventListener("submit", async e => {
@@ -1496,7 +1695,7 @@ function finishOnboard(){
   const o = S.onboard; if (!o) return;
   const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits });
   Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {}, suite: o.suite }; Store.touch("profile");
-  S.onboard = null; S.view = "today"; S.date = today(); S.snap = snap();
+  S.onboard = null; ls.del("gm-onboard:" + Store.uid); S.view = "today"; S.date = today(); S.snap = snap(); S.pendingTour = !profile().toured;
   celebrate({ art: ART.mountain, title: "Your journey begins", sub: jn.start <= today() ? "Day 1 starts now. Your first morning ritual is waiting on Today." : `Day 1 is ${fmtDate(jn.start, { weekday: "long", month: "long", day: "numeric" })}. Everything's ready for you.` });
 }
 let holdT = null;
@@ -1523,7 +1722,7 @@ const Sync = {
   apply(rows){
     let changed = false;
     rows.forEach(r => { if (!r || !r.key || r.key.startsWith("ink|") || Store.dirty.has(r.key) || Store.writing.has(r.key)) return;
-      if (JSON.stringify(Store.docs[r.key]) !== JSON.stringify(r.data)) { Store.docs[r.key] = r.data; changed = true; } });
+      Base[r.key] = clone(r.data); if (JSON.stringify(Store.docs[r.key]) !== JSON.stringify(r.data)) { Store.docs[r.key] = r.data; changed = true; } });
     this.note(rows);
     if (changed) { ls.set(mirrorKey(), Store.docs); softRender(); }
   },
@@ -1541,11 +1740,16 @@ const Sync = {
 function softRender(){ const a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest("#root")) { S.needsRender = true; return; } render(); }
 document.addEventListener("focusout", () => setTimeout(() => { if (S.needsRender && !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { S.needsRender = false; render(); } }, 50));
 
+const Base = {}; const clone = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+function merge3(b, l, s){ const J = JSON.stringify; if (J(l) === J(b)) return s; if (J(s) === J(b) || s === undefined) return l;
+  if (l && s && typeof l === "object" && typeof s === "object" && Array.isArray(l) === Array.isArray(s)) { const out = Array.isArray(l) ? [] : {};
+    new Set([...Object.keys(l), ...Object.keys(s)]).forEach(k => { const v = merge3(b && typeof b === "object" ? b[k] : undefined, l[k], s[k]); if (v !== undefined) out[k] = v; }); return out; }
+  return l; }
 const SupaStore = {
   async loadAll(){
     try {
       const rows = await sbAll(() => sb.from("docs").select("key,data,updated_at").eq("user_id", Store.uid).not("key", "like", "ink|%"));
-      const out = {}; rows.forEach(r => { out[r.key] = r.data; }); Sync.note(rows);
+      const out = {}; rows.forEach(r => { out[r.key] = r.data; Base[r.key] = clone(r.data); }); Sync.note(rows);
       const mirror = ls.get(mirrorKey()) || {}; const pend = Pending.get();
       pend.forEach(k => { if (k in mirror) { out[k] = mirror[k]; Store.dirty.set(k, true); } else if (!(k in mirror) && out[k]) { delete out[k]; Store.dirty.set(k, true); } });
       Store.docs = out; ls.set(mirrorKey(), out); S.offline = false;
@@ -1557,9 +1761,17 @@ const SupaStore = {
     keys.forEach(k => { Store.dirty.delete(k); Store.writing.add(k); });
     ls.set(mirrorKey(), Store.docs); Pending.add(keys);
     try {
-      const ups = keys.filter(k => Store.docs[k]).map(k => ({ user_id: Store.uid, key: k, data: JSON.parse(JSON.stringify(Store.docs[k])) }));
-      const dels = keys.filter(k => !Store.docs[k]);
-      if (ups.length) { const { error } = await sb.from("docs").upsert(ups); if (error) throw error; }
+      const upKeys = keys.filter(k => Store.docs[k]); const dels = keys.filter(k => !Store.docs[k]); let merged = false;
+      if (upKeys.length) {
+        const { data: srv, error: e1 } = await sb.from("docs").select("key,data").eq("user_id", Store.uid).in("key", upKeys); if (e1) throw e1;
+        const sm = {}; (srv || []).forEach(r => { sm[r.key] = r.data; });
+        const ups = upKeys.map(k => { let d = clone(Store.docs[k]);
+          if (k in sm && JSON.stringify(sm[k]) !== JSON.stringify(Base[k])) { d = merge3(Base[k], d, sm[k]); if (JSON.stringify(d) !== JSON.stringify(Store.docs[k]) && !Store.dirty.has(k)) { Store.docs[k] = clone(d); merged = true; } }
+          return { user_id: Store.uid, key: k, data: d }; });
+        const { error } = await sb.from("docs").upsert(ups); if (error) throw error;
+        ups.forEach(r => { Base[r.key] = clone(r.data); });
+      }
+      if (merged) { ls.set(mirrorKey(), Store.docs); softRender(); }
       if (dels.length) { const { error } = await sb.from("docs").delete().eq("user_id", Store.uid).in("key", dels); if (error) throw error; }
       S.offline = false; S.syncErr = null; Pending.clear(keys);
     } catch (e) { keys.forEach(k => Store.dirty.set(k, true)); S.offline = !navigator.onLine; S.syncErr = e && (e.code || e.message); Store.setStatus("error"); }

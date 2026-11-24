@@ -31,6 +31,7 @@ async function onboard(p, nick){
   await p.fill('#og0', 'Run a sub-25 5K by March'); await p.click('[data-act=onext]');
   await p.click('[data-v="Move 30 min"]'); await p.click('[data-act=onext]');
   await p.evaluate(() => document.getElementById('commitBtn').click()); await p.waitForSelector('.cele'); await p.click('.cele button');
+  await p.waitForTimeout(1800); if (await p.locator('#tourLayer').count()) await p.keyboard.press('Escape');
 }
 const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.backdrop,svg,canvas,.fx')) return;
@@ -56,6 +57,18 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   ok(await A.inputValue('#w0') === 'Finished the run', 'evening ritual saves to Today');
   await A.waitForTimeout(900);
 
+  // 2b. Calendar, day summary, logo home, Partner via Settings, tour replay.
+  await A.click('[data-act=nav][data-v=calendar] >> visible=true'); ok(await A.locator('.cal-grid .cd.now').count() === 1, 'calendar month shows today');
+  await A.click('.cal-grid .cd.now'); ok(/My son/.test(await A.locator('.sheet').innerText()), 'tapping a day shows what was written');
+  await A.click('[data-act=dayGo]'); ok(await A.locator('.hero').count() === 1, 'open this day goes to Today');
+  await A.click('[data-act=nav][data-v=calendar] >> visible=true'); await A.click('[data-act=calMode][data-v=journey]'); ok(await A.locator('.jr').count() === 13, 'calendar shows all 13 weeks');
+  await A.click('[data-act=nav][data-v=today].brand >> visible=true'); ok(await A.locator('.hero').count() === 1, 'logo goes home to Today');
+  ok(await A.locator('.tabs [data-v=partner], .nav [data-v=partner]').count() === 0, 'Partner is not in the tab bar');
+  await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('.main [data-act=nav][data-v=partner]'); ok(await A.locator('[data-act=toggleShare]').count() === 1, 'Partner opens from Settings');
+  await A.click('.back'); await A.click('[data-act=tourStart]'); let steps = 0;
+  while (await A.locator('#tourLayer [data-act=tourNext]').count() && steps < 8) { steps++; await A.waitForTimeout(450); await A.click('#tourLayer [data-act=tourNext]'); }
+  ok(steps >= 4 && await A.locator('#tourLayer').count() === 0, `tour walks through ${steps} steps and closes`);
+
   // 3. Same person opens GreatestMe from a different place (separate storage): clear message, not a password error.
   const B = await page(b, { ...PHONE }, 'homescreen');
   await B.click('[data-act=gmode][data-v=signin]'); await B.fill('#gname', 'Lyllian'); await B.fill('#gpass', PASS); await B.click('button[type=submit]');
@@ -80,7 +93,8 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
       await createAccount(p, 'Tester', 'Tester#2026');
       for (let st = 0; st < 6; st++) { if (st === 1) await p.fill('#onick', 'Tester'); if (st === 4) await p.fill('#og0', 'A goal'); await p.waitForTimeout(60); const o = await overflow(p); ok(!o, `${label} ${suite} onboarding ${st} fits${o ? ' (' + o + ')' : ''}`); await p.click('[data-act=onext]'); }
       await p.evaluate(() => document.getElementById('commitBtn').click()); await p.click('.cele button');
-      for (const v of ['today', 'week', 'goals', 'habits', 'progress', 'partner', 'prefs']) { await p.click(`[data-act=nav][data-v=${v}] >> visible=true`); await p.waitForTimeout(60); const o = await overflow(p); if (o) ok(false, `${label} ${suite} ${v} fits (${o})`); }
+      await p.waitForTimeout(1800); if (await p.locator('#tourLayer').count()) { const o = await overflow(p); ok(!o, `${label} ${suite} tour fits${o ? ' (' + o + ')' : ''}`); await p.keyboard.press('Escape'); }
+      for (const v of ['today', 'week', 'goals', 'habits', 'progress', 'calendar', 'prefs']) { await p.click(`[data-act=nav][data-v=${v}] >> visible=true`); await p.waitForTimeout(60); const o = await overflow(p); if (o) ok(false, `${label} ${suite} ${v} fits (${o})`); }
       await p.context().close();
     }
   }
@@ -98,12 +112,15 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     await H.fill('#w0', 'Hit the gym'); await H.locator('#w0').blur(); await C.waitForTimeout(2600);
     ok(await C.inputValue('#w0') === 'Hit the gym', 'accounts: changes sync live to the other place');
     await C.reload(); await C.waitForTimeout(900); ok(await C.locator('.hero').count() === 1, 'accounts: stays signed in after reopening');
+    await C.fill('#g2', 'From the iPhone'); await H.fill('#imp', 'From the iPad'); await C.locator('#g2').blur(); await H.locator('#imp').blur(); await C.waitForTimeout(3500);
+    await H.reload(); await H.waitForTimeout(900);
+    ok(await H.inputValue('#g2') === 'From the iPhone' && await H.inputValue('#imp') === 'From the iPad', 'accounts: two devices editing the same day at once keep both edits');
     await C.fill('#g1', 'Health'); await C.evaluate(() => { const e = document.getElementById('g1'); e.setSelectionRange(2, 2); });
     await C.evaluate(() => window.dispatchEvent(new Event('x'))); await C.keyboard.type('XX'); ok(await C.inputValue('#g1') === 'HeXXalth', 'typing stays in order where the cursor is');
     const L = await page(b, { ...PHONE }, 'acct-lyllian', 'accounts'); await signup(L, 'l@example.com', 'Purple#2026xx'); await onboard(L, 'Lyllian');
-    await L.click('[data-act=nav][data-v=partner] >> visible=true'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
+    await L.click('[data-act=nav][data-v=prefs] >> visible=true'); await L.click('.main [data-act=nav][data-v=partner]'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
     const code = (await L.locator('.mono[style*="letter-spacing"]').innerText()).trim(); await L.click('[data-act=toggleShare]'); await L.waitForTimeout(3000);
-    await C.click('[data-act=nav][data-v=partner] >> visible=true'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
+    await C.click('[data-act=nav][data-v=prefs] >> visible=true'); await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
     ok((await C.locator('.partner h2').allInnerTexts()).includes('Lyllian'), 'accounts: partner invite code links two phones');
   } finally { fake.kill(); }
 

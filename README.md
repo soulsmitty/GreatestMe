@@ -24,6 +24,10 @@ opt-in Partner board for accountability.
 ## Experience
 
 - **Onboarding:** welcome, your name, pick your look, Day 1, goals, habits, then press-and-hold to commit.
+- **Calendar:** month view with mini progress rings, mood and habits per day, Day 1 and Day 91 markers, swipe between months; a 13-week heat map with milestone flags (overdue in amber) and weekly scores; tap any day for its summary.
+- **Settings:** look, Partner, sounds and celebrations, handwriting, Siri and Shortcuts, journeys, backup, Help (replay the tour, show tips again).
+- **First-run tour** (five steps, replayable) and dismissible tips. Tap the logo to return to Today.
+- **Sync:** edits from two devices at the same moment are merged field by field, never overwritten.
 - **Today:** time-of-day greeting and scene, three progress rings (morning, targets, evening), streak flame, this week's check-ins.
 - **Guided rituals:** Morning (one-minute breathing, gratitude, intention, three targets) and Evening (wins, lessons, tomorrow, mood and energy), one prompt per screen.
 - **Celebrations:** confetti and a soft chime for targets, all habits done, a full page, milestones and streaks (3, 7, 14, 21, 30, 45, 60, 75, 91 days). Both can be turned off in Settings.
