@@ -276,10 +276,10 @@ details.sched summary::-webkit-details-marker{display:none}
 .ring .trk{fill:none;stroke:var(--line);stroke-width:9}
 .ring .arc{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)}
 .ring .ctr{position:absolute;inset:0;display:grid;place-items:center;text-align:center;line-height:1.05}
-.ring .ctr b{font-family:var(--f-mono);font-size:1.5rem;letter-spacing:-.04em}
+.ring .ctr b{font-family:var(--f-mono);font-size:1.25rem;letter-spacing:-.04em}
 .ring .ctr span{font-size:.62rem;font-family:var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .hero h1{font-size:clamp(1.3rem,4.6vw,1.9rem)}
-@media (max-width:520px){.hero .hi{padding-right:92px}.hero{grid-template-columns:1fr}.hero .ring{position:absolute;right:16px;top:16px;width:84px;height:84px}.ring .ctr b{font-size:1.1rem}.hero .scene{width:150px;opacity:.55}}
+@media (max-width:520px){.hero .ring .ctr span{display:none}.hero .ring .ctr b{font-size:.95rem}.hero .hi{padding-right:92px}.hero{grid-template-columns:1fr}.hero .ring{position:absolute;right:16px;top:16px;width:84px;height:84px}.ring .ctr b{font-size:1.1rem}.hero .scene{width:150px;opacity:.55}}
 .week7{display:flex;gap:6px}
 .week7 .d{display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
 .week7 .d i{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;background:var(--solid)}
@@ -1198,7 +1198,7 @@ function render(){
       <div class="rail-foot"><div id="savestate" class="save" style="padding:0 8px"></div>
       <button class="me" data-act="nav" data-v="prefs" aria-label="Settings" ${S.view === "prefs" ? 'aria-current="page"' : ""}><span class="avatar sm">${esc((p.nick || "?").trim().charAt(0))}</span><span style="flex:1;min-width:0"><b style="display:block">${esc(p.nick || "")}</b><span class="muted small">Settings</span></span>${ICON.gear.replace("<svg", '<svg width="18" height="18"')}</button></div></aside>
     <main class="main"><div class="col ${entering ? "enter" : ""}">
-      <div class="mtop"><button class="brand" style="padding:0" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button><button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear}</button></div>
+      <div class="mtop"><button class="brand" style="padding:0" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button><button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear.replace("<svg", '<svg width="22" height="22"')}</button></div>
       ${v}
     </div></main>
     <nav class="tabs" style="--tabs:${items.length}">${nav()}</nav>
@@ -1244,7 +1244,7 @@ function todayView(){
   const parts = dayParts(dd), mDone = parts.m >= 1 && dd.targets.some(t => t.t.trim()), eDone = parts.e >= .99;
   const lit = journalled(Store.get(dayKey(today())));
   return `
-  <div class="head"><span class="label">${esc(j.title)} · ${n >= 1 && n <= TOTAL_DAYS ? `Week ${weekOf(d)}` : "Outside journey"}</span>
+  <div class="head"><span class="label">${esc(j.title)} · ${n >= 1 && n <= TOTAL_DAYS ? `Week ${weekOf(d)}` : n < 1 ? `Day 1 is ${esc(fmtDate(j.start, { weekday: "short", month: "short", day: "numeric" }))}` : "Journey complete"}</span>
     <div class="daynav"><button class="btn icon" aria-label="Previous day" data-act="day" data-n="-1">${ICON.left}</button>
     <button class="btn sm" data-act="day" data-n="0" ${isToday ? "disabled" : ""}>Today</button>
     <button class="btn icon" aria-label="Next day" data-act="day" data-n="1">${ICON.right}</button></div></div>
@@ -1897,7 +1897,11 @@ async function bootLocal(){
   if (acct) await startLocal(acct); else showGate();
 }
 window.addEventListener("hashchange", routeHash);
-if (!window.claude && "serviceWorker" in navigator && /^https?:$/.test(location.protocol)) { try { navigator.serviceWorker.register("sw.js").catch(() => {}); } catch {} }
+if (!window.claude && "serviceWorker" in navigator && /^https?:$/.test(location.protocol)) { try {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js").then(reg => { document.addEventListener("visibilitychange", () => { if (!document.hidden) reg.update().catch(() => {}); }); }).catch(() => {});
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadController && !S.ritual && !document.querySelector("#root input:focus, #root textarea:focus")) location.reload(); });
+} catch {} }
 async function boot(){
   Theme.apply();
   if (SUPA_WANTED()) {

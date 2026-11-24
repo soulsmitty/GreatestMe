@@ -31,7 +31,7 @@ async function onboard(p, nick){
   await p.fill('#og0', 'Run a sub-25 5K by March'); await p.click('[data-act=onext]');
   await p.click('[data-v="Move 30 min"]'); await p.click('[data-act=onext]');
   await p.evaluate(() => document.getElementById('commitBtn').click()); await p.waitForSelector('.cele'); await p.click('.cele button');
-  await p.waitForTimeout(1800); if (await p.locator('#tourLayer').count()) await p.keyboard.press('Escape');
+  await p.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }).then(() => p.keyboard.press('Escape')).catch(() => {}); await p.waitForTimeout(150);
 }
 const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.backdrop,svg,canvas,.fx')) return;
@@ -93,7 +93,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
       await createAccount(p, 'Tester', 'Tester#2026');
       for (let st = 0; st < 6; st++) { if (st === 1) await p.fill('#onick', 'Tester'); if (st === 4) await p.fill('#og0', 'A goal'); await p.waitForTimeout(60); const o = await overflow(p); ok(!o, `${label} ${suite} onboarding ${st} fits${o ? ' (' + o + ')' : ''}`); await p.click('[data-act=onext]'); }
       await p.evaluate(() => document.getElementById('commitBtn').click()); await p.click('.cele button');
-      await p.waitForTimeout(1800); if (await p.locator('#tourLayer').count()) { const o = await overflow(p); ok(!o, `${label} ${suite} tour fits${o ? ' (' + o + ')' : ''}`); await p.keyboard.press('Escape'); }
+      if (await p.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }).then(() => true).catch(() => false)) { const o = await overflow(p); ok(!o, `${label} ${suite} tour fits${o ? ' (' + o + ')' : ''}`); await p.keyboard.press('Escape'); }
       for (const v of ['today', 'week', 'goals', 'habits', 'progress', 'calendar', 'prefs']) { await p.click(`[data-act=nav][data-v=${v}] >> visible=true`); await p.waitForTimeout(60); const o = await overflow(p); if (o) ok(false, `${label} ${suite} ${v} fits (${o})`); }
       await p.context().close();
     }
