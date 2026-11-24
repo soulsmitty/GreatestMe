@@ -3,6 +3,9 @@ on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
+  push: # also run right away when the recap code changes, so a fix is checked without waiting for the schedule
+    branches: [main]
+    paths: ["scripts/recaps.mjs", "scripts/email-templates.mjs", ".github/workflows/recaps.yml"]
 permissions:
   contents: read
 concurrency:
