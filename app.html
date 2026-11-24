@@ -458,6 +458,23 @@ details.sched summary::-webkit-details-marker{display:none}
 .cal-sec .cal-card{box-shadow:none;border:0;background:transparent;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none;margin-top:0!important}
 .wk-strip{display:grid;grid-template-columns:repeat(7,minmax(64px,1fr));gap:8px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding:2px;-webkit-overflow-scrolling:touch}
 .wk-strip::-webkit-scrollbar{display:none}
+/* calendar: the week strip folds away, then the month opens outward from this week; closing reverses it */
+.cal-in.strip-out .wd{animation:stripOut .17s ease-in both;animation-delay:calc(var(--i,0)*12ms)}
+@keyframes stripOut{to{opacity:0;transform:scale(.9) translateY(6px)}}
+.cal-grow .cal-seg,.cal-grow .cal-top{animation:calFade .28s ease-out both}
+.cal-grow .cal-grid .dow{animation:calFade .28s ease-out .06s both}
+.cal-grow .cal-grid .cd{animation:calCell .36s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(70ms + var(--d,0)*55ms)}
+.cal-grow .cal-sum,.cal-grow .legend,.cal-grow .tip,.cal-grow .jr{animation:calFade .3s ease-out .34s both}
+@keyframes calFade{from{opacity:0;transform:translateY(-4px)}}
+@keyframes calCell{from{opacity:0;transform:translateY(calc(var(--dir,0) * -14px)) scale(.9)}}
+.cal-shrink .cal-grid .cd{animation:calCellOut .24s ease-in both;animation-delay:calc((5 - var(--d,0)) * 30ms)}
+.cal-shrink .cal-grid .cd.now{animation-delay:.2s}
+.cal-shrink .cal-seg,.cal-shrink .cal-top,.cal-shrink .cal-sum,.cal-shrink .legend,.cal-shrink .tip,.cal-shrink .dow,.cal-shrink .jr{animation:calFadeOut .2s ease-in both}
+@keyframes calCellOut{to{opacity:0;transform:translateY(calc(var(--dir,0) * -14px)) scale(.9)}}
+@keyframes calFadeOut{to{opacity:0}}
+.cal-strip-in .wd{animation:calCell .32s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*35ms)}
+@media (prefers-reduced-motion:reduce){.cal-in *{animation:none!important}}
+
 .wd{all:unset;box-sizing:border-box;cursor:pointer;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;border-radius:14px;border:1px solid var(--line);background:var(--solid);min-height:104px;transition:transform .12s}
 .wd:active{transform:scale(.95)}.wd:focus-visible{outline:2px solid var(--acc)}
 .wd .wn{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
@@ -1202,11 +1219,12 @@ function calendarView(){
     let journaled = 0, moods = [], best = 0, run = 0;
     days.forEach(d => { const dd = Store.get(dayKey(d)); if (d <= t && journalled(dd)) { journaled++; run++; best = Math.max(best, run); } else if (d <= t) run = 0; if (dd && dd.mood) moods.push(dd.mood); });
     const avg = moods.length ? (moods.reduce((a, b) => a + b, 0) / moods.length) : 0;
-    const cells = Array.from({ length: lead }, () => `<span class="cd blank" aria-hidden="true"></span>`).concat(days.map(d => {
+    const anchor = t.slice(0, 7) === ym ? Math.floor((lead + parse(t).getDate() - 1) / 7) : 0; const rowOf = i => Math.floor(i / 7); const dv = i => { const r = rowOf(i) - anchor; return `--d:${Math.abs(r)};--dir:${Math.sign(r)}`; };
+    const cells = Array.from({ length: lead }, (_, i) => `<span class="cd blank" aria-hidden="true" style="${dv(i)}"></span>`).concat(days.map((d, di) => {
       const dd = Store.get(dayKey(d)); const n = dayNum(d, j); const inJ = n >= 1 && n <= TOTAL_DAYS; const fut = d > t;
       const hDone = dd ? j.habits.filter(h => dd.habits[h.id]).length : 0;
       const marks = `${n === 1 ? `<i class="flag" title="Day 1">1</i>` : ""}${n === TOTAL_DAYS ? `<i class="flag end" title="Day 91">91</i>` : ""}`;
-      return `<button class="cd ${d === t ? "now" : ""} ${inJ ? "" : "out"} ${fut ? "fut" : ""} ${journalled(dd) ? "on" : ""}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}${journalled(dd) ? ", journaled" : ""}${dd && dd.mood ? ", mood " + dd.mood + " of 5" : ""}">
+      return `<button class="cd ${d === t ? "now" : ""} ${inJ ? "" : "out"} ${fut ? "fut" : ""} ${journalled(dd) ? "on" : ""}" style="${dv(lead + di)}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}${journalled(dd) ? ", journaled" : ""}${dd && dd.mood ? ", mood " + dd.mood + " of 5" : ""}">
         <span class="dn">${parse(d).getDate()}</span>${marks}${fut || !inJ ? "" : miniRing(dd)}
         <span class="meta">${dd && dd.mood ? `<span class="mood">${MOOD_FACE[dd.mood]}</span>` : ""}${j.habits.length && !fut && inJ ? `<span class="hb"><i style="width:${Math.round(hDone / j.habits.length * 100)}%"></i></span>` : ""}</span></button>`; }));
     body = `<section class="card cal-card" style="margin-top:12px">
@@ -1234,11 +1252,11 @@ function calendarSection(){
   const ws = n >= 1 && n <= TOTAL_DAYS ? addDays(j.start, (weekOf(t, j) - 1) * 7) : addDays(t, -((parse(t).getDay() + 6) % 7));
   const days = Array.from({ length: 7 }, (_, i) => addDays(ws, i)); const done = days.filter(d => d <= t && journalled(Store.get(dayKey(d)))).length; const past = days.filter(d => d <= t).length;
   const strip = `<div class="wk-strip" role="list" aria-label="This week">${days.map(d => { const dd = Store.get(dayKey(d)); const fut = d > t; const inJ = dayNum(d, j) >= 1 && dayNum(d, j) <= TOTAL_DAYS;
-    return `<button role="listitem" class="wd ${d === t ? "now" : ""} ${fut ? "fut" : ""}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}${journalled(dd) ? ", journaled" : ""}"><span class="wn">${esc(fmtDate(d, { weekday: "short" }))}</span><b class="mono">${parse(d).getDate()}</b>${fut || !inJ ? `<span class="mini-ph"></span>` : miniRing(dd, 34)}<span class="mood">${dd && dd.mood ? MOOD_FACE[dd.mood] : ""}</span></button>`; }).join("")}</div>`;
-  const c = open ? calendarView() : null;
+    return `<button role="listitem" style="--i:${days.indexOf(d)}" class="wd ${d === t ? "now" : ""} ${fut ? "fut" : ""}" data-act="dayOpen" data-v="${d}" aria-label="${esc(fmtDate(d))}${journalled(dd) ? ", journaled" : ""}"><span class="wn">${esc(fmtDate(d, { weekday: "short" }))}</span><b class="mono">${parse(d).getDate()}</b>${fut || !inJ ? `<span class="mini-ph"></span>` : miniRing(dd, 34)}<span class="mood">${dd && dd.mood ? MOOD_FACE[dd.mood] : ""}</span></button>`; }).join("")}</div>`;
+  const c = open ? calendarView() : null; const anim = reduced() ? "" : S.calAnim === "open" && open ? "cal-grow" : S.calAnim === "close" && !open ? "cal-strip-in" : ""; S.calAnim = null;
   return `<section class="card cal-sec ${open ? "open" : ""}" id="sec-calendar">
     <button class="acc-h" data-act="calToggle" aria-expanded="${open}" aria-controls="calFull"><span class="sdot ${done === past && past ? "done" : done ? "part" : ""}" style="--p:${past ? Math.round(done / past * 100) : 0}%" aria-hidden="true">${done === past && past ? "✓" : ""}</span><span class="acc-t"><h2>Calendar</h2><span class="muted small">This week · ${done} of ${past || 7} day${(past || 7) === 1 ? "" : "s"} journaled</span></span><span class="schip ${open ? "part" : ""}">${open ? "Full view" : "This week"}</span>${CHEV}</button>
-    <div class="acc-in cal-in">${strip}${open ? `<div class="row" style="justify-content:center">${c.seg}</div><div id="calFull">${c.body}</div>` : ""}</div></section>`;
+    <div class="acc-in cal-in ${anim}">${open ? `<div class="row cal-seg" style="justify-content:center">${c.seg}</div><div id="calFull">${c.body}</div>` : strip}</div></section>`;
 }
 function daySheet(){
   const d = S.sheetDate, j = J(), dd = Store.get(dayKey(d)), has = journalled(dd);
@@ -1982,7 +2000,12 @@ async function onClick(e){
     case "signout": await Store.flush(); if (Store.mode === "supa") { ls.del(mirrorKey()); try { await sb.auth.signOut(); } catch {} } ls.del("gm:session"); location.reload(); break;
     case "migrate": await migrate(); break;
     case "calMode": S.calMode = t.dataset.v; render(); break;
-    case "calToggle": { let o = false; try { o = localStorage.getItem("gm-cal-open") === "1"; localStorage.setItem("gm-cal-open", o ? "0" : "1"); } catch {} S.calOpenMem = !o; buzz(6); render(); if (!o) setTimeout(() => { const el = document.getElementById("sec-calendar"); el && el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 60); break; }
+    case "calToggle": { let o = false; try { o = localStorage.getItem("gm-cal-open") === "1"; } catch {} buzz(6);
+      const commit = () => { try { localStorage.setItem("gm-cal-open", o ? "0" : "1"); } catch {} S.calOpenMem = !o; S.calAnim = o ? "close" : "open"; render();
+        if (!o) setTimeout(() => { const el = document.getElementById("sec-calendar"); el && el.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" }); }, 60); };
+      const inner = document.querySelector("#sec-calendar .cal-in"); if (reduced() || !inner || S.calBusy) { commit(); break; }
+      S.calBusy = true; const h = document.querySelector("#sec-calendar .acc-h"); h && h.setAttribute("aria-expanded", String(!o)); document.getElementById("sec-calendar").classList.toggle("open", !o);
+      inner.classList.add(o ? "cal-shrink" : "strip-out"); setTimeout(() => { S.calBusy = false; commit(); }, o ? 300 : 170); break; }
     case "emailPref": { const p = profile(); p.emails = { daily: true, weekly: true, journey: true, ...(p.emails || {}) }; p.emails[t.dataset.v] = t.checked; Store.touch("profile"); break; }
     case "schedPref": profile().schedule = t.checked; Store.touch("profile"); break;
     case "water": { const k = dayKey(S.date); const dd = Store.ensure(k, newDay); const goal = profile().waterGoal || 8; const before = dd.water || 0; dd.water = clamp(before + +t.dataset.n, 0, 30); Store.touch(k); buzz(8);
