@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@600;800&family=Bungee&family=Alfa+Slab+One&family=Nunito:wght@400;600;700;800&display=swap"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@600;800&family=Bungee&family=Alfa+Slab+One&family=Nunito:wght@400;600;700;800&display=swap"></noscript>
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@600;800&family=Bungee&family=Alfa+Slab+One&family=Permanent+Marker&family=VT323&family=Abril+Fatface&family=Oswald:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@600;800&family=Bungee&family=Alfa+Slab+One&family=Permanent+Marker&family=VT323&family=Abril+Fatface&family=Oswald:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap"></noscript>
 <style>
 /* Theme suites. Default "greatestme": the deep iMessage purple with frosted glass (light + dark).
    "synthwave": neon sunset over a grid (dark). "martin": loud '90s sitcom colour-blocking (bright).
@@ -52,14 +52,14 @@
   --f-display:"Bungee", "Arial Black", system-ui, sans-serif; --f-body:"Nunito", "Segoe UI", system-ui, sans-serif; --h-case:uppercase; --h-track:.01em; --h-weight:400; --h-shadow:2px 2px 0 #FFB703;
   color-scheme:light}
 /* A Different World: Hillman College crimson and gold, collegiate slab headings, late-'80s campus geometry (bright) */
-:root[data-suite="differentworld"],.pv[data-suite="differentworld"]{
-  --canvas:#FBF3E6; --surface:#FFFDF8; --solid:#FFFFFF; --raised:#FFF6E6; --line:rgb(122 14 34 / .16); --ink:#2A0A10; --muted:#6B4A45; --faint:#9A7D74;
-  --acc:#A6192E; --acc2:#D99A1E; --good:#1F7A5C; --bad:#C0262D; --on-acc:#FFFFFF; --warn:#E0A526;
-  --shadow-card:0 1px 0 rgb(122 14 34 / .05),0 10px 26px rgb(122 14 34 / .1); --shadow-lift:0 14px 36px rgb(122 14 34 / .18);
-  --glass:none; --r:16px; --r-sm:10px; --glow-a:rgb(166 25 46 / .14); --glow-b:rgb(217 154 30 / .16); --glow-c:rgb(0 150 160 / .1); --paper:#FFFFFF;
-  --f-display:"Alfa Slab One", Georgia, serif; --h-case:none; --h-track:.005em; --h-weight:400; --h-shadow:none; color-scheme:light}
-:root[data-suite="differentworld"] h2,:root[data-suite="differentworld"] h3{font-family:var(--f-body);font-weight:800;letter-spacing:-.01em}
-:root[data-suite="differentworld"] .hero{box-shadow:inset 0 7px 0 #A6192E,inset 0 11px 0 #D99A1E,var(--shadow-card)}
+:root[data-suite="differentworld"],.pv[data-suite="differentworld"]{ /* Hillman College: deep burgundy and white, varsity slab headings */
+  --canvas:#561424; --surface:rgb(255 255 255 / .07); --solid:#66192C; --raised:rgb(255 255 255 / .1); --line:rgb(255 255 255 / .2); --ink:#FFFFFF; --muted:#EBCFD4; --faint:#BF939B;
+  --acc:#FFFFFF; --acc2:#F2B8C2; --good:#FFFFFF; --bad:#FFB3A8; --on-acc:#561424; --warn:#F7D9A0;
+  --ring-m:#FFFFFF; --ring-t:#F2B8C2; --ring-e:#D7899A;
+  --shadow-card:0 1px 0 rgb(255 255 255 / .06) inset,0 10px 30px rgb(30 0 8 / .35); --shadow-lift:0 16px 44px rgb(30 0 8 / .45);
+  --glass:blur(12px); --r:14px; --r-sm:10px; --glow-a:rgb(255 255 255 / .06); --glow-b:rgb(120 20 45 / .5); --glow-c:transparent; --paper:#FAF8F3;
+  --f-display:"Alfa Slab One", Georgia, serif; --h-case:uppercase; --h-track:.03em; --h-weight:400; --h-shadow:none; color-scheme:dark}
+:root[data-suite="differentworld"] h2,:root[data-suite="differentworld"] h3{font-family:var(--f-body);font-weight:800;text-transform:none;letter-spacing:-.01em}
 /* Heritage (Black History Month): Pan-African red, black and green with kente gold (dark) */
 :root[data-suite="heritage"],.pv[data-suite="heritage"]{
   --canvas:#0B0A08; --surface:rgb(26 22 16 / .86); --solid:#17140F; --raised:rgb(242 201 76 / .07); --line:rgb(242 201 76 / .2); --ink:#FFF7E6; --muted:#CDBF9F; --faint:#8C8169;
@@ -96,6 +96,34 @@
   --shadow-card:0 1px 1px rgb(0 70 85 / .04),0 8px 28px rgb(0 90 110 / .09); --shadow-lift:0 12px 40px rgb(0 90 110 / .16);
   --glass:blur(22px) saturate(1.4); --r:20px; --glow-a:rgb(0 134 157 / .22); --glow-b:rgb(242 113 75 / .16); --glow-c:rgb(0 180 200 / .14); --paper:#FFFFFF;
   --f-display:"Plus Jakarta Sans", system-ui, sans-serif; --h-case:none; --h-weight:800; --h-shadow:none; color-scheme:light}
+/* Fresh Prince: graffiti doodles on bubblegum lavender, spray-paint headings (bright) */
+:root[data-suite="freshprince"],.pv[data-suite="freshprince"]{
+  --canvas:#F4D6EE; --surface:rgb(255 255 255 / .9); --solid:#FFFFFF; --raised:#FFF3FB; --line:rgb(43 11 63 / .2); --ink:#2B0B3F; --muted:#6E4A7E; --faint:#9C7EA8;
+  --acc:#17922F; --acc2:#E8188C; --good:#00A0D2; --bad:#E5243B; --on-acc:#FFFFFF; --warn:#F5B800;
+  --shadow-card:4px 4px 0 rgb(43 11 63 / .9); --shadow-lift:6px 6px 0 #2B0B3F; --btn-shadow:3px 3px 0 #2B0B3F; --press:translate(2px,2px);
+  --glass:none; --border-w:2px; --r:18px; --r-sm:12px; --glow-a:transparent; --glow-b:transparent; --glow-c:transparent; --paper:#FFFFFF;
+  --f-display:"Permanent Marker", "Marker Felt", "Comic Sans MS", cursive; --h-case:none; --h-track:.01em; --h-weight:400; --h-shadow:none; color-scheme:light}
+:root[data-suite="freshprince"] .card,:root[data-suite="freshprince"] .ritual-card,:root[data-suite="freshprince"] .hero{border-color:#2B0B3F}
+:root[data-suite="freshprince"] h1{color:#3FCB1B;text-shadow:2px 2px 0 #2B0B3F,-1px -1px 0 #2B0B3F,1px -1px 0 #2B0B3F,-1px 1px 0 #2B0B3F,4px 4px 0 #FF4FB0}
+:root[data-suite="freshprince"] h2,:root[data-suite="freshprince"] h3{color:#2B0B3F}
+/* Matrix: green phosphor and falling binary (dark) */
+:root[data-suite="matrix"],.pv[data-suite="matrix"]{
+  --canvas:#000300; --surface:rgb(0 14 4 / .86); --solid:#001306; --raised:rgb(0 255 65 / .06); --line:rgb(0 255 65 / .24); --ink:#D6FFE0; --muted:#7CD896; --faint:#3F8E56;
+  --acc:#00FF41; --acc2:#7DFFB0; --good:#00D134; --bad:#FF4D4D; --on-acc:#001A06; --warn:#E7FF5A;
+  --ring-m:#00FF41; --ring-t:#00B82F; --ring-e:#9DFFC2;
+  --shadow-card:0 0 0 1px rgb(0 255 65 / .14),0 0 24px rgb(0 255 65 / .1); --shadow-lift:0 0 36px rgb(0 255 65 / .22);
+  --glass:blur(4px); --r:8px; --r-sm:4px; --glow-a:transparent; --glow-b:transparent; --glow-c:transparent; --paper:#FAF8F3;
+  --f-display:"VT323", "JetBrains Mono", ui-monospace, monospace; --h-case:uppercase; --h-track:.06em; --h-weight:400; --h-shadow:0 0 10px rgb(0 255 65 / .8); color-scheme:dark}
+:root[data-suite="matrix"] h1{font-size:clamp(1.9rem,6vw,2.5rem)}
+:root[data-suite="matrix"] h2,:root[data-suite="matrix"] h3{font-size:1.35rem}
+/* Living Single: Brooklyn brownstones, plum, mustard and coral, magazine serif (bright) */
+:root[data-suite="livingsingle"],.pv[data-suite="livingsingle"]{
+  --canvas:#F7EBDD; --surface:#FFFAF3; --solid:#FFFFFF; --raised:#FBF1E4; --line:rgb(107 45 92 / .16); --ink:#2A1622; --muted:#6E5260; --faint:#9D8590;
+  --acc:#6B2D5C; --acc2:#E1A832; --good:#2E8B57; --bad:#C8432E; --on-acc:#FFFFFF; --warn:#E66A4E;
+  --shadow-card:0 1px 0 rgb(107 45 92 / .05),0 10px 26px rgb(107 45 92 / .1); --shadow-lift:0 14px 36px rgb(107 45 92 / .18);
+  --glass:none; --r:14px; --glow-a:rgb(230 106 78 / .14); --glow-b:rgb(225 168 50 / .16); --glow-c:transparent; --paper:#FFFFFF;
+  --f-display:"Abril Fatface", Georgia, serif; --h-case:none; --h-track:.005em; --h-weight:400; --h-shadow:none; color-scheme:light}
+:root[data-suite="livingsingle"] h2,:root[data-suite="livingsingle"] h3{font-family:var(--f-body);font-weight:800}
 /* Studio: quiet cool grey */
 :root[data-suite="studio"],.pv[data-suite="studio"]{
   --canvas:#F2F4F7; --surface:#FFFFFF; --solid:#FFFFFF; --raised:#F8F9FB; --line:#E5E8EE; --ink:#0F1420; --muted:#6C7688; --faint:#949EB0;
@@ -147,8 +175,8 @@ body{overflow-wrap:break-word}
   background:linear-gradient(#FFC86B,#FFA53C 30%,#FF2E86 62%,#B15CFF);-webkit-mask:repeating-linear-gradient(0deg,#000 0 14px,transparent 14px 20px);mask:repeating-linear-gradient(0deg,#000 0 14px,transparent 14px 20px)}
 :root[data-suite="martin"] .backdrop{background-color:#FFF1D6;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cpath d='M12 30q10-16 20 0t20 0 20 0' fill='none' stroke='%237B2CBF' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M118 22l16 28h-32z' fill='%2300A6A6'/%3E%3Ccircle cx='60' cy='118' r='11' fill='none' stroke='%23E63946' stroke-width='4'/%3E%3Crect x='128' y='112' width='22' height='22' transform='rotate(18 139 123)' fill='%23FFB703'/%3E%3Cpath d='M20 160l10-10 10 10 10-10' fill='none' stroke='%23151515' stroke-width='3'/%3E%3C/svg%3E");background-size:180px;opacity:.22}
 :root[data-suite="martin"] .backdrop::before,:root[data-suite="martin"] .backdrop::after,:root[data-suite="studio"] .backdrop::before,:root[data-suite="studio"] .backdrop::after{display:none}
-:root[data-suite="differentworld"] .backdrop{background-color:#FBF3E6;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M20 40l18-18M30 46l18-18' stroke='%23A6192E' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='150' cy='40' r='12' fill='none' stroke='%23D99A1E' stroke-width='4'/%3E%3Cpath d='M60 150h26v26H60z' fill='%2300969F' transform='rotate(14 73 163)'/%3E%3Cpath d='M140 130l14 26h-28z' fill='%23A6192E'/%3E%3Cpath d='M100 96q8-10 16 0t16 0' fill='none' stroke='%232A0A10' stroke-width='3'/%3E%3C/svg%3E");background-size:200px;opacity:.13}
-:root[data-suite="differentworld"] .backdrop::before,:root[data-suite="differentworld"] .backdrop::after,:root[data-suite="pumpkin"] .backdrop::after,:root[data-suite="coastal"] .backdrop::after{display:none}
+:root[data-suite="differentworld"] .backdrop{background:radial-gradient(90% 60% at 50% 0%,#6E1B30 0%,#561424 60%,#45101D 100%)}
+:root[data-suite="differentworld"] .backdrop::after,:root[data-suite="pumpkin"] .backdrop::after,:root[data-suite="coastal"] .backdrop::after{display:none}
 :root[data-suite="heritage"] .backdrop{background:radial-gradient(120% 70% at 50% 110%,#14241A 0%,#0B0A08 60%)}
 :root[data-suite="heritage"] .backdrop::after{top:auto;bottom:0;left:0;right:0;height:10px;transform:none;filter:none;opacity:.9;background:repeating-linear-gradient(90deg,#E0383E 0 28px,#0B0A08 28px 34px,#F2C94C 34px 62px,#0B0A08 62px 68px,#22A95B 68px 96px,#0B0A08 96px 102px)}
 :root[data-suite="pumpkin"] .backdrop{background:radial-gradient(70% 50% at 10% 0%,#F6D6B0 0%,transparent 70%),radial-gradient(60% 50% at 100% 100%,#EEC9A0 0%,transparent 70%),#FBF0E2}
@@ -157,9 +185,71 @@ body{overflow-wrap:break-word}
 @keyframes snow{to{background-position:30px 240px}}
 :root[data-suite="midnight"] .backdrop{background:radial-gradient(80% 60% at 50% -10%,#18224A 0%,#060A18 65%)}
 @media (prefers-reduced-motion:reduce){:root[data-suite="christmas"] .backdrop::after{animation:none}}
-.pv[data-suite="differentworld"]::after{content:"";position:absolute;right:-8px;bottom:-8px;width:46px;height:46px;border-radius:50%;border:6px solid #D99A1E;opacity:.6}
 .pv[data-suite="heritage"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:repeating-linear-gradient(90deg,#E0383E 0 14px,#F2C94C 14px 28px,#22A95B 28px 42px)}
 .pv[data-suite="christmas"]::after{content:"";position:absolute;inset:0;opacity:.7;background-image:radial-gradient(1.5px 1.5px at 12px 14px,#fff,transparent),radial-gradient(1.5px 1.5px at 44px 40px,#fff,transparent),radial-gradient(1px 1px at 70px 18px,#fff,transparent);background-size:90px 60px}
+/* themed scenery: emblems and skylines live in the backdrop, behind everything */
+:root[data-suite="livingsingle"] :root[data-suite="freshprince"] :root[data-suite="martin"] :root[data-suite="differentworld"] /* theme art lives in the date card: logo or city photo under a fade, so text, dots and the ring stay crisp */
+:root:is([data-suite="livingsingle"],[data-suite="freshprince"],[data-suite="martin"],[data-suite="differentworld"],[data-suite="chicago"],[data-suite="atlanta"]) .hero .scene{display:none}
+:root[data-suite="livingsingle"] .hero{background:linear-gradient(100deg,rgb(255 250 243 / .97) 0%,rgb(255 250 243 / .9) 50%,rgb(255 250 243 / .78) 100%),url("themes/livingsingle-logo.webp") right 10px center/auto 82% no-repeat,#FFFAF3}
+:root[data-suite="freshprince"] .hero{background:linear-gradient(100deg,rgb(255 246 252 / .97) 0%,rgb(255 246 252 / .88) 50%,rgb(255 246 252 / .74) 100%),url("themes/freshprince-logo.webp") right 6px center/auto 86% no-repeat,#FFF6FC}
+:root[data-suite="martin"] .hero{background:linear-gradient(100deg,rgb(255 183 3 / .97) 0%,rgb(255 183 3 / .9) 50%,rgb(255 183 3 / .8) 100%),url("themes/martin-logo.webp") right 10px center/auto 46% no-repeat,#FFB703}
+:root[data-suite="differentworld"] .hero{background:linear-gradient(100deg,rgb(102 25 44 / .96) 0%,rgb(102 25 44 / .86) 50%,rgb(102 25 44 / .7) 100%),url("themes/hillman-logo.webp") right 10px center/auto 92% no-repeat,#66192C}
+/* Chicago: Bulls red and black by day, Bears navy and orange in dark mode */
+:root[data-suite="chicago"],.pv[data-suite="chicago"]{
+  --canvas:#F6F2F2; --surface:rgb(255 255 255 / .92); --solid:#FFFFFF; --raised:#FBF7F7; --line:rgb(18 18 18 / .12); --ink:#121212; --muted:#5C5656; --faint:#8E8888;
+  --acc:#CE1141; --acc2:#1D1D1D; --good:#1E9E6A; --bad:#CE1141; --on-acc:#FFFFFF; --warn:#F2A33A; --ring-m:#CE1141; --ring-t:#1D1D1D; --ring-e:#8E8888;
+  --shadow-card:0 1px 1px rgb(18 18 18 / .05),0 8px 24px rgb(18 18 18 / .08); --shadow-lift:0 12px 36px rgb(18 18 18 / .16);
+  --glass:blur(14px); --r:12px; --r-sm:8px; --glow-a:transparent; --glow-b:transparent; --glow-c:transparent; --paper:#FFFFFF;
+  --f-display:"Oswald", "Arial Narrow", system-ui, sans-serif; --h-case:uppercase; --h-track:.03em; --h-weight:700; --h-shadow:none; color-scheme:light}
+@media (prefers-color-scheme: dark){:root[data-suite="chicago"]:not([data-theme="light"]){--canvas:#0B162A; --surface:rgb(19 33 59 / .88); --solid:#13213B; --raised:rgb(200 56 3 / .08); --line:rgb(255 255 255 / .12); --ink:#F4F6FA; --muted:#A9B4C8; --faint:#6F7D96;
+  --acc:#E0530F; --acc2:#7FA1D8; --good:#3DDC97; --bad:#FF6B5E; --on-acc:#FFFFFF; --ring-m:#E0530F; --ring-t:#7FA1D8; --ring-e:#F4F6FA;
+  --shadow-card:0 1px 0 rgb(255 255 255 / .04) inset,0 10px 30px rgb(0 0 0 / .4); --shadow-lift:0 16px 50px rgb(0 0 0 / .5); color-scheme:dark}}
+:root[data-suite="chicago"][data-theme="dark"]{--canvas:#0B162A; --surface:rgb(19 33 59 / .88); --solid:#13213B; --raised:rgb(200 56 3 / .08); --line:rgb(255 255 255 / .12); --ink:#F4F6FA; --muted:#A9B4C8; --faint:#6F7D96;
+  --acc:#E0530F; --acc2:#7FA1D8; --good:#3DDC97; --bad:#FF6B5E; --on-acc:#FFFFFF; --ring-m:#E0530F; --ring-t:#7FA1D8; --ring-e:#F4F6FA;
+  --shadow-card:0 1px 0 rgb(255 255 255 / .04) inset,0 10px 30px rgb(0 0 0 / .4); --shadow-lift:0 16px 50px rgb(0 0 0 / .5); color-scheme:dark}
+:root[data-suite="chicago"] .hero{background:linear-gradient(100deg,rgb(255 255 255 / .95) 0%,rgb(255 255 255 / .8) 48%,rgb(255 255 255 / .25) 100%),url("themes/chicago-bg.jpg") center 40%/cover no-repeat,#FFFFFF}
+@media (prefers-color-scheme: dark){:root[data-suite="chicago"]:not([data-theme="light"]) .hero{background:linear-gradient(100deg,rgb(11 22 42 / .94) 0%,rgb(11 22 42 / .74) 48%,rgb(11 22 42 / .25) 100%),url("themes/chicago-bg.jpg") center 40%/cover no-repeat,#0B162A}}
+:root[data-suite="chicago"][data-theme="dark"] .hero{background:linear-gradient(100deg,rgb(11 22 42 / .94) 0%,rgb(11 22 42 / .74) 48%,rgb(11 22 42 / .25) 100%),url("themes/chicago-bg.jpg") center 40%/cover no-repeat,#0B162A}
+:root[data-suite="chicago"] .backdrop{background:linear-gradient(rgb(246 242 242 / .05) 0%,rgb(246 242 242 / .4) 30%,#F6F2F2 62%),url("themes/chicago-bg.jpg") top center/cover no-repeat,#F6F2F2}
+@media (prefers-color-scheme: dark){:root[data-suite="chicago"]:not([data-theme="light"]) .backdrop{background:linear-gradient(rgb(11 22 42 / .3) 0%,rgb(11 22 42 / .7) 35%,#0B162A 65%),url("themes/chicago-bg.jpg") top center/cover no-repeat,#0B162A}}
+:root[data-suite="chicago"][data-theme="dark"] .backdrop{background:linear-gradient(rgb(11 22 42 / .3) 0%,rgb(11 22 42 / .7) 35%,#0B162A 65%),url("themes/chicago-bg.jpg") top center/cover no-repeat,#0B162A}
+/* Atlanta: Hawks red and volt by day, Falcons black, red and silver in dark mode */
+:root[data-suite="atlanta"],.pv[data-suite="atlanta"]{
+  --canvas:#F7F4F0; --surface:rgb(255 255 255 / .92); --solid:#FFFFFF; --raised:#FBF8F4; --line:rgb(38 40 42 / .12); --ink:#26282A; --muted:#5E6063; --faint:#909295;
+  --acc:#E03A3E; --acc2:#7F9116; --good:#2E9E5B; --bad:#E03A3E; --on-acc:#FFFFFF; --warn:#F2A33A; --ring-m:#E03A3E; --ring-t:#9DB21E; --ring-e:#26282A;
+  --shadow-card:0 1px 1px rgb(38 40 42 / .05),0 8px 24px rgb(38 40 42 / .08); --shadow-lift:0 12px 36px rgb(38 40 42 / .16);
+  --glass:blur(14px); --r:16px; --glow-a:transparent; --glow-b:transparent; --glow-c:transparent; --paper:#FFFFFF;
+  --f-display:"Plus Jakarta Sans", system-ui, sans-serif; --h-case:none; --h-weight:800; --h-shadow:none; color-scheme:light}
+@media (prefers-color-scheme: dark){:root[data-suite="atlanta"]:not([data-theme="light"]){--canvas:#0A0A0A; --surface:rgb(24 24 24 / .88); --solid:#161616; --raised:rgb(167 25 48 / .1); --line:rgb(165 172 175 / .2); --ink:#F4F4F4; --muted:#A5ACAF; --faint:#6E7477;
+  --acc:#EF4058; --acc2:#A5ACAF; --good:#3DDC97; --bad:#FF5A5A; --on-acc:#FFFFFF; --ring-m:#EF4058; --ring-t:#A5ACAF; --ring-e:#F4F4F4;
+  --shadow-card:0 1px 0 rgb(255 255 255 / .04) inset,0 10px 30px rgb(0 0 0 / .45); --shadow-lift:0 16px 50px rgb(0 0 0 / .55); color-scheme:dark}}
+:root[data-suite="atlanta"][data-theme="dark"]{--canvas:#0A0A0A; --surface:rgb(24 24 24 / .88); --solid:#161616; --raised:rgb(167 25 48 / .1); --line:rgb(165 172 175 / .2); --ink:#F4F4F4; --muted:#A5ACAF; --faint:#6E7477;
+  --acc:#EF4058; --acc2:#A5ACAF; --good:#3DDC97; --bad:#FF5A5A; --on-acc:#FFFFFF; --ring-m:#EF4058; --ring-t:#A5ACAF; --ring-e:#F4F4F4;
+  --shadow-card:0 1px 0 rgb(255 255 255 / .04) inset,0 10px 30px rgb(0 0 0 / .45); --shadow-lift:0 16px 50px rgb(0 0 0 / .55); color-scheme:dark}
+:root[data-suite="atlanta"] .hero{background:linear-gradient(100deg,rgb(255 255 255 / .95) 0%,rgb(255 255 255 / .8) 48%,rgb(255 255 255 / .2) 100%),url("themes/atlanta-bg.jpg") center 45%/cover no-repeat,#FFFFFF}
+@media (prefers-color-scheme: dark){:root[data-suite="atlanta"]:not([data-theme="light"]) .hero{background:linear-gradient(100deg,rgb(10 10 10 / .92) 0%,rgb(10 10 10 / .7) 48%,rgb(10 10 10 / .15) 100%),url("themes/atlanta-bg.jpg") center 45%/cover no-repeat,#0A0A0A}}
+:root[data-suite="atlanta"][data-theme="dark"] .hero{background:linear-gradient(100deg,rgb(10 10 10 / .92) 0%,rgb(10 10 10 / .7) 48%,rgb(10 10 10 / .15) 100%),url("themes/atlanta-bg.jpg") center 45%/cover no-repeat,#0A0A0A}
+:root[data-suite="atlanta"] .backdrop{background:linear-gradient(rgb(247 244 240 / .05) 0%,rgb(247 244 240 / .45) 30%,#F7F4F0 62%),url("themes/atlanta-bg.jpg") center top/cover no-repeat,#F7F4F0}
+@media (prefers-color-scheme: dark){:root[data-suite="atlanta"]:not([data-theme="light"]) .backdrop{background:linear-gradient(rgb(10 10 10 / .25) 0%,rgb(10 10 10 / .65) 45%,rgb(10 10 10 / .9) 100%),url("themes/atlanta-bg.jpg") center/cover no-repeat,#0A0A0A}}
+:root[data-suite="atlanta"][data-theme="dark"] .backdrop{background:linear-gradient(rgb(10 10 10 / .25) 0%,rgb(10 10 10 / .65) 45%,rgb(10 10 10 / .9) 100%),url("themes/atlanta-bg.jpg") center/cover no-repeat,#0A0A0A}
+:root[data-suite="chicago"] h2,:root[data-suite="chicago"] h3{font-weight:700}
+.backdrop .skyline{left:0;right:0;bottom:0;height:min(32vh,260px);background-repeat:repeat-x;background-position:bottom center;background-size:auto 100%}
+:root[data-suite="freshprince"] .backdrop{background-color:#F4D6EE;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%0A%3Cpath d='M14 40c20-26 40 18 60-8s30 20 52-2' fill='none' stroke='%2300B4E6' stroke-width='6' stroke-linecap='round'/%3E%0A%3Cpath d='M170 20l8 18 20 2-15 13 5 20-18-11-18 11 5-20-15-13 20-2z' fill='%23FFD23F' stroke='%232B0B3F' stroke-width='3'/%3E%0A%3Cpath d='M30 120q30-30 60 0t60 0' fill='none' stroke='%23FF3FA4' stroke-width='7' stroke-linecap='round'/%3E%0A%3Cpath d='M200 110l30 10-30 10 30 10' fill='none' stroke='%235BE32B' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%0A%3Ccircle cx='60' cy='200' r='16' fill='none' stroke='%238A4FFF' stroke-width='6'/%3E%3Cpath d='M60 200m-6 0a6 6 0 1 0 12 0' fill='none' stroke='%238A4FFF' stroke-width='4'/%3E%0A%3Cpath d='M120 170v30M120 200q0 14 6 18M140 168v22M140 190q0 10 5 12' stroke='%23FF3FA4' stroke-width='5' fill='none' stroke-linecap='round'/%3E%0A%3Cpath d='M180 210l10-24 10 24 10-24 10 24' fill='none' stroke='%2300B4E6' stroke-width='5' stroke-linejoin='round'/%3E%0A%3Cpath d='M96 70l6-12 6 12 6-12' fill='none' stroke='%232B0B3F' stroke-width='4'/%3E%0A%3Crect x='220' y='170' width='22' height='22' rx='4' transform='rotate%2820 231 181%29' fill='%235BE32B' stroke='%232B0B3F' stroke-width='3'/%3E%0A%3C/svg%3E");background-size:260px;opacity:1}
+:root[data-suite="freshprince"] .backdrop::before,:root[data-suite="freshprince"] .backdrop::after,:root[data-suite="matrix"] .backdrop::before,:root[data-suite="matrix"] .backdrop::after,:root[data-suite="livingsingle"] .backdrop::after,:root[data-suite="chicago"] .backdrop::before,:root[data-suite="chicago"] .backdrop::after{display:none}
+:root[data-suite="matrix"] .backdrop{background:transparent}
+:root[data-suite="livingsingle"] .backdrop{background:linear-gradient(#F7EBDD 0%,#F3DEC8 100%)}
+:root[data-suite="livingsingle"] .skyline{display:block;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='xMidYMax slice'%3E%3Cg fill='%236B2D5C' opacity='.9'%3E%0A%3Cpath d='M0 220V70h140v150z'/%3E%3Crect x='-4' y='60' width='148' height='10'/%3E%3Cpath d='M150 220V60h130v160z'/%3E%3Crect x='146' y='50' width='138' height='10'/%3E%3Cpath d='M290 220V80h150v140z'/%3E%3Crect x='286' y='70' width='158' height='10'/%3E%3Cpath d='M450 220V55h140v165z'/%3E%3Crect x='446' y='45' width='148' height='10'/%3E%3Cpath d='M600 220V75h130v145z'/%3E%3Crect x='596' y='65' width='138' height='10'/%3E%3Cpath d='M740 220V60h150v160z'/%3E%3Crect x='736' y='50' width='158' height='10'/%3E%3Cpath d='M900 220V70h140v150z'/%3E%3Crect x='896' y='60' width='148' height='10'/%3E%3Cpath d='M1050 220V58h150v162z'/%3E%3Crect x='1046' y='48' width='158' height='10'/%3E%3C/g%3E%3Cg fill='%23F7EBDD' opacity='.55'%3E%3Crect x='25' y='90' width='18' height='28' rx='9'/%3E%3Crect x='25' y='140' width='18' height='28' rx='9'/%3E%3Crect x='60' y='90' width='18' height='28' rx='9'/%3E%3Crect x='60' y='140' width='18' height='28' rx='9'/%3E%3Crect x='95' y='90' width='18' height='28' rx='9'/%3E%3Crect x='95' y='140' width='18' height='28' rx='9'/%3E%3Crect x='175' y='80' width='18' height='28' rx='9'/%3E%3Crect x='175' y='130' width='18' height='28' rx='9'/%3E%3Crect x='210' y='80' width='18' height='28' rx='9'/%3E%3Crect x='210' y='130' width='18' height='28' rx='9'/%3E%3Crect x='245' y='80' width='18' height='28' rx='9'/%3E%3Crect x='245' y='130' width='18' height='28' rx='9'/%3E%3Crect x='315' y='100' width='18' height='28' rx='9'/%3E%3Crect x='315' y='150' width='18' height='28' rx='9'/%3E%3Crect x='350' y='100' width='18' height='28' rx='9'/%3E%3Crect x='350' y='150' width='18' height='28' rx='9'/%3E%3Crect x='385' y='100' width='18' height='28' rx='9'/%3E%3Crect x='385' y='150' width='18' height='28' rx='9'/%3E%3Crect x='475' y='75' width='18' height='28' rx='9'/%3E%3Crect x='475' y='125' width='18' height='28' rx='9'/%3E%3Crect x='510' y='75' width='18' height='28' rx='9'/%3E%3Crect x='510' y='125' width='18' height='28' rx='9'/%3E%3Crect x='545' y='75' width='18' height='28' rx='9'/%3E%3Crect x='545' y='125' width='18' height='28' rx='9'/%3E%3Crect x='625' y='95' width='18' height='28' rx='9'/%3E%3Crect x='625' y='145' width='18' height='28' rx='9'/%3E%3Crect x='660' y='95' width='18' height='28' rx='9'/%3E%3Crect x='660' y='145' width='18' height='28' rx='9'/%3E%3Crect x='695' y='95' width='18' height='28' rx='9'/%3E%3Crect x='695' y='145' width='18' height='28' rx='9'/%3E%3Crect x='765' y='80' width='18' height='28' rx='9'/%3E%3Crect x='765' y='130' width='18' height='28' rx='9'/%3E%3Crect x='800' y='80' width='18' height='28' rx='9'/%3E%3Crect x='800' y='130' width='18' height='28' rx='9'/%3E%3Crect x='835' y='80' width='18' height='28' rx='9'/%3E%3Crect x='835' y='130' width='18' height='28' rx='9'/%3E%3Crect x='925' y='90' width='18' height='28' rx='9'/%3E%3Crect x='925' y='140' width='18' height='28' rx='9'/%3E%3Crect x='960' y='90' width='18' height='28' rx='9'/%3E%3Crect x='960' y='140' width='18' height='28' rx='9'/%3E%3Crect x='995' y='90' width='18' height='28' rx='9'/%3E%3Crect x='995' y='140' width='18' height='28' rx='9'/%3E%3Crect x='1075' y='78' width='18' height='28' rx='9'/%3E%3Crect x='1075' y='128' width='18' height='28' rx='9'/%3E%3Crect x='1110' y='78' width='18' height='28' rx='9'/%3E%3Crect x='1110' y='128' width='18' height='28' rx='9'/%3E%3Crect x='1145' y='78' width='18' height='28' rx='9'/%3E%3Crect x='1145' y='128' width='18' height='28' rx='9'/%3E%3C/g%3E%3Cg fill='%23E1A832'%3E%3Cpath d='M40 220l20-30h40l20 30z'/%3E%3Cpath d='M330 220l20-30h40l20 30z'/%3E%3Cpath d='M640 220l20-30h40l20 30z'/%3E%3Cpath d='M940 220l20-30h40l20 30z'/%3E%3C/g%3E%3C/svg%3E");opacity:.22}
+:root[data-suite="atlanta"] .backdrop::before,:root[data-suite="atlanta"] .backdrop::after{display:none}
+.pv[data-suite="freshprince"]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%0A%3Cpath d='M14 40c20-26 40 18 60-8s30 20 52-2' fill='none' stroke='%2300B4E6' stroke-width='6' stroke-linecap='round'/%3E%0A%3Cpath d='M170 20l8 18 20 2-15 13 5 20-18-11-18 11 5-20-15-13 20-2z' fill='%23FFD23F' stroke='%232B0B3F' stroke-width='3'/%3E%0A%3Cpath d='M30 120q30-30 60 0t60 0' fill='none' stroke='%23FF3FA4' stroke-width='7' stroke-linecap='round'/%3E%0A%3Cpath d='M200 110l30 10-30 10 30 10' fill='none' stroke='%235BE32B' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%0A%3Ccircle cx='60' cy='200' r='16' fill='none' stroke='%238A4FFF' stroke-width='6'/%3E%3Cpath d='M60 200m-6 0a6 6 0 1 0 12 0' fill='none' stroke='%238A4FFF' stroke-width='4'/%3E%0A%3Cpath d='M120 170v30M120 200q0 14 6 18M140 168v22M140 190q0 10 5 12' stroke='%23FF3FA4' stroke-width='5' fill='none' stroke-linecap='round'/%3E%0A%3Cpath d='M180 210l10-24 10 24 10-24 10 24' fill='none' stroke='%2300B4E6' stroke-width='5' stroke-linejoin='round'/%3E%0A%3Cpath d='M96 70l6-12 6 12 6-12' fill='none' stroke='%232B0B3F' stroke-width='4'/%3E%0A%3Crect x='220' y='170' width='22' height='22' rx='4' transform='rotate%2820 231 181%29' fill='%235BE32B' stroke='%232B0B3F' stroke-width='3'/%3E%0A%3C/svg%3E");background-size:130px}
+.pv[data-suite="freshprince"]::before,.pv[data-suite="matrix"]::before,.pv[data-suite="chicago"]::before{background:none}
+.pv[data-suite="matrix"]::after{content:"10110 0101 1100 0110 1011 0010 1101";position:absolute;inset:0;font-family:"VT323",monospace;color:rgb(0 255 65 / .35);font-size:.8rem;line-height:1;word-break:break-all;padding:2px;writing-mode:vertical-rl}
+.pv[data-suite="livingsingle"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:45%;background-repeat:repeat-x;background-position:bottom;background-size:auto 100%}
+.pv[data-suite="chicago"]{background:linear-gradient(rgb(246 242 242 / .1),#F6F2F2 85%),url("themes/chicago-bg.jpg") top/cover}
+.pv[data-suite="chicago"]::after{display:none}
+.pv[data-suite="atlanta"]{background:linear-gradient(rgb(247 244 240 / .1),#F7F4F0 85%),url("themes/atlanta-bg.jpg") center/cover}
+.pv[data-suite="atlanta"]::after{display:none}
+.pv[data-suite="livingsingle"]::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='xMidYMax slice'%3E%3Cg fill='%236B2D5C' opacity='.9'%3E%0A%3Cpath d='M0 220V70h140v150z'/%3E%3Crect x='-4' y='60' width='148' height='10'/%3E%3Cpath d='M150 220V60h130v160z'/%3E%3Crect x='146' y='50' width='138' height='10'/%3E%3Cpath d='M290 220V80h150v140z'/%3E%3Crect x='286' y='70' width='158' height='10'/%3E%3Cpath d='M450 220V55h140v165z'/%3E%3Crect x='446' y='45' width='148' height='10'/%3E%3Cpath d='M600 220V75h130v145z'/%3E%3Crect x='596' y='65' width='138' height='10'/%3E%3Cpath d='M740 220V60h150v160z'/%3E%3Crect x='736' y='50' width='158' height='10'/%3E%3Cpath d='M900 220V70h140v150z'/%3E%3Crect x='896' y='60' width='148' height='10'/%3E%3Cpath d='M1050 220V58h150v162z'/%3E%3Crect x='1046' y='48' width='158' height='10'/%3E%3C/g%3E%3Cg fill='%23F7EBDD' opacity='.55'%3E%3Crect x='25' y='90' width='18' height='28' rx='9'/%3E%3Crect x='25' y='140' width='18' height='28' rx='9'/%3E%3Crect x='60' y='90' width='18' height='28' rx='9'/%3E%3Crect x='60' y='140' width='18' height='28' rx='9'/%3E%3Crect x='95' y='90' width='18' height='28' rx='9'/%3E%3Crect x='95' y='140' width='18' height='28' rx='9'/%3E%3Crect x='175' y='80' width='18' height='28' rx='9'/%3E%3Crect x='175' y='130' width='18' height='28' rx='9'/%3E%3Crect x='210' y='80' width='18' height='28' rx='9'/%3E%3Crect x='210' y='130' width='18' height='28' rx='9'/%3E%3Crect x='245' y='80' width='18' height='28' rx='9'/%3E%3Crect x='245' y='130' width='18' height='28' rx='9'/%3E%3Crect x='315' y='100' width='18' height='28' rx='9'/%3E%3Crect x='315' y='150' width='18' height='28' rx='9'/%3E%3Crect x='350' y='100' width='18' height='28' rx='9'/%3E%3Crect x='350' y='150' width='18' height='28' rx='9'/%3E%3Crect x='385' y='100' width='18' height='28' rx='9'/%3E%3Crect x='385' y='150' width='18' height='28' rx='9'/%3E%3Crect x='475' y='75' width='18' height='28' rx='9'/%3E%3Crect x='475' y='125' width='18' height='28' rx='9'/%3E%3Crect x='510' y='75' width='18' height='28' rx='9'/%3E%3Crect x='510' y='125' width='18' height='28' rx='9'/%3E%3Crect x='545' y='75' width='18' height='28' rx='9'/%3E%3Crect x='545' y='125' width='18' height='28' rx='9'/%3E%3Crect x='625' y='95' width='18' height='28' rx='9'/%3E%3Crect x='625' y='145' width='18' height='28' rx='9'/%3E%3Crect x='660' y='95' width='18' height='28' rx='9'/%3E%3Crect x='660' y='145' width='18' height='28' rx='9'/%3E%3Crect x='695' y='95' width='18' height='28' rx='9'/%3E%3Crect x='695' y='145' width='18' height='28' rx='9'/%3E%3Crect x='765' y='80' width='18' height='28' rx='9'/%3E%3Crect x='765' y='130' width='18' height='28' rx='9'/%3E%3Crect x='800' y='80' width='18' height='28' rx='9'/%3E%3Crect x='800' y='130' width='18' height='28' rx='9'/%3E%3Crect x='835' y='80' width='18' height='28' rx='9'/%3E%3Crect x='835' y='130' width='18' height='28' rx='9'/%3E%3Crect x='925' y='90' width='18' height='28' rx='9'/%3E%3Crect x='925' y='140' width='18' height='28' rx='9'/%3E%3Crect x='960' y='90' width='18' height='28' rx='9'/%3E%3Crect x='960' y='140' width='18' height='28' rx='9'/%3E%3Crect x='995' y='90' width='18' height='28' rx='9'/%3E%3Crect x='995' y='140' width='18' height='28' rx='9'/%3E%3Crect x='1075' y='78' width='18' height='28' rx='9'/%3E%3Crect x='1075' y='128' width='18' height='28' rx='9'/%3E%3Crect x='1110' y='78' width='18' height='28' rx='9'/%3E%3Crect x='1110' y='128' width='18' height='28' rx='9'/%3E%3Crect x='1145' y='78' width='18' height='28' rx='9'/%3E%3Crect x='1145' y='128' width='18' height='28' rx='9'/%3E%3C/g%3E%3Cg fill='%23E1A832'%3E%3Cpath d='M40 220l20-30h40l20 30z'/%3E%3Cpath d='M330 220l20-30h40l20 30z'/%3E%3Cpath d='M640 220l20-30h40l20 30z'/%3E%3Cpath d='M940 220l20-30h40l20 30z'/%3E%3C/g%3E%3C/svg%3E");opacity:.3}
+#matrixRain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5}
 @keyframes drift{to{transform:translate3d(4%,3%,0) scale(1.08)}}
 @keyframes grid{to{background-position:0 48px,0 48px}}
 
@@ -329,7 +419,6 @@ details.sched summary::-webkit-details-marker{display:none}
 /* hero (Today) */
 .hero{position:relative;overflow:hidden;border-radius:calc(var(--r) + 4px);padding:22px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;color:var(--ink);
   background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 22%,var(--surface)),color-mix(in srgb,var(--acc2) 14%,var(--surface)));border:var(--border-w) solid var(--line);box-shadow:var(--shadow-card);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
-:root[data-suite="martin"] .hero{background:#FFB703}
 .hero .scene{position:absolute;right:-8px;bottom:-6px;width:200px;opacity:.9;pointer-events:none}
 .hero .hi{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
 .hero .greet{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -1062,9 +1151,14 @@ const SUITES = {
   coastal:    { name: "Coastal",    note: "Deep ocean teal with a coral sunset.", color: "#00869D", modes: false, bar: "#EEF8F9", group: "Everyday" },
   midnight:   { name: "Midnight",   note: "Navy and old gold. Quiet luxury.", color: "#D4AF37", modes: false, bar: "#060A18", group: "Everyday" },
   studio:     { name: "Studio",     note: "Quiet and minimal. Light & dark.", color: "#4F46E5", modes: true, bar: "#F2F4F7", group: "Everyday" },
-  synthwave:  { name: "Synthwave",  note: "SOLEN neon: Miami-night blue, hot pink, purple and sunset orange over the grid.", color: "#00D9F5", modes: false, bar: "#020B14", group: "Bold" },
-  martin:     { name: "Martin",     note: "'90s sitcom colour, loud and proud.", color: "#7B2CBF", modes: false, bar: "#FFF1D6", group: "Bold" },
-  differentworld: { name: "Different World", note: "Hillman College crimson and gold. Class is in session.", color: "#A6192E", modes: false, bar: "#FBF3E6", group: "Bold" },
+  matrix:     { name: "Matrix",     note: "Green phosphor and falling binary. Wake up.", color: "#00FF41", modes: false, bar: "#000300", group: "Retro & shows" },
+  freshprince:{ name: "Fresh Prince", note: "Graffiti doodles on bubblegum lavender. West Philadelphia, born and raised.", color: "#17922F", modes: false, bar: "#F4D6EE", group: "Retro & shows" },
+  livingsingle:{ name: "Living Single", note: "Brooklyn brownstones in plum, mustard and coral.", color: "#6B2D5C", modes: false, bar: "#F7EBDD", group: "Retro & shows" },
+  chicago:    { name: "Chicago",    note: "Bulls red and black by day, Bears navy and orange in dark mode, over the lakefront skyline.", color: "#CE1141", modes: true, bar: "#F6F2F2", group: "Cities" },
+  atlanta:    { name: "Atlanta",    note: "Hawks red and volt by day, Falcons black, red and silver in dark mode, over the downtown skyline.", color: "#E03A3E", modes: true, bar: "#F7F4F0", group: "Cities" },
+  synthwave:  { name: "Synthwave",  note: "SOLEN neon: Miami-night blue, hot pink, purple and sunset orange over the grid.", color: "#00D9F5", modes: false, bar: "#020B14", group: "Retro & shows" },
+  martin:     { name: "Martin",     note: "'90s sitcom colour, loud and proud.", color: "#7B2CBF", modes: false, bar: "#FFF1D6", group: "Retro & shows" },
+  differentworld: { name: "Different World", note: "Hillman College burgundy and white. Class is in session.", color: "#561424", modes: false, bar: "#561424", group: "Retro & shows" },
   heritage:   { name: "Heritage",   note: "Black History Month: red, black and green with kente gold.", color: "#F2C94C", modes: false, bar: "#0B0A08", group: "Seasons & heritage", tag: "February" },
   pumpkin:    { name: "Pumpkin Spice", note: "Cinnamon, pumpkin and sage. Cozy season.", color: "#C8541D", modes: false, bar: "#FBF0E2", group: "Seasons & heritage", tag: "Fall" },
   christmas:  { name: "Christmas",  note: "Evergreen nights, candy red and gold, falling snow.", color: "#E8453C", modes: false, bar: "#071A12", group: "Seasons & heritage", tag: "December" },
@@ -1077,10 +1171,15 @@ const MARKS = { // the GM monogram, one look per theme
   studio:     { bg: ["#4F46E5", "#0EA5E9"], ink: "#FFFFFF" },
   coastal:    { bg: ["#00869D", "#00A6B8"], ink: "#FFFFFF" },
   midnight:   { bg: ["#060A18", "#18224A"], ink: "#D4AF37" },
-  differentworld: { bg: ["#A6192E", "#7A0E22"], ink: "#F2C14E" },
+  differentworld: { bg: ["#6E1B30", "#561424"], ink: "#FFFFFF" },
   heritage:   { bg: ["#0B0A08", "#1A1610"], ink: ["#E0383E", "#22A95B"], band: ["#E0383E", "#F2C94C", "#22A95B"] },
   pumpkin:    { bg: ["#E07A2E", "#C8541D"], ink: "#FFF6E8" },
   christmas:  { bg: ["#0B2419", "#123A28"], ink: "#E8453C", glow: "#E8C26A" },
+  matrix:     { bg: ["#000300", "#002A0B"], ink: "#00FF41", glow: "#00FF41" },
+  freshprince:{ bg: ["#FF4FB0", "#B26BFF"], ink: "#5BE32B", edge: "#2B0B3F" },
+  livingsingle:{ bg: ["#6B2D5C", "#8E3E77"], ink: "#E1A832" },
+  chicago:    { bg: ["#CE1141", "#9E0B31"], ink: "#FFFFFF" },
+  atlanta:    { bg: ["#E03A3E", "#B51F2B"], ink: "#FFFFFF", band: ["#C1D32F", "#26282A", "#C1D32F"] },
 };
 let markN = 0;
 function markSvg(suite, full){ // full = square, edge to edge (home screen icons get rounded by the phone)
@@ -1104,8 +1203,20 @@ const Suite = {
     if (!SUITES[name]) name = "greatestme";
     document.documentElement.setAttribute("data-suite", name); const p = profile(); if (!(p && p.suiteRandom)) ls.set("gm-suite", name);
     const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", SUITES[name].bar);
-    setIcons(name);
+    setIcons(name); MatrixRain.sync(name === "matrix");
   },
+};
+const MatrixRain = { c: null, t: null,
+  sync(on){ if (on && !reduced()) this.start(); else this.stop(); },
+  start(){ if (this.c) return; const c = this.c = document.createElement("canvas"); c.id = "matrixRain"; c.setAttribute("aria-hidden", "true"); document.body.prepend(c);
+    const x = c.getContext("2d"); let cols = [], fs = 16, last = 0;
+    const size = () => { const d = Math.min(2, devicePixelRatio || 1); c.width = innerWidth * d; c.height = innerHeight * d; x.setTransform(d, 0, 0, d, 0, 0); cols = Array.from({ length: Math.ceil(innerWidth / fs) }, () => Math.random() * -innerHeight / fs); };
+    size(); this.onResize = size; addEventListener("resize", size);
+    const step = now => { this.t = requestAnimationFrame(step); if (document.hidden || now - last < 55) return; last = now;
+      x.fillStyle = "rgba(0,3,0,.12)"; x.fillRect(0, 0, innerWidth, innerHeight); x.font = `${fs}px "VT323", monospace`;
+      cols.forEach((y, i) => { const ch = Math.random() < .5 ? "0" : "1"; x.fillStyle = Math.random() < .04 ? "#CFFFD8" : "#00FF41"; x.fillText(ch, i * fs, y * fs); cols[i] = y * fs > innerHeight && Math.random() > .975 ? 0 : y + 1; }); };
+    this.t = requestAnimationFrame(step); },
+  stop(){ if (!this.c) return; cancelAnimationFrame(this.t); removeEventListener("resize", this.onResize); this.c.remove(); this.c = null; },
 };
 let iconsFor = "";
 function setIcons(name){ // the tab icon and the home screen icon follow the theme
@@ -1669,7 +1780,7 @@ function renderPage(){
   try { if (ae && /^(INPUT|TEXTAREA)$/.test(ae.tagName) && typeof ae.selectionStart === "number") caret = [ae.selectionStart, ae.selectionEnd]; } catch {}
   if (!shuffledOnce && profile() && J()) { shuffledOnce = true; Suite.shuffle(); } // Surprise me: new look once per app open
   Suite.apply();
-  const BD = `<div class="backdrop"><div class="sun"></div></div>`;
+  const BD = `<div class="backdrop"><div class="sun"></div><div class="skyline"></div></div>`;
   const gk = S.gate ? "g" + S.gate.mode : (!profile() || !J()) ? "o" + (S.onboard ? S.onboard.step : 0) : ""; const gEnter = gk !== S.lastGate; S.lastGate = gk;
   const enterCard = h => gEnter ? h.replace('class="gate-card"', 'class="gate-card enter"') : h;
   if (S.gate) { root.innerHTML = BD + enterCard(S.gate.supa ? supaGateView() : gateView()); return; }

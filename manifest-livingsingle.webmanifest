@@ -1,0 +1,47 @@
+{
+  "name": "GreatestMe",
+  "short_name": "GreatestMe",
+  "description": "A 13-week journal for goals, habits and daily wins.",
+  "start_url": "./#today",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F7EBDD",
+  "theme_color": "#F7EBDD",
+  "icons": [
+    {
+      "src": "icon-192-livingsingle.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512-livingsingle.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512-livingsingle.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Morning page",
+      "url": "./#morning"
+    },
+    {
+      "name": "Evening review",
+      "url": "./#evening"
+    },
+    {
+      "name": "Habits",
+      "url": "./#habits"
+    },
+    {
+      "name": "Write by hand",
+      "url": "./#ink"
+    }
+  ]
+}
