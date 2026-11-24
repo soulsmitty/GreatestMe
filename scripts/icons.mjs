@@ -8,7 +8,7 @@ const src = readFileSync(new URL("../app.html", import.meta.url), "utf8");
 const code = src.slice(src.indexOf("/*MARK*/"), src.indexOf("/*/MARK*/"));
 const { MARKS, markSvg } = new Function(code + "; return { MARKS, markSvg };")();
 const base = JSON.parse(readFileSync(new URL("../manifest.webmanifest", import.meta.url), "utf8"));
-const canvas = { greatestme: "#0D0820", synthwave: "#03131D", martin: "#FFF1D6", studio: "#F2F4F7" };
+const canvas = { greatestme: "#0D0820", synthwave: "#020B14", martin: "#FFF1D6", studio: "#F2F4F7", coastal: "#EEF8F9", midnight: "#060A18", differentworld: "#FBF3E6", heritage: "#0B0A08", pumpkin: "#FBF0E2", christmas: "#071A12" };
 const browser = await chromium.launch(); const page = await browser.newPage();
 for (const suite of Object.keys(MARKS)) {
   for (const size of [180, 192, 512]) {

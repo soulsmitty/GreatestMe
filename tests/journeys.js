@@ -87,6 +87,12 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await A.click('.sheet [data-act=guideTour]'); await A.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }); ok(/goal/i.test(await A.locator('.tour-card').innerText()), 'Show me around spotlights the Goals page');
   await A.keyboard.press('Escape'); await go(A, 'today'); await go(A, 'goals'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 0, 'a page guide shows only once');
   await A.click('[data-act=guide][data-v=goals] >> visible=true'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 1, 'the ? button reopens the page guide'); await A.click('.sheet [data-act=guideClose] >> nth=-1');
+  await go(A, 'prefs'); ok(await A.locator('.look-group').count() === 3 && await A.locator('.look-row .suite').count() === 10, 'Look shows ten themes in three groups');
+  await A.click('.look-row [data-act=suite][data-v=heritage]'); ok(await A.evaluate(() => document.documentElement.dataset.suite) === 'heritage', 'picking a theme applies it');
+  { const before = await A.evaluate(() => document.documentElement.dataset.suite); await A.evaluate(() => document.getElementById('lookRandom').click()); await A.waitForTimeout(200);
+    const after = await A.evaluate(() => document.documentElement.dataset.suite); ok(after !== before && await A.locator('[data-act=shuffleNow]').count() === 1, 'Surprise me picks a new look');
+    await A.click('[data-act=shuffleNow]'); ok(await A.evaluate(() => document.documentElement.dataset.suite) !== after, 'Shuffle now changes the look again');
+    await A.evaluate(() => document.getElementById('lookRandom').click()); await A.click('.look-row [data-act=suite][data-v=greatestme]'); }
   await go(A, 'prefs'); await A.click('.main [data-act=nav][data-v=method]'); ok(await A.locator('.main section.card').count() === 11, 'Settings opens the eleven-chapter GreatestMe Method');
   await go(A, 'today'); await openSec(A, 'evening'); await A.locator('#winDay').fill('8'); await A.waitForTimeout(800);
   ok(/8\/10/.test(await A.locator('#winDay-v').innerText()), 'Win the Day score saves on the evening page');
@@ -153,7 +159,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
 
   // 5. Layout: folded, phone, unfolded, iPad × every theme × every screen.
   for (const [w, h, label] of (process.env.QUICK ? [] : [[360, 760, 'fold closed'], [393, 852, 'iPhone'], [744, 860, 'fold open'], [834, 1194, 'iPad']])) {
-    for (const suite of ['greatestme', 'synthwave', 'martin', 'studio']) {
+    for (const suite of ['greatestme', 'synthwave', 'martin', 'studio', 'differentworld', 'heritage']) {
       const p = await page(b, { viewport: { width: w, height: h }, hasTouch: true, isMobile: w < 800, userAgent: PHONE.userAgent }, label + ' ' + suite);
       await p.evaluate(s => localStorage.setItem('gm-suite', JSON.stringify(s)), suite); await p.reload();
       await createAccount(p, 'Tester', 'Tester#2026');

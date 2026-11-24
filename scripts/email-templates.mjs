@@ -1,8 +1,14 @@
 // Themed recap emails. Table layout + inline styles so they render in Apple Mail, Gmail and Outlook.
 export const THEMES = {
   greatestme: { bg: "#0D0820", card: "#1A1233", ink: "#F3EEFF", muted: "#B4A9D6", acc: "#A78BFA", acc2: "#5B9CFF", good: "#34D399", line: "#2E2550", font: "'Plus Jakarta Sans',-apple-system,Segoe UI,Arial,sans-serif", head: "'Plus Jakarta Sans',-apple-system,Arial,sans-serif", caps: false },
-  synthwave: { bg: "#03131D", card: "#072331", ink: "#EAFFFB", muted: "#A3CFCB", acc: "#2EF2D8", acc2: "#FF3EA5", good: "#C6FF3D", line: "#0F3B4C", font: "-apple-system,Segoe UI,Arial,sans-serif", head: "'Orbitron',Arial Black,Arial,sans-serif", caps: true },
+  synthwave: { bg: "#020B14", card: "#08182C", ink: "#EEFBFF", muted: "#A9C4E0", acc: "#00D9F5", acc2: "#FF2E86", good: "#B15CFF", line: "#1B2F52", font: "-apple-system,Segoe UI,Arial,sans-serif", head: "'Orbitron',Arial Black,Arial,sans-serif", caps: true },
   martin: { bg: "#FFF1D6", card: "#FFFFFF", ink: "#151515", muted: "#4A4036", acc: "#7B2CBF", acc2: "#E63946", good: "#1E9E4A", line: "#151515", font: "'Nunito',Segoe UI,Arial,sans-serif", head: "'Bungee',Arial Black,Arial,sans-serif", caps: true, border: "3px solid #151515" },
+  coastal: { onAcc: "#FFFFFF", bg: "#EEF8F9", card: "#FFFFFF", ink: "#062A31", muted: "#4B6B72", acc: "#00869D", acc2: "#F2714B", good: "#1FA971", line: "#D3E9EC", font: "-apple-system,Segoe UI,Arial,sans-serif", head: "-apple-system,Segoe UI,Arial,sans-serif", caps: false },
+  midnight: { bg: "#060A18", card: "#0E1530", ink: "#EEF1FF", muted: "#AAB3D6", acc: "#D4AF37", acc2: "#6E9BFF", good: "#3DDC97", line: "#23305A", font: "-apple-system,Segoe UI,Arial,sans-serif", head: "-apple-system,Segoe UI,Arial,sans-serif", caps: false },
+  differentworld: { onAcc: "#FFFFFF", bg: "#FBF3E6", card: "#FFFFFF", ink: "#2A0A10", muted: "#6B4A45", acc: "#A6192E", acc2: "#D99A1E", good: "#1F7A5C", line: "#EBD9C6", font: "-apple-system,Segoe UI,Arial,sans-serif", head: "'Alfa Slab One',Georgia,serif", caps: false },
+  heritage: { bg: "#0B0A08", card: "#17140F", ink: "#FFF7E6", muted: "#CDBF9F", acc: "#F2C94C", acc2: "#E0383E", good: "#22A95B", line: "#3A3222", font: "-apple-system,Segoe UI,Arial,sans-serif", head: "-apple-system,Segoe UI,Arial,sans-serif", caps: false },
+  pumpkin: { onAcc: "#FFFFFF", bg: "#FBF0E2", card: "#FFFFFF", ink: "#3A2214", muted: "#7A5641", acc: "#C8541D", acc2: "#8B4A2B", good: "#6B8E23", line: "#EED9C3", font: "'Nunito',-apple-system,Arial,sans-serif", head: "'Nunito',-apple-system,Arial,sans-serif", caps: false },
+  christmas: { onAcc: "#FFFFFF", bg: "#071A12", card: "#0F2A1F", ink: "#F7F2E8", muted: "#BCCFC2", acc: "#E8453C", acc2: "#E8C26A", good: "#5FD08A", line: "#24453A", font: "-apple-system,Segoe UI,Arial,sans-serif", head: "-apple-system,Segoe UI,Arial,sans-serif", caps: false },
   studio: { bg: "#F2F4F7", card: "#FFFFFF", ink: "#0F1420", muted: "#6C7688", acc: "#4F46E5", acc2: "#0EA5E9", good: "#10B981", line: "#E5E8EE", font: "-apple-system,Segoe UI,Arial,sans-serif", head: "-apple-system,Segoe UI,Arial,sans-serif", caps: false },
 };
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -20,7 +26,7 @@ function shell(t, { preheader, title, kicker, body, cta, ctaUrl, footer }) {
   <div style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:${t.acc};">${esc(kicker)}</div>
   <h1 style="margin:8px 0 14px;${h()}font-size:26px;line-height:1.2;color:${t.ink};font-weight:800;">${esc(title)}</h1>
   <div style="font-family:${t.font};font-size:16px;line-height:1.55;color:${t.ink};">${body}</div>
-  ${cta ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:22px;"><tr><td style="border-radius:14px;background:${t.acc};${t.border ? `border:${t.border};` : ""}"><a href="${esc(ctaUrl)}" style="display:inline-block;padding:14px 22px;font-family:${t.font};font-size:16px;font-weight:800;color:${t.bg === "#FFF1D6" || t.bg === "#F2F4F7" ? "#FFFFFF" : t.bg};text-decoration:none;">${esc(cta)}</a></td></tr></table>` : ""}
+  ${cta ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:22px;"><tr><td style="border-radius:14px;background:${t.acc};${t.border ? `border:${t.border};` : ""}"><a href="${esc(ctaUrl)}" style="display:inline-block;padding:14px 22px;font-family:${t.font};font-size:16px;font-weight:800;color:${t.onAcc || (t.bg === "#FFF1D6" || t.bg === "#F2F4F7" ? "#FFFFFF" : t.bg)};text-decoration:none;">${esc(cta)}</a></td></tr></table>` : ""}
 </td></tr>
 <tr><td style="padding:16px 8px;font-family:${t.font};font-size:12px;line-height:1.5;color:${t.muted};text-align:center;">${footer}</td></tr>
 </table></td></tr></table></body></html>`;
