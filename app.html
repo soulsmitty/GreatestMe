@@ -346,7 +346,7 @@ details.sched summary::-webkit-details-marker{display:none}
 /* auth / onboarding */
 .gate{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding-block:28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .gate-card{width:100%;max-width:540px;background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border:var(--border-w) solid var(--line);border-radius:28px;padding:28px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow-lift)}
-.gate-card>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.gate-card.enter>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
 .gate-brand{font-family:var(--f-display);font-weight:800;font-size:2.3rem;letter-spacing:-.035em;line-height:1;text-transform:none}
 .gate-brand b{color:var(--acc)}
 :root[data-suite="martin"] .gate-brand{font-weight:400;letter-spacing:0}
@@ -554,7 +554,8 @@ const Accounts = {
   },
   async signIn(name, pass){
     const a = this.list().find(x => x.name.toLowerCase() === name.trim().toLowerCase());
-    if (!a || a.hash !== await hashPass(a.salt, pass)) throw new Error("Name or passcode doesn't match.");
+    if (!a) { const e = new Error("noacct"); e.noacct = true; throw e; }
+    if (a.hash !== await hashPass(a.salt, pass)) throw new Error(`That passcode doesn't match ${a.name}'s account here. Passcodes are case-sensitive.`);
     return a;
   },
 };
@@ -693,6 +694,8 @@ const IDB = {
   db: null,
   open(){ return this.db || (this.db = new Promise((res, rej) => { try { const r = indexedDB.open("greatestme", 1); r.onupgradeneeded = () => r.result.createObjectStore("ink"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } })); },
   async get(k){ const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction("ink").objectStore("ink").get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
+  async all(prefix){ const db = await this.open(); return new Promise((res, rej) => { const out = {}; const q = db.transaction("ink").objectStore("ink").openCursor();
+    q.onsuccess = () => { const c = q.result; if (!c) return res(out); if (String(c.key).startsWith(prefix)) out[String(c.key).slice(prefix.length)] = c.value; c.continue(); }; q.onerror = () => rej(q.error); }); },
   async put(k, v){ const db = await this.open(); return new Promise((res, rej) => { const t = db.transaction("ink", "readwrite"); t.objectStore("ink").put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); },
 };
 const InkStore = {
@@ -974,7 +977,7 @@ function prefsView(){
   <section class="card"><div class="card-h"><h2>Journeys</h2><button class="btn sm" data-act="sheet" data-v="newJourney">+ New journey</button></div>
     ${journeys.map(x => `<div class="set-row"><div><b>${esc(x.title)}</b><div class="muted mono small">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
     <div class="field"><label class="label" for="jstart">Day 1 of this journey</label><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"></div></section>
-  <section class="card"><div class="card-h"><h2>Backup</h2></div><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
+  <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal lives in this browser or Home Screen app only. Export gives you a transfer code to move it, passcode included."}</p><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
   <section class="card"><div class="card-h"><h2>Ideas & requests</h2></div><p class="muted small">${window.claude ? "Want something changed or added? Leave a comment on this page and send it to Claude. Requests get built into the app for both of you." : "Want something changed or added? Tell Dalton, or open an issue on the GreatestMe GitHub repo."}</p></section>
   ${Store.mode === "local" ? `<button class="btn" style="align-self:flex-start" data-act="signout">Sign out</button>` : ""}`;
 }
@@ -990,8 +993,10 @@ function render(){
   const active = document.activeElement && document.activeElement.id;
   Suite.apply();
   const BD = `<div class="backdrop"><div class="sun"></div></div>`;
-  if (S.gate) { root.innerHTML = BD + gateView(); return; }
-  if (!profile() || !J()) { root.innerHTML = BD + onboardView(); return; }
+  const gk = S.gate ? "g" + S.gate.mode : (!profile() || !J()) ? "o" + (S.onboard ? S.onboard.step : 0) : ""; const gEnter = gk !== S.lastGate; S.lastGate = gk;
+  const enterCard = h => gEnter ? h.replace('class="gate-card"', 'class="gate-card enter"') : h;
+  if (S.gate) { root.innerHTML = BD + enterCard(gateView()); return; }
+  if (!profile() || !J()) { root.innerHTML = BD + enterCard(onboardView()); return; }
   if (S.view === "ink" && !canInk()) S.view = "today";
   const entering = S.lastView !== S.view; S.lastView = S.view;
   const v = { today: todayView, prefs: prefsView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, partner: partnerView }[S.view]();
@@ -1248,16 +1253,28 @@ function nextMonday(){ const d = new Date(); const dow = d.getDay(); if (dow !==
 /* ---------- Gate (local sign-in) ---------- */
 function gateView(){
   const g = S.gate; const accts = Accounts.list();
+  const where = Device.standalone ? "this Home Screen app" : "this browser";
+  if (g.mode === "import") return `<div class="gate"><div class="gate-card">
+    <div class="row" style="justify-content:space-between"><button class="btn icon ghost" data-act="gmode" data-v="signin" aria-label="Back">${ICON.left}</button><span class="label">Bring my journal here</span><span></span></div>
+    <h1>Move your journal into ${where}.</h1>
+    <p class="muted small">On iPhone, Safari, Chrome and the Home Screen app each keep their own separate copy. In the place where your journal lives now, open <b>Settings → Backup → Export my data</b> and copy the transfer code. Then paste it here.</p>
+    <div class="field"><label class="label" for="gcode">Transfer code</label><textarea id="gcode" class="in" placeholder="Paste your transfer code" style="min-height:110px;font-family:var(--f-mono);font-size:13px"></textarea></div>
+    <div class="row"><span class="muted small">Or use a saved file:</span><label class="btn sm" for="gfile">Choose file</label><input id="gfile" type="file" accept="application/json,.json,text/plain" hidden></div>
+    ${g.err ? `<p class="err" role="alert">${esc(g.err)}</p>` : ""}
+    <button class="btn primary lg" data-act="gimport">Bring it over</button>
+    <p class="muted small">Your passcode comes with it, so you sign in the same way.</p></div></div>`;
   return `<div class="gate"><form class="gate-card" id="gateForm" novalidate>
-    <div class="hero-art" style="max-width:220px">${ART.welcome}</div><div><div class="gate-brand">Greatest<b>Me</b></div><p class="muted" style="margin-top:8px">A 13-week journal for goals, habits and daily wins.</p></div>
+    <div class="hero-art" style="max-width:200px">${ART.welcome}</div><div><div class="gate-brand">Greatest<b>Me</b></div><p class="muted" style="margin-top:8px">A 13-week journal for goals, habits and daily wins.</p></div>
     <div class="seg"><button type="button" data-act="gmode" data-v="signin" aria-pressed="${g.mode === "signin"}">Sign in</button><button type="button" data-act="gmode" data-v="create" aria-pressed="${g.mode === "create"}">Create account</button></div>
     ${g.mode === "signin" && accts.length ? `<div class="presets">${accts.map(a => `<button type="button" data-act="pickAcct" data-v="${esc(a.name)}" aria-pressed="${g.name === a.name}">${esc(a.name)}</button>`).join("")}</div>` : ""}
-    <div class="field"><label class="label" for="gname">Your name</label><input id="gname" class="in box" value="${esc(g.name || "")}" autocomplete="username" required></div>
+    <div class="field"><label class="label" for="gname">Your name</label><input id="gname" class="in box" value="${esc(g.name || "")}" autocomplete="username" autocapitalize="words" required></div>
     <div class="field"><label class="label" for="gpass">Passcode</label><input id="gpass" type="password" class="in box" autocomplete="${g.mode === "create" ? "new-password" : "current-password"}" required></div>
     ${g.mode === "create" ? `<div class="field"><label class="label" for="gpass2">Confirm passcode</label><input id="gpass2" type="password" class="in box" autocomplete="new-password"></div>` : ""}
+    ${g.noacct ? `<div class="card" role="alert" style="gap:10px"><b>No account named ${esc(g.noacct)} in ${where} yet.</b><p class="muted small">On iPhone, Safari, Chrome and the Home Screen app each keep a separate copy of GreatestMe. If you made your account somewhere else, bring it over and your passcode will work here too.</p><div class="row"><button type="button" class="btn primary sm" data-act="gmode" data-v="import">Bring my journal here</button><button type="button" class="btn sm" data-act="gmode" data-v="create">Start fresh here</button></div></div>` : ""}
     ${g.err ? `<p class="err" role="alert">${esc(g.err)}</p>` : ""}
-    <button class="btn primary" type="submit">${g.mode === "create" ? "Create my account" : "Sign in"}</button>
-    <p class="muted" style="font-size:.8rem">Accounts on this device keep separate, passcode-protected journals. Open GreatestMe in Claude to sync across devices with your Claude account.</p>
+    <button class="btn primary lg" type="submit">${g.mode === "create" ? "Create my account" : "Sign in"}</button>
+    ${g.mode === "signin" && !g.noacct ? `<button type="button" class="btn ghost sm" data-act="gmode" data-v="import">Moving from another browser or device? Bring my journal here</button>` : ""}
+    <p class="muted small">Your journal is saved in ${where}. Use Settings → Backup to move it, or open GreatestMe in Claude to sync across devices.</p>
   </form></div>`;
 }
 
@@ -1325,7 +1342,7 @@ async function onClick(e){
     case "close": case "closebg": S.sheet = null; render(); break;
     case "switchJ": profile().active = t.dataset.id; Store.touch("profile"); S.sheet = null; S.date = today(); S.week = null; render(); break;
     case "createJourney": { const start = $("#njs").value || nextMonday(); const nj = createJourney({ title: $("#njt").value.trim() || "Journey", start, goals: [], habits: j.habits.map(h => h.name) }); profile().active = nj.id; Store.touch("profile"); S.sheet = null; S.view = "goals"; render(); toast("New journey created. Set your goals."); break; }
-    case "export": doExport(); break;
+    case "export": await doExport(); break;
     case "theme": Theme.set(t.dataset.v); render(); break;
     case "accent": profile().accent = t.dataset.v; Store.touch("profile"); render(); break;
     case "inkPref": profile().ink = t.dataset.v === "auto" ? undefined : t.dataset.v; if (t.dataset.v === "auto") delete profile().ink; Store.touch("profile"); render(); break;
@@ -1339,7 +1356,11 @@ async function onClick(e){
     case "inkAddPage": if (Ink.data) { Ink.data.pages.push([]); Ink.status = ""; Ink.queue(Ink.data.pages.length - 1); render(); setTimeout(() => { const pg = document.querySelectorAll(".ink-page"); pg[pg.length - 1]?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); } break;
     case "inkClear": if (Ink.data) { if (t.dataset.confirm === "1") { const i = Ink.data.pages.length - 1; Ink.snapshot(i); Ink.data.pages[i] = []; Ink.queue(i); render(); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to clear"; t.classList.add("ember"); } } break;
     case "signout": await Store.flush(); ls.del("gm:session"); location.reload(); break;
-    case "gmode": S.gate.mode = t.dataset.v; S.gate.err = ""; render(); break;
+    case "gmode": S.gate.mode = t.dataset.v; S.gate.err = ""; if (t.dataset.v !== "signin") S.gate.noacct = ""; render(); break;
+    case "gimport": { const code = ($("#gcode") && $("#gcode").value.trim()) || S.gate.fileText || ""; if (!code) { S.gate.err = "Paste your transfer code or choose a file first."; render(); break; }
+      try { const acct = await importToDevice(code); ls.set("gm:session", { id: acct.id }); S.gate = null; await startLocal(acct); toast(`Welcome back, ${acct.name.split(" ")[0]}`); } catch (err) { S.gate.err = err.message || "That code didn't work."; render(); } break; }
+    case "copyXfer": { const ta = $("#xferOut"); try { await navigator.clipboard.writeText(ta.value); toast("Transfer code copied"); } catch { ta.focus(); ta.select(); toast("Code selected. Tap Copy."); } break; }
+    case "saveXfer": { const ta = $("#xferOut"); toast(saveFile(ta.value, `greatestme-${today()}.json`) ? "Saved to your downloads" : "Couldn't save a file here. Copy the code instead."); break; }
     case "pickAcct": S.gate.name = t.dataset.v; render(); $("#gpass").focus(); break;
     case "ostart": $("#ostart").value = t.dataset.v; break;
     case "oh": { captureOnboard(); const o = S.onboard; const v = t.dataset.v; o.habits = o.habits.includes(v) ? o.habits.filter(x => x !== v) : o.habits.concat(v).slice(0, 8); render(); break; }
@@ -1365,30 +1386,48 @@ async function onClick(e){
 }
 function addHabit(name){ const j = J(); name = (name || "").trim(); if (!name || j.habits.length >= 8) return; j.habits.push({ id: uid(), name }); Store.touch("journey-" + j.id); render(); const n = $("#newHabit"); n && n.focus(); }
 
-async function doExport(){
+async function buildBackup(){
   await Store.flush();
-  const data = JSON.stringify({ app: "GreatestMe", version: 1, exported: new Date().toISOString(), docs: Store.docs }, null, 2);
-  const name = `greatestme-backup-${today()}.json`;
+  const out = { app: "GreatestMe", version: 2, exported: new Date().toISOString(), docs: Store.docs };
+  if (Store.mode === "local") { const acct = Accounts.list().find(a => a.id === Store.uid); if (acct) out.account = acct; try { out.ink = await IDB.all(Store.uid + "|"); } catch {} }
+  return JSON.stringify(out);
+}
+async function doExport(){
+  const data = await buildBackup(); const name = `greatestme-${today()}.json`;
   try {
     const dl = window.claude && window.claude.use ? await claude.use("downloads") : null;
     if (dl) { await dl.save({ filename: name, data }); toast("Backup ready"); return; }
   } catch (e) { if (e && e.code && e.code !== "unavailable") { toast("Backup cancelled"); return; } }
-  const showText = () => { const out = $("#exportOut"); if (out) out.innerHTML = `<p class="muted" style="font-size:.8rem">Copy this text and keep it somewhere safe.</p><textarea class="in" readonly style="min-height:120px">${esc(data)}</textarea>`; };
-  if (window.claude) return showText();
-  try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast("Backup downloaded"); }
-  catch { const out = $("#exportOut"); if (out) { out.innerHTML = `<textarea class="in" readonly style="min-height:120px">${esc(data)}</textarea>`; } }
+  const out = $("#exportOut");
+  if (out) out.innerHTML = `<p class="muted small">Your transfer code. Copy it, open GreatestMe where you want your journal (another browser, the Home Screen app, another device), choose <b>Bring my journal here</b> on the sign-in screen and paste it.</p><textarea id="xferOut" class="in" readonly style="min-height:96px;font-family:var(--f-mono);font-size:12px">${esc(data)}</textarea><div class="row"><button class="btn sm primary" data-act="copyXfer">Copy transfer code</button>${window.claude ? "" : `<button class="btn sm" data-act="saveXfer">Save as a file</button>`}</div>`;
 }
+function saveFile(data, name){ try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); return true; } catch { return false; } }
+function parseBackup(text){ const obj = JSON.parse(text); if (!obj || obj.app !== "GreatestMe" || !obj.docs || typeof obj.docs !== "object") throw new Error("That isn't a GreatestMe transfer code or backup file."); return obj; }
+const DOC_KEY = /^(profile|journey-[\w-]+|day-[\w-]+|week-[\w-]+)$/;
 async function doImport(file){
   try {
-    const obj = JSON.parse(await file.text()); if (!obj || obj.app !== "GreatestMe" || !obj.docs || typeof obj.docs !== "object") throw 0;
-    Object.entries(obj.docs).forEach(([k, v]) => { if (/^(profile|journey-[\w-]+|day-[\w-]+|week-[\w-]+)$/.test(k) && v && typeof v === "object") { Store.docs[k] = v; Store.dirty.set(k, true); } });
-    await Store.flush(); S.sheet = null; render(); toast("Backup imported");
-  } catch { toast("That file isn't a GreatestMe backup"); }
+    const obj = parseBackup(await file.text());
+    Object.entries(obj.docs).forEach(([k, v]) => { if (DOC_KEY.test(k) && v && typeof v === "object") { Store.docs[k] = v; Store.dirty.set(k, true); } });
+    if (Store.mode === "local" && obj.ink) for (const [k, v] of Object.entries(obj.ink)) await IDB.put(Store.uid + "|" + k, v).catch(() => {});
+    await Store.flush(); render(); toast("Backup imported");
+  } catch (e) { toast(e.message && e.message.startsWith("That") ? e.message : "That file isn't a GreatestMe backup"); }
+}
+/* bring a journal into this browser/app from the sign-in screen */
+async function importToDevice(text){
+  const obj = parseBackup(text);
+  if (!obj.account || !obj.account.id || !obj.account.salt || !obj.account.hash) throw new Error("This backup has no account in it. Create an account here, then import it from Settings → Backup.");
+  const all = Accounts.list(); const same = all.find(a => a.name.toLowerCase() === obj.account.name.toLowerCase());
+  if (same && same.id !== obj.account.id) throw new Error(`An account named ${same.name} already exists here. Sign in to it, then import from Settings → Backup.`);
+  if (!same) { all.push({ id: obj.account.id, name: obj.account.name, salt: obj.account.salt, hash: obj.account.hash, created: obj.account.created || Date.now() }); Accounts.save(all); }
+  const docs = {}; Object.entries(obj.docs).forEach(([k, v]) => { if (DOC_KEY.test(k) && v && typeof v === "object") docs[k] = v; });
+  if (!ls.set("gm:data:" + obj.account.id, docs)) throw new Error("This browser is blocking storage, so the journal can't be saved here.");
+  if (obj.ink) for (const [k, v] of Object.entries(obj.ink)) await IDB.put(obj.account.id + "|" + k, v).catch(() => {});
+  return obj.account;
 }
 
 document.addEventListener("input", onInput);
 document.addEventListener("change", e => { if (e.target.dataset && e.target.dataset.doc && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== "checkbox" && !S.ritual) checkWins(e.target); });
-document.addEventListener("change", e => { if (e.target.id === "inkTpl" && Ink.data) { Ink.data.meta.tpl = e.target.value; profile().inkTpl = e.target.value; Store.touch("profile"); Ink.queue(0); render(); return; } if (e.target.id === "importFile" && e.target.files[0]) doImport(e.target.files[0]); else if (e.target.type === "checkbox" || e.target.tagName === "SELECT" || e.target.type === "date") { /* handled by input */ } });
+document.addEventListener("change", async e => { if (e.target.id === "gfile" && e.target.files[0]) { S.gate.fileText = await e.target.files[0].text(); S.gate.err = ""; const ta = $("#gcode"); if (ta) ta.value = S.gate.fileText; return; } if (e.target.id === "inkTpl" && Ink.data) { Ink.data.meta.tpl = e.target.value; profile().inkTpl = e.target.value; Store.touch("profile"); Ink.queue(0); render(); return; } if (e.target.id === "importFile" && e.target.files[0]) doImport(e.target.files[0]); else if (e.target.type === "checkbox" || e.target.tagName === "SELECT" || e.target.type === "date") { /* handled by input */ } });
 document.addEventListener("click", onClick);
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "newHabit") { e.preventDefault(); addHabit(e.target.value); }
@@ -1403,7 +1442,7 @@ document.addEventListener("submit", async e => {
     if (g.mode === "create") { if (pass !== ($("#gpass2").value)) throw new Error("Passcodes don't match."); acct = await Accounts.create(name, pass); }
     else acct = await Accounts.signIn(name, pass);
     ls.set("gm:session", { id: acct.id }); await startLocal(acct);
-  } catch (err) { g.err = err.message || "Something went wrong."; render(); }
+  } catch (err) { if (err.noacct) { g.noacct = name.trim(); g.err = ""; } else { g.noacct = ""; g.err = err.message || "Something went wrong."; } render(); }
 });
 window.addEventListener("pagehide", () => { if (Store.dirty.size) Store.flush(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden && Store.dirty.size) Store.flush(); });
