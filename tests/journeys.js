@@ -25,6 +25,8 @@ async function createAccount(p, name, pass){
   if (await p.locator('[data-act=ackHere]').count()) await p.click('[data-act=ackHere]');
   await p.fill('#gname', name); await p.fill('#gpass', pass); await p.fill('#gpass2', pass); await p.click('button[type=submit]');
 }
+const dismissGuide = async p => { if (await p.waitForSelector('[data-act=guideClose]', { timeout: 1200 }).then(() => true).catch(() => false)) { await p.click('.sheet [data-act=guideClose] >> nth=-1'); await p.waitForTimeout(150); } };
+const go = async (p, v) => { await p.click(`[data-act=nav][data-v=${v}] >> visible=true`); await dismissGuide(p); };
 const openSec = async (p, id) => { if (!(await p.locator(`#sec-${id}.open`).count())) { await p.click(`#sec-${id} .acc-h`); await p.waitForTimeout(350); } };
 async function onboard(p, nick){
   await p.waitForSelector('#ob0'); await p.click('[data-act=onext]'); await p.fill('#onick', nick);
@@ -33,7 +35,7 @@ async function onboard(p, nick){
   await p.click('[data-v="Move 30 min"]'); await p.click('[data-act=onext]');
   await p.waitForSelector('[data-rem=o]'); await p.click('[data-act=onext]');
   await p.evaluate(() => document.getElementById('commitBtn').click()); await p.waitForSelector('.cele'); await p.click('.cele button');
-  await p.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }).then(() => p.keyboard.press('Escape')).catch(() => {}); await p.waitForTimeout(150);
+  if (await p.waitForSelector('.sheet [data-act=guideTour]', { timeout: 6000 }).then(() => true).catch(() => false)) await p.click('.sheet [data-act=guideClose] >> nth=-1'); await p.waitForTimeout(150);
 }
 const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.hl-track,.wk-strip,.backdrop,svg,canvas,.fx')) return;
@@ -80,11 +82,20 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await A.click('[data-act=water][data-n="1"]'); await A.click('[data-act=water][data-n="1"]');
   ok(/^2/.test((await A.locator('.hl-card:has([data-act=water]) .hl-big b').innerText()).trim()), 'water taps count up');
 
+  // 2-g. Page guides, the Method and the evening scores.
+  await A.click('[data-act=nav][data-v=goals] >> visible=true'); ok(await A.waitForSelector('.sheet [data-act=guideTour]', { timeout: 3000 }).then(() => true).catch(() => false), 'first visit to Goals explains the page');
+  await A.click('.sheet [data-act=guideTour]'); await A.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }); ok(/goal/i.test(await A.locator('.tour-card').innerText()), 'Show me around spotlights the Goals page');
+  await A.keyboard.press('Escape'); await go(A, 'today'); await go(A, 'goals'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 0, 'a page guide shows only once');
+  await A.click('[data-act=guide][data-v=goals] >> visible=true'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 1, 'the ? button reopens the page guide'); await A.click('.sheet [data-act=guideClose] >> nth=-1');
+  await go(A, 'prefs'); await A.click('.main [data-act=nav][data-v=method]'); ok(await A.locator('.main section.card').count() === 9, 'Settings opens the nine-chapter GreatestMe Method');
+  await go(A, 'today'); await openSec(A, 'evening'); await A.locator('#winDay').fill('8'); await A.waitForTimeout(800);
+  ok(/8\/10/.test(await A.locator('#winDay-v').innerText()), 'Win the Day score saves on the evening page');
+
   // 2a. Accordion folds and unfolds; a badge was earned for the first page.
   const wasOpen = await A.locator('#sec-targets.open').count(); await A.click('#sec-targets .acc-h'); ok(await A.locator('#sec-targets.open').count() !== wasOpen, 'sections fold and unfold');
   ok(await A.locator('#sec-schedule').count() === 0, 'optional schedule stays out of the way until turned on');
-  await A.click('[data-act=nav][data-v=progress] >> visible=true'); ok(await A.locator('.bd.earned').count() >= 1, 'first-page badge earned');
-  await A.click('[data-act=nav][data-v=today] >> visible=true');
+  await go(A, 'progress'); ok(await A.locator('.bd.earned').count() >= 1, 'first-page badge earned');
+  await go(A, 'today');
 
   // 2b. Calendar, day summary, logo home, Partner via Settings, tour replay.
   ok(await A.locator('#sec-morning .schip').innerText().then(t => /done|\/3/i.test(t)), 'Today sections show their completion status');
@@ -97,14 +108,14 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await A.click('[data-act=calMode][data-v=journey]'); ok(await A.locator('.jr').count() === 13, 'calendar shows all 13 weeks');
   await A.click('[data-act=nav][data-v=today].brand >> visible=true'); ok(await A.locator('.hero').count() === 1, 'logo goes home to Today');
   ok(await A.locator('.tabs [data-v=partner], .nav [data-v=partner]').count() === 0, 'Partner is not in the tab bar');
-  await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('.main [data-act=nav][data-v=partner]'); ok(/Partner/.test(await A.locator('h1').first().innerText()) && await A.locator('[data-act=toggleShare]').count() === 0, 'Partner opens from Settings (no sharing switch until accounts sync)');
+  await go(A, 'prefs'); await A.click('.main [data-act=nav][data-v=partner]'); ok(/Partner/.test(await A.locator('h1').first().innerText()) && await A.locator('[data-act=toggleShare]').count() === 0, 'Partner opens from Settings (no sharing switch until accounts sync)');
   await A.click('.back'); await A.click('[data-act=tourStart]'); await A.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 8000 }).catch(() => {}); let steps = 0;
   while (await A.locator('#tourLayer [data-act=tourNext]').count() && steps < 8) { steps++; await A.waitForTimeout(450); await A.click('#tourLayer [data-act=tourNext]'); }
   ok(steps >= 4 && await A.locator('#tourLayer').count() === 0, `tour walks through ${steps} steps and closes`);
 
   // 2c. iPad Ink: strokes survive an immediate day switch.
   const I = await page(b, { ...(devices['iPad Pro 11'] || PHONE) }, 'ipad-ink'); await createAccount(I, 'Inky', PASS); await onboard(I, 'Inky');
-  await I.click('[data-act=nav][data-v=ink] >> visible=true'); await I.waitForSelector('canvas[data-page="0"]'); const bx = await I.locator('canvas[data-page="0"]').boundingBox();
+  await go(I, 'ink'); await I.waitForSelector('canvas[data-page="0"]'); const bx = await I.locator('canvas[data-page="0"]').boundingBox();
   await I.evaluate(({ bx }) => { const cv = document.querySelector('canvas[data-page="0"]'); const f = (t, x, y) => cv.dispatchEvent(new PointerEvent(t, { pointerId: 3, pointerType: 'pen', clientX: bx.x + x, clientY: bx.y + y, pressure: .5, bubbles: true, cancelable: true }));
     f('pointerdown', 150, 150); for (let k = 0; k < 30; k++) f('pointermove', 150 + k * 4, 150 + (k % 5)); f('pointerup', 270, 150); }, { bx });
   await I.click('[data-act=day][data-n="-1"]'); await I.waitForTimeout(300); await I.click('[data-act=day][data-n="1"]'); await I.waitForTimeout(700);
@@ -120,10 +131,10 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   ok(/no Lyllian account/i.test(msg) && /password is probably fine/i.test(msg), 'other place: explains where the account lives instead of blaming the password');
 
   // 4. Move the journal over with a transfer code; same passcode works; wrong passcode gets its own message.
-  await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('.more > summary'); await A.click('[data-act=export]'); const code = await A.inputValue('#xferOut');
+  await go(A, 'prefs'); await A.click('.more > summary'); await A.click('[data-act=export]'); const code = await A.inputValue('#xferOut');
   await B.click('[data-act=gmode][data-v=import] >> nth=0'); await B.fill('#gcode', code); await B.click('[data-act=gimport]'); await B.waitForTimeout(400);
   ok(await B.inputValue('#g0').catch(() => '') === 'My son', 'transfer code brings the journal over');
-  await B.click('[data-act=nav][data-v=prefs] >> visible=true'); await B.click('[data-act=signout]'); await B.waitForTimeout(400);
+  await go(B, 'prefs'); await B.click('[data-act=signout]'); await B.waitForTimeout(400);
   await B.fill('#gname', 'Lyllian'); await B.fill('#gpass', 'nope'); await B.click('button[type=submit]');
   ok(/doesn't match/i.test(await B.locator('.err').innerText()), 'wrong passcode gets a clear message');
   await B.fill('#gpass', PASS); await B.click('button[type=submit]'); await B.waitForTimeout(300);
@@ -137,8 +148,8 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
       await createAccount(p, 'Tester', 'Tester#2026');
       for (let st = 0; st < 7; st++) { if (st === 1) await p.fill('#onick', 'Tester'); if (st === 4) await p.fill('#og0', 'A goal'); await p.waitForTimeout(60); const o = await overflow(p); ok(!o, `${label} ${suite} onboarding ${st} fits${o ? ' (' + o + ')' : ''}`); await p.click('[data-act=onext]'); }
       await p.evaluate(() => document.getElementById('commitBtn').click()); await p.click('.cele button');
-      if (await p.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }).then(() => true).catch(() => false)) { const o = await overflow(p); ok(!o, `${label} ${suite} tour fits${o ? ' (' + o + ')' : ''}`); await p.keyboard.press('Escape'); }
-      for (const v of ['today', 'week', 'goals', 'habits', 'progress', 'prefs']) { await p.click(`[data-act=nav][data-v=${v}] >> visible=true`); await p.waitForTimeout(60); const o = await overflow(p); if (o) ok(false, `${label} ${suite} ${v} fits (${o})`); }
+      if (await p.waitForSelector('.sheet [data-act=guideTour]', { timeout: 6000 }).then(() => true).catch(() => false)) { const o = await overflow(p); ok(!o, `${label} ${suite} first-run guide fits${o ? ' (' + o + ')' : ''}`); await p.click('.sheet [data-act=guideClose] >> nth=-1'); }
+      for (const v of ['today', 'week', 'goals', 'habits', 'progress', 'prefs']) { await go(p, v); await p.waitForTimeout(60); const o = await overflow(p); if (o) ok(false, `${label} ${suite} ${v} fits (${o})`); }
       await p.context().close();
     }
   }
@@ -162,9 +173,9 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     await openSec(C, 'morning'); await C.fill('#g1', 'Health'); await C.evaluate(() => { const e = document.getElementById('g1'); e.setSelectionRange(2, 2); });
     await C.evaluate(() => window.dispatchEvent(new Event('x'))); await C.keyboard.type('XX'); ok(await C.inputValue('#g1') === 'HeXXalth', 'typing stays in order where the cursor is');
     const L = await page(b, { ...PHONE }, 'acct-lyllian', 'accounts'); await signup(L, 'l@example.com', 'Purple#2026xx'); await onboard(L, 'Lyllian');
-    await L.click('[data-act=nav][data-v=prefs] >> visible=true'); await L.waitForTimeout(300); if (!(await L.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG L:', (await L.evaluate(() => document.body.innerText)).slice(0, 500)); await L.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Ldebug.png' }); } await L.click('.main [data-act=nav][data-v=partner]'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
+    await go(L, 'prefs'); await L.waitForTimeout(300); if (!(await L.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG L:', (await L.evaluate(() => document.body.innerText)).slice(0, 500)); await L.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Ldebug.png' }); } await L.click('.main [data-act=nav][data-v=partner]'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
     const code = (await L.locator('.mono[style*="letter-spacing"]').innerText()).trim(); await L.click('[data-act=toggleShare]'); await L.waitForTimeout(3000);
-    await C.click('[data-act=nav][data-v=prefs] >> visible=true'); await C.waitForTimeout(300); if (!(await C.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG C:', (await C.evaluate(() => document.body.innerText)).slice(0, 700)); await C.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Cdebug.png' }); } await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
+    await go(C, 'prefs'); await C.waitForTimeout(300); if (!(await C.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG C:', (await C.evaluate(() => document.body.innerText)).slice(0, 700)); await C.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Cdebug.png' }); } await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
     ok((await C.locator('.partner h2').allInnerTexts()).includes('Lyllian'), 'accounts: partner invite code links two phones');
   } finally { fake.kill(); }
 

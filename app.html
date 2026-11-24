@@ -468,6 +468,12 @@ details.sched summary::-webkit-details-marker{display:none}
 .more{display:flex;flex-direction:column;gap:18px}
 .more>summary{list-style:none;align-self:flex-start}.more>summary::-webkit-details-marker{display:none}
 .more-in{display:flex;flex-direction:column;gap:18px;margin-top:18px}
+/* guides */
+.guide-steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
+.qbtn{font-weight:800;font-size:1.05rem}
+.qdot{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font-size:.75rem;font-weight:800}
+.range{width:100%;accent-color:var(--acc);min-height:32px}
+.rv{font-size:.95rem}
 /* daily highlights */
 .hl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-width:0}
 .hl-track{height:178px;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;scroll-snap-stop:always;scrollbar-width:none;overscroll-behavior:contain;border-radius:var(--r);-webkit-overflow-scrolling:touch}
@@ -804,7 +810,7 @@ const DEEP = [["today","Today's page"],["morning","Morning: gratitude and target
 function routeHash(){
   let h = ""; try { h = (location.hash || "").slice(1).toLowerCase(); } catch {}
   if (!h || !profile() || !J()) return;
-  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", calendar:"today", duo:"partner", partner:"partner", preferences:"prefs" };
+  const map = { today:"today", morning:"today", evening:"today", win:"today", habits:"habits", week:"week", review:"week", ink:"ink", write:"ink", goals:"goals", progress:"progress", method:"method", calendar:"today", duo:"partner", partner:"partner", preferences:"prefs" };
   if (!map[h]) return;
   S.view = map[h]; if (S.view === "today" || S.view === "ink") S.date = today(); if (S.view === "week") S.week = null; S.sheet = null;
   if (h === "morning" || h === "evening") { S.breathStart = Date.now(); S.ritual = { kind: h, step: 0 }; S.snap = snap(); S.anim = { ritual: true, step: true }; render(); return; }
@@ -1085,7 +1091,8 @@ function ritualView(){
   if (step === "lessons") body = `<span class="kicker">Lessons</span><h1>What did today teach you?</h1>${ta("rl", key, "lessons", dd.lessons, "What would you tell yourself this morning?").replace('class="in"', 'class="in big-in" style="min-height:140px"')}`;
   if (step === "improve") body = `<span class="kicker">Tomorrow</span><h1>One thing you'll do better tomorrow.</h1>${inp("ri", key, "improve", dd.improve, "One adjustment", "in box big-in")}${inp("rgp", key, "gratitudePM", dd.gratitudePM, "And tonight I'm grateful for…", "in box big-in")}`;
   if (step === "mood") body = `<span class="kicker">Check in</span><h1>How did today feel?</h1><div class="field"><span class="label">Mood</span><div class="scale faces" role="group">${["😣", "🙁", "😐", "🙂", "😄"].map((f, i) => `<button data-act="scale" data-doc="${key}" data-f="mood" data-n="${i + 1}" aria-pressed="${dd.mood === i + 1}" aria-label="Mood ${i + 1} of 5">${f}</button>`).join("")}</div></div>
-    <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained", "Low", "Okay", "Strong", "Charged"])}</div>`;
+    <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained", "Low", "Okay", "Strong", "Charged"])}</div>
+    ${rangeField("rwin", key, "winDay", dd.winDay, "Win the Day", "Score today from 1 to 10.")}`;
   if (step === "done") { const st = stats(); const parts = dayParts(dd);
     body = `<div style="display:grid;place-items:center;gap:14px;text-align:center">${rings(parts, `${dayScore(dd)}%`, "today")}<span class="kicker">${R.title} complete</span><h1>${!journalled(dd) ? `Nothing written yet, and that's okay. Come back any time today.` : r.kind === "morning" ? `You're set, ${nick}. Go make it count.` : `Day closed. Proud of you, ${nick}.`}</h1>
       ${dayNum(d) < 1 ? `<span class="muted small">Practice day · your streak starts ${esc(fmtDate(J().start, { month: "short", day: "numeric" }))}</span>` : `<span class="flame ${journalled(dd) ? "lit" : "out"}">${FLAME}${st.streak} day streak</span>`}</div>`; }
@@ -1120,7 +1127,7 @@ function prefsView(){
   <section class="card"><div class="card-h"><h2>Partner</h2><span class="label">${p.share ? "Sharing on" : "Sharing off"}</span></div>
     <p class="muted small">Cheer each other on. Your partner sees your streak, rates, goal progress and one win you choose. Never your journal.</p>
     <button class="btn" style="align-self:flex-start" data-act="nav" data-v="partner">${ICON.partner.replace("<svg", '<svg width="16" height="16"')} ${Store.mode === "supa" && !(S.links || []).length ? "Connect with your partner" : "Open Partner"}</button></section>
-  <section class="card"><div class="card-h"><h2>Help</h2></div><div class="row"><button class="btn" data-act="tourStart">Take the tour</button><button class="btn ghost" data-act="tipsReset">Show tips again</button></div></section>
+  <section class="card"><div class="card-h"><h2>Help</h2></div><p class="muted small">The GreatestMe Method is the guide behind the journal: why 13 weeks, setting goals that stick, and how each page helps.</p><div class="row"><button class="btn primary" data-act="nav" data-v="method">Read the Method</button><button class="btn" data-act="tourStart">Take the tour</button><button class="btn ghost" data-act="tipsReset">Show tips again</button></div></section>
   <details class="more" ${S.moreOpen ? "open" : ""}><summary class="btn">More settings</summary><div class="more-in">
   <section class="card"><div class="card-h"><h2>Feel</h2><span class="label">This phone only</span></div><div class="set-group">
     <label class="set-row"><div><b>Time-block schedule</b><p class="muted small">Adds an hour-by-hour planner to Today.</p></div><input type="checkbox" class="switch" data-act="schedPref" ${p.schedule ? "checked" : ""}></label>
@@ -1228,14 +1235,14 @@ const TOUR = [
   { sel: '[data-act=nav][data-v=habits]', title: "Habits", text: "Your daily non-negotiables, with streaks you'll want to protect." },
   { sel: '[data-act=nav][data-v=prefs]', title: "Settings", text: "Change your look, set your reminders and connect with your partner. Replay this tour from Help in Settings." },
 ];
-function tryTour(){ if (!S.pendingTour || S.tour) return; if (!S.ritual && !S.sheet && !S.cele && S.view === "today") { S.pendingTour = false; Tour.start(); } }
+function tryTour(){ if (!S.pendingTour || S.tour) return; if (!S.ritual && !S.sheet && !S.cele && S.view === "today") { S.pendingTour = false; const p = profile(); if (p && !p.toured) { p.toured = Date.now(); Store.touch("profile"); } S.guideFor = "today"; S.sheet = "guide"; S.sheetFocus = true; render(); } }
 const Tour = {
-  start(){ S.tour = { step: 0 }; S.view = "today"; S.date = today(); S.sheet = null; window.scrollTo(0, 0); document.documentElement.style.overflow = "hidden"; render(); },
+  start(steps = GUIDES.today.steps, view = "today"){ S.tour = { step: 0, steps }; S.view = view; if (view === "today") S.date = today(); S.sheet = null; window.scrollTo(0, 0); document.documentElement.style.overflow = "hidden"; render(); },
   end(){ S.tour = null; document.documentElement.style.overflow = ""; const a = document.querySelector(".app"); if (a) a.inert = false; const p = profile(); if (p && !p.toured) { p.toured = Date.now(); Store.touch("profile"); } document.querySelectorAll("#tourLayer").forEach(x => x.remove()); render(); },
   paint(settling){
     let l = document.getElementById("tourLayer"); if (!S.tour) { document.querySelectorAll("#tourLayer").forEach(x => x.remove()); return; }
-    const st = TOUR[S.tour.step]; const el = [...document.querySelectorAll(st.sel)].find(x => x.getClientRects().length && x.offsetParent !== null);
-    if (!el) { if (S.tour.step < TOUR.length - 1) { S.tour.step++; return this.paint(); } return this.end(); }
+    const st = S.tour.steps[S.tour.step]; const el = [...document.querySelectorAll(st.sel)].find(x => x.getClientRects().length && x.offsetParent !== null);
+    if (!el) { if (S.tour.step < S.tour.steps.length - 1) { S.tour.step++; return this.paint(); } return this.end(); }
     if (!settling) el.scrollIntoView({ block: "center" });
     if (!l) { l = document.createElement("div"); l.id = "tourLayer"; l.innerHTML = `<div class="spot"></div><div class="tour-card" role="dialog" aria-modal="true"></div>`; document.body.appendChild(l); }
     requestAnimationFrame(() => {
@@ -1245,8 +1252,8 @@ const Tour = {
       Object.assign(spot.style, { left: r.left - pad + "px", top: r.top - pad + "px", width: r.width + pad * 2 + "px", height: r.height + pad * 2 + "px" });
       if (card.dataset.step !== String(S.tour.step)) {
         card.dataset.step = S.tour.step; card.setAttribute("aria-label", st.title); card.classList.remove("in"); void card.offsetWidth; card.classList.add("in");
-        card.innerHTML = `<span class="label">${S.tour.step + 1} of ${TOUR.length}</span><h2>${esc(st.title)}</h2><p class="muted">${esc(st.text)}</p>
-          <div class="row" style="justify-content:space-between">${S.tour.step === TOUR.length - 1 ? "<span></span>" : `<button class="btn ghost sm" data-act="tourSkip">Skip tour</button>`}<button class="btn primary" data-act="tourNext">${S.tour.step === TOUR.length - 1 ? "Let's go" : "Next"}</button></div>`;
+        card.innerHTML = `<span class="label">${S.tour.step + 1} of ${S.tour.steps.length}</span><h2>${esc(st.title)}</h2><p class="muted">${esc(st.text)}</p>
+          <div class="row" style="justify-content:space-between">${S.tour.step === S.tour.steps.length - 1 ? "<span></span>" : `<button class="btn ghost sm" data-act="tourSkip">Skip tour</button>`}<button class="btn primary" data-act="tourNext">${S.tour.step === S.tour.steps.length - 1 ? "Let's go" : "Next"}</button></div>`;
         const btn = card.querySelector("[data-act=tourNext]"); if (btn) btn.focus({ preventScroll: true });
       }
       const W = Math.min(340, innerWidth - 32); const left = Math.max(16, Math.min(innerWidth - W - 16, r.left + r.width / 2 - W / 2));
@@ -1371,7 +1378,7 @@ function badgePop(b, more){
 }
 function badgesCard(){
   const p = profile(); const got = (p && p.badges) || {}; const n = BADGES.filter(b => got[b.id]).length;
-  return `<section class="card"><div class="card-h"><h2>Badges</h2><span class="label">${n} of ${BADGES.length}</span></div>
+  return `<section class="card" id="pg-badges"><div class="card-h"><h2>Badges</h2><span class="label">${n} of ${BADGES.length}</span></div>
     <div class="badges">${BADGES.map(b => `<div class="bd ${got[b.id] ? "earned" : ""}" title="${esc(b.desc)}"><div class="badge">${got[b.id] ? b.icon : "🔒"}</div><b>${esc(b.name)}</b><span class="muted">${esc(got[b.id] ? fmtDate(got[b.id], { month: "short", day: "numeric" }) : b.desc)}</span></div>`).join("")}</div></section>`;
 }
 
@@ -1415,6 +1422,70 @@ Stack.start();
 document.addEventListener("scroll", e => { if (e.target && e.target.id === "hlTrack") Stack.sync(); }, true);
 ["pointerdown", "touchstart", "wheel", "focusin"].forEach(ev => document.addEventListener(ev, e => { if (e.target.closest && e.target.closest("#hlTrack")) Stack.hold = Date.now(); }, { passive: true, capture: true }));
 
+/* ============================ page guides + the GreatestMe Method ============================ */
+const GUIDES = {
+  today: { title: "Today is your daily page", why: "Small wins, every day, add up to 13-week results.",
+    how: ["Morning: breathe, name three things you're grateful for, set one intention and three targets that move your goals.", "During the day: check off targets and habits as you go.", "Evening: write your wins and one lesson, then score the day: Win the Day and Plan to Reality."],
+    tip: "Close all three rings to complete the day. On busy days, one line still keeps your streak.",
+    steps: [{ sel: ".hero .ring", title: "Three rings", text: "Morning, targets and evening. Close all three and the day is complete." },
+      { sel: ".ritual-card", title: "Guided rituals", text: "About three minutes, one question at a time. The easiest way to fill your page." },
+      { sel: "#sec-morning .acc-h", title: "Sections that track themselves", text: "Each part shows if it's done. Finished parts fold away; the next one opens." },
+      { sel: "#sec-calendar", title: "Your calendar", text: "This week at a glance. Tap a day to look back, or tap Calendar for the month and all 13 weeks." },
+      { sel: "[data-act=nav][data-v=prefs]", title: "Settings and help", text: "Your look, reminders, partner, and the full GreatestMe Method guide." }] },
+  week: { title: "Your week: plan it, then review it", why: "A week is where a big goal becomes a plan you can actually do.",
+    how: ["Plan: one target for each goal and your top three priorities.", "Check the milestones due this week and tick habits across all seven days.", "Review: wins, lessons, what got in the way, one change for next week. Then rate the week."],
+    tip: `Plan on ${"$DAY1"}s; review the evening before.`,
+    steps: [{ sel: ".strip", title: "Where you are", text: "Each bar is one of your 13 weeks. The bright one is now." },
+      { sel: "#wk-plan", title: "Weekly plan", text: "One target per goal and three priorities. That's the whole plan." },
+      { sel: "#wk-ms", title: "Milestones due", text: "The roadmap steps you set for this week. Check them off when they're done." },
+      { sel: "#wk-review", title: "Weekly review", text: "Five minutes: wins, lessons, obstacles, one change, and a score. Your Win the Day average shows here too." }] },
+  goals: { title: "Goals that actually happen", why: "Thirteen weeks is long enough to change something real and short enough to stay urgent.",
+    how: ["Make each goal SMART: specific, measurable, achievable, relevant, and done by Day 91.", "Write why it matters and the reward you'll give yourself.", "Break it into milestones and give each one a week."],
+    tip: "Three goals at most. Focus beats volume.",
+    steps: [{ sel: ".goal", title: "One goal", text: "A clear finish line, your why, how you'll measure it, and your reward." },
+      { sel: "[data-act=addMs],[data-act=seedMs]", title: "Your roadmap", text: "Milestones turn a 13-week goal into weekly steps. Give each one a week." }] },
+  habits: { title: "Habits: the daily engine", why: "Goals are where you're going. Habits are how you get there without relying on motivation.",
+    how: ["Pick a few daily non-negotiables.", "Check them off on Today or in the weekly grid.", "Watch your streaks and the 13-week heatmap fill in."],
+    tip: "Missed a day? Don't miss two.",
+    steps: [{ sel: "#newHabit,.presets", title: "Add habits", text: "Type your own or tap a suggestion. Keep it to a handful." },
+      { sel: ".heat", title: "Your 13 weeks", text: "Every square is a day. Green means done." }] },
+  progress: { title: "See how far you've come", why: "Seeing real progress keeps motivation honest.",
+    how: ["Streaks, consistency and hit rates update as you go.", "Badges mark the milestones of the method.", "In week 13, do your quarterly review and plan the next 13 weeks."],
+    tip: "Compare weeks, not days.",
+    steps: [{ sel: ".stats", title: "Your numbers", text: "Streak, consistency, habit and target rates." },
+      { sel: "#pg-badges", title: "Badges", text: "Earned by doing the method: first page, streaks, perfect weeks and more." },
+      { sel: "#pg-review", title: "Quarterly review", text: "At the end of 13 weeks: score your goals, keep, stop, start, and choose what's next." }] },
+};
+const METHOD = [
+  { t: "Why 13 weeks", go: "goals", b: "A year is too far away to feel urgent; a week is too short to change much. Thirteen weeks, one quarter, is the sweet spot: long enough for real results, short enough that every day counts. You'll set up to three goals, work them daily, review them weekly, and finish with a quarterly review." },
+  { t: "Set goals that stick", go: "goals", b: "Make each goal SMART: specific, measurable, achievable, relevant and time-bound. \"Get fit\" becomes \"Run a 5K in under 30 minutes by Day 91.\" Then write why it matters to you and the reward you'll give yourself when you hit it. A clear why carries you through the days motivation doesn't show up." },
+  { t: "Map your roadmap", go: "goals", b: "Break each goal into milestones and give each one a week. Working backward from Day 91 shows you exactly what this week needs to look like. Milestones due each week show up on your Week page." },
+  { t: "Win the morning", go: "today", b: "Start with a minute of breathing, then three things you're grateful for, one intention for who you'll be today, and three targets: the moves that matter most for your goals. Gratitude sets the tone; targets set the direction." },
+  { t: "Close the evening", go: "today", b: "Write your wins, however small. Note one lesson and one thing you'll do better tomorrow. Then score the day: Win the Day (how well it went, 1–10) and Plan to Reality (how closely the day matched your plan, 1–10). Your scores show patterns your memory won't." },
+  { t: "Plan and review every week", go: "week", b: "Once a week, set one target per goal and three priorities. At the end of the week, look back: biggest wins, lessons, what got in the way, and one change. Rate the week. Fifteen minutes here saves hours of drifting." },
+  { t: "Build habits that carry you", go: "habits", b: "Choose a few daily non-negotiables that make everything else easier: water, movement, reading, sleep. Check them off daily and let the streaks and heatmap pull you forward." },
+  { t: "Missed a day?", go: "today", b: "Pick up where you left off. No guilt, no starting over. One line keeps the streak; one missed day is a blip, two is a pattern. Practice days before Day 1 are a free warm-up." },
+  { t: "Finish strong: the quarterly review", go: "progress", b: "At the end of 13 weeks, score each goal, write your proudest moments and what you learned about yourself, decide what to keep, stop and start, and choose what the next 13 weeks are for." },
+];
+function guideSheet(){
+  const k = S.guideFor, g = GUIDES[k]; if (!g) return ""; const tip = g.tip.replace("$DAY1", J() ? fmtDate(J().start, { weekday: "long" }) : "Monday");
+  return `<div class="card-h"><div><span class="label">How this page works</span><h2 id="sheetTitle" style="margin-top:4px">${esc(g.title)}</h2></div><button class="btn icon ghost" aria-label="Close" data-act="guideClose">${ICON.x}</button></div>
+    <p class="muted">${esc(g.why)}</p><ol class="guide-steps">${g.how.map(x => `<li>${esc(x)}</li>`).join("")}</ol>
+    <div class="tip" role="note"><span>${esc(tip)}</span></div>
+    <div class="row"><button class="btn primary" data-act="guideTour" data-v="${k}">Show me around</button><button class="btn ghost" data-act="guideClose">Got it</button></div>
+    <button class="btn ghost sm" style="align-self:flex-start" data-act="nav" data-v="method">Read the full GreatestMe Method</button>`;
+}
+function methodView(){
+  return `<button class="back" data-act="nav" data-v="prefs">${ICON.left} Settings</button>
+  <div class="head"><div><span class="label">Your guide to the next 13 weeks</span><h1 class="title-bar" style="margin-top:4px">The GreatestMe Method</h1><p class="sub">Everything the journal is built on, in nine short reads.</p></div></div>
+  ${METHOD.map((c, i) => `<section class="card"><div class="card-h"><h2><span class="goal-n" style="margin-right:8px">${String(i + 1).padStart(2, "0")}</span>${esc(c.t)}</h2></div><p>${esc(c.b)}</p><button class="btn sm" style="align-self:flex-start" data-act="nav" data-v="${c.go}">Open ${esc({ goals: "Goals", today: "Today", week: "Week", habits: "Habits", progress: "Progress" }[c.go])}</button></section>`).join("")}`;
+}
+function maybeGuide(){ // first visit to a page shows its guide once
+  const p = profile(); if (!p || S.tour || S.pendingTour || S.sheet || S.cele || S.ritual || !GUIDES[S.view]) return;
+  if (p.guides && p.guides[S.view]) return; S.guideFor = S.view; S.sheet = "guide"; S.sheetFocus = true; render();
+}
+function markGuide(k){ const p = profile(); if (!p) return; p.guides = p.guides || {}; if (!p.guides[k]) { p.guides[k] = 1; Store.touch("profile"); } }
+
 /* ============================ rendering ============================ */
 let User = null;
 const NAV = [["today","Today"],["week","Week"],["goals","Goals"],["habits","Habits"],["progress","Progress"]];
@@ -1433,15 +1504,15 @@ function render(){
   if (!profile() || !J()) { root.innerHTML = BD + enterCard(onboardView()); return; }
   if (S.view === "ink" && !canInk()) S.view = "today";
   const entering = S.lastView !== S.view; S.lastView = S.view;
-  const v = { today: todayView, prefs: prefsView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, partner: partnerView }[S.view]();
+  const v = { today: todayView, method: methodView, prefs: prefsView, ink: inkView, week: weekView, goals: goalsView, habits: habitsView, progress: progressView, partner: partnerView }[S.view]();
   const items = navItems(); const nav = () => items.map(([k, l]) => `<button data-act="nav" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
   const p = profile();
   root.innerHTML = `${BD}<div class="app">
     <aside class="rail"><button class="brand" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button><nav class="nav">${nav()}</nav>
-      <div class="rail-foot"><div id="savestate" class="save" style="padding:0 8px"></div>
+      <div class="rail-foot">${GUIDES[S.view] ? `<button class="btn sm ghost" style="justify-content:flex-start" data-act="guide" data-v="${S.view}"><span class="qdot">?</span> How this page works</button>` : ""}<div id="savestate" class="save" style="padding:0 8px"></div>
       <button class="me" data-act="nav" data-v="prefs" aria-label="Settings" ${S.view === "prefs" ? 'aria-current="page"' : ""}><span class="avatar sm">${esc((p.nick || "?").trim().charAt(0))}</span><span style="flex:1;min-width:0"><b style="display:block">${esc(p.nick || "")}</b><span class="muted small">Settings</span></span>${ICON.gear.replace("<svg", '<svg width="18" height="18"')}</button></div></aside>
     <main class="main"><div class="col ${entering ? "enter" : ""}">
-      <div class="mtop"><button class="brand" style="padding:0" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button><button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear.replace("<svg", '<svg width="22" height="22"')}</button></div>
+      <div class="mtop"><button class="brand" style="padding:0" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button>${GUIDES[S.view] ? `<button class="btn icon ghost qbtn" aria-label="How this page works" data-act="guide" data-v="${S.view}">?</button>` : ""}<button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear.replace("<svg", '<svg width="22" height="22"')}</button></div>
       ${v}
     </div></main>
     <nav class="tabs" style="--tabs:${items.length}">${nav()}</nav>
@@ -1458,6 +1529,7 @@ function render(){
   if (S.sheet && S.sheetFocus) { S.sheetFocus = false; const c = document.querySelector(".sheet [data-act=close]"); if (c) c.focus({ preventScroll: true }); }
   if (!S.sheet && S.refocus) { const r = document.querySelector(S.refocus); S.refocus = null; if (r) r.focus({ preventScroll: true }); }
   if (S.tour) Tour.paint();
+  if (entering && GUIDES[S.view] && !S.pendingTour) { clearTimeout(maybeGuide.t); maybeGuide.t = setTimeout(maybeGuide, 450); }
   if (S.pendingTour && !S.cele && !S.ritual && !S.sheet && S.view === "today") { clearTimeout(tryTour.t); tryTour.t = setTimeout(tryTour, 1200); }
 }
 function celeView(){ const c = S.cele; return `<div class="cele ${S.anim && S.anim.cele ? "anim" : ""}" data-act="celeClose"><div class="cele-card" role="dialog" aria-modal="true" aria-label="${esc(c.title)}">${c.art || ""}${c.num != null ? `<div class="num">${+c.num}</div>` : ""}<h1>${esc(c.title)}</h1><p class="muted">${esc(c.sub || "")}</p><button class="btn primary lg" data-act="celeClose" style="width:100%">Keep going</button></div></div>`; }
@@ -1471,6 +1543,7 @@ const bind = (key, path, extra = "") => `data-doc="${esc(key)}" data-f="${esc(pa
 const inp = (id, key, path, val, ph, cls = "in") => `<input id="${id}" class="${cls}" ${bind(key, path)} value="${esc(val)}" placeholder="${esc(ph)}" autocomplete="off">`;
 const ta = (id, key, path, val, ph) => `<textarea id="${id}" class="in" ${bind(key, path)} placeholder="${esc(ph)}">${esc(val)}</textarea>`;
 const goalOpts = (sel) => `<option value="">No goal</option>` + J().goals.map((g, i) => `<option value="${esc(g.id)}" ${sel === g.id ? "selected" : ""}>Goal ${i + 1}: ${esc(g.title.slice(0, 28))}</option>`).join("");
+const rangeField = (id, key, path, val, label, help) => `<div class="field"><div class="row" style="justify-content:space-between"><label class="label" for="${id}">${label}</label><b class="mono rv" id="${id}-v">${val ? val + "/10" : "–"}</b></div><input type="range" id="${id}" class="range" min="0" max="10" step="1" value="${+val || 0}" ${bind(key, path, 'data-num="1"')} aria-valuetext="${val ? val + " out of 10" : "not set"}"><span class="muted small">${help}</span></div>`;
 const scaleBtns = (key, path, val, n, labels) => `<div class="scale" role="group">${Array.from({ length: n }, (_, i) => `<button data-act="scale" data-doc="${esc(key)}" data-f="${esc(path)}" data-n="${i + 1}" aria-pressed="${val === i + 1}" title="${esc(labels ? labels[i] : i + 1)}">${i + 1}</button>`).join("")}</div>`;
 const bar = (pct, cls = "") => `<div class="bar ${cls}" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${clamp(pct, 0, 100)}%"></i></div>`;
 
@@ -1514,6 +1587,7 @@ function todayView(){
       <div class="field"><label class="label" for="les">What I learned</label>${ta("les", key, "lessons", dd.lessons, "What would you tell yourself this morning?")}</div></div>
       <div class="grid2"><div class="field"><label class="label" for="imp">Tomorrow I'll improve by</label>${inp("imp", key, "improve", dd.improve, "One adjustment", "in box")}</div>
       <div class="field"><label class="label" for="gpm">Tonight I'm grateful for</label>${inp("gpm", key, "gratitudePM", dd.gratitudePM, "", "in box")}</div></div>
+      <div class="grid2">${rangeField("winDay", key, "winDay", dd.winDay, "Win the Day", "How well did today go overall?")}${rangeField("planReal", key, "planReal", dd.planReal, "Plan to Reality", "How closely did the day match your plan?")}</div>
       <div class="grid2"><div class="field"><span class="label">Mood</span>${scaleBtns(key, "mood", dd.mood, 5, ["Rough", "Low", "Steady", "Good", "Great"])}</div>
       <div class="field"><span class="label">Energy</span>${scaleBtns(key, "energy", dd.energy, 5, ["Drained", "Low", "Okay", "Strong", "Charged"])}</div></div>`;
     const sched = `<div class="sched-grid">${hours.map(h => `<span class="t">${h > 12 ? h - 12 : h}:00 ${h >= 12 ? "pm" : "am"}</span>${inp(`s${h}`, key, `schedule.h${h}`, (dd.schedule || {})["h" + h] || "", "")}`).join("")}</div>`;
@@ -1539,11 +1613,11 @@ function weekView(){
     <button class="btn sm" data-act="week" data-n="0">This week</button>
     <button class="btn icon" aria-label="Next week" data-act="week" data-n="1" ${w >= WEEKS ? "disabled" : ""}>${ICON.right}</button></div></div>
   ${strip(j)}
-  <section class="card"><div class="card-h"><h2>Weekly plan</h2><span class="label">Plan on ${esc(fmtDate(J().start, { weekday: "long" }))}s, execute daily</span></div>
+  <section class="card" id="wk-plan"><div class="card-h"><h2>Weekly plan</h2><span class="label">Plan on ${esc(fmtDate(J().start, { weekday: "long" }))}s, execute daily</span></div>
     ${j.goals.length ? j.goals.map((g, i) => `<div class="field"><label class="label" for="wf${i}">Goal ${i + 1} · ${esc(g.title)}: this week's target</label>${inp(`wf${i}`, key, `focus.${g.id}`, wd.focus[g.id] || "", "What gets done this week to move this goal?", "in box")}</div>`).join("") : `<p class="muted">Add goals to plan weekly targets against them.</p>`}
     <div class="field"><span class="label">Top priorities</span><div class="num-rows">${wd.priorities.map((p, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`wp${i}`, key, `priorities.${i}`, p, "")}</div>`).join("")}</div></div>
   </section>
-  <section class="card"><div class="card-h"><h2>Milestones due this week</h2><span class="label">From your roadmap</span></div>
+  <section class="card" id="wk-ms"><div class="card-h"><h2>Milestones due this week</h2><span class="label">From your roadmap</span></div>
     ${due.length ? due.map(({ g, gi, m }) => `<label class="row" style="gap:10px"><input type="checkbox" class="check" id="wm-${esc(m.id)}" data-act="ms" data-g="${esc(g.id)}" data-m="${esc(m.id)}" ${m.done ? "checked" : ""}><span class="${m.done ? "done-text" : ""}">${esc(m.text)}</span><span class="chip">Goal ${gi + 1}</span></label>`).join("") : `<p class="muted">Nothing scheduled for week ${w}. Assign milestones to weeks in Goals.</p>`}
   </section>
   <section class="card"><div class="card-h"><h2>Habit tracker</h2><span class="label">Tap to check off</span></div>
@@ -1551,7 +1625,7 @@ function weekView(){
     ${j.habits.map(h => { let c = 0; const cells = days.map(d => { const dd = Store.get(dayKey(d)); const on = !!(dd && dd.habits[h.id]); if (on) c++; return `<td><button class="cell" id="c-${d}-${esc(h.id)}" data-act="habit" data-d="${d}" data-h="${esc(h.id)}" aria-pressed="${on}" aria-label="${esc(h.name)} on ${esc(fmtDate(d))}" ${d > t ? "disabled" : ""}></button></td>`; }).join(""); return `<tr><th class="hn">${esc(h.name)}</th>${cells}<td class="mono">${c}/7</td></tr>`; }).join("")}
     </tbody></table></div>` : `<p class="muted">No habits yet.</p>`}
   </section>
-  <section class="card"><div class="card-h"><h2>Weekly review</h2><span class="label">Be honest. Then adjust.</span></div>
+  <section class="card" id="wk-review"><div class="card-h"><h2>Weekly review</h2>${(() => { const sc = days.map(d => Store.get(dayKey(d))).filter(Boolean); const a = k => { const xs = sc.map(x => +x[k]).filter(Boolean); return xs.length ? (xs.reduce((p, q) => p + q, 0) / xs.length).toFixed(1) : null; }; const w1 = a("winDay"), p1 = a("planReal"); return w1 || p1 ? `<span class="chip">Win the Day ${w1 || "–"} · Plan to Reality ${p1 || "–"}</span>` : ""; })()}<span class="label">Be honest. Then adjust.</span></div>
     <div class="grid2">
       <div class="field"><label class="label" for="wr1">Biggest wins</label>${ta("wr1", key, "wins", wd.wins, "")}</div>
       <div class="field"><label class="label" for="wr2">Lessons learned</label>${ta("wr2", key, "lessons", wd.lessons, "")}</div>
@@ -1639,7 +1713,7 @@ function progressView(){
   </section>
   ${badgesCard()}
   <section class="card"><div class="card-h"><h2>Mindful minutes</h2><span class="label">From your breathing</span></div><p><b class="mono" style="font-size:1.6rem">${Math.round(achieveStats(j).mindful / 60)}</b> <span class="muted">minutes this journey</span></p><p class="muted small">One minute of breathing each morning adds up.</p></section>
-  <section class="card"><div class="card-h"><h2>Quarterly review</h2><span class="label">${weekOf(today()) >= 12 && dayNum(today()) >= 1 ? "It's time" : "Best done in week 13"}</span></div>
+  <section class="card" id="pg-review"><div class="card-h"><h2>Quarterly review</h2><span class="label">${weekOf(today()) >= 12 && dayNum(today()) >= 1 ? "It's time" : "Best done in week 13"}</span></div>
     <p class="muted">At the end of 13 weeks, look back before you plan the next journey.</p>
     ${j.goals.map((g, i) => `<div class="field"><span class="label">How did "${esc(g.title)}" land? (1–10)</span>${scaleBtns(rk, `review.g_${g.id}`, rv["g_" + g.id] || 0, 10)}</div>`).join("")}
     <div class="grid2">
@@ -1682,7 +1756,7 @@ function partnerView(){
 /* ---------- Sheets ---------- */
 function sheetView(){
   const p = profile(); const j = J(); let body = "";
-  if (S.sheet === "day") { body = daySheet(); } else if (S.sheet === "pass") {
+  if (S.sheet === "guide") { body = guideSheet(); } else if (S.sheet === "day") { body = daySheet(); } else if (S.sheet === "pass") {
     body = `<div class="card-h"><h2>Change password</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div><input id="newPass" type="password" class="in box" autocomplete="new-password" placeholder="New password (8+ characters)"><button class="btn primary" data-act="chpass">Save password</button>`;
   } else if (S.sheet === "newJourney") {
     body = `<div class="card-h"><h2>Start a new journey</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div>
@@ -1749,7 +1823,7 @@ function onboardView(){
   if (o.step === 2) body = `<span class="label">Step 2 · Your look</span><h1>Pick your vibe${o.nick ? ", " + esc(o.nick.split(" ")[0]) : ""}.</h1><p class="muted small">You can change it any time in Settings.</p><div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="osuite" data-v="${k}" aria-pressed="${o.suite === k}"><div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div><span class="nm">${esc(SUITES[k].name)}</span></button>`).join("")}</div>`;
   if (o.step === 3) body = `<span class="label">Step 3 · Day 1</span><h1>When does your journey start?</h1><p class="muted">Thirteen weeks from Day 1. Starting today works. So does a fresh Monday.</p><div class="presets"><button type="button" data-act="ostart" data-v="${today()}" aria-pressed="${o.start === today()}">Today</button><button type="button" data-act="ostart" data-v="${nextMonday()}" aria-pressed="${o.start === nextMonday() && nextMonday() !== today()}">Next Monday</button></div><input id="ostart" type="date" class="in box big-in" value="${esc(o.start)}" aria-label="Day 1 date">
     <div class="card" style="gap:4px"><span class="label">Your 13 weeks</span><b>${esc(fmtDate(o.start, { weekday: "short", month: "short", day: "numeric" }))} → ${esc(fmtDate(addDays(o.start, TOTAL_DAYS - 1), { weekday: "short", month: "short", day: "numeric", year: "numeric" }))}</b></div>`;
-  if (o.step === 4) body = `<div class="hero-art" style="max-width:200px">${ART.mountain}</div><span class="label">Step 4 · Goals</span><h1>What will be true in 13 weeks?</h1><p class="muted small">One to three. Specific enough that on day 91 you'll know.</p>
+  if (o.step === 4) body = `<div class="hero-art" style="max-width:200px">${ART.mountain}</div><span class="label">Step 4 · Goals</span><h1>What will be true in 13 weeks?</h1><p class="muted small">One to three. Make each one <b>specific</b> and <b>measurable</b>, with a finish line by Day 91. "Get fit" becomes "Run a 5K in under 30 minutes."</p>
     ${o.goals.map((g, i) => `<input id="og${i}" class="in box" data-og="${i}" value="${esc(g.title)}" placeholder="${["Save $5,000 for the emergency fund", "Run a sub-25 5K", "Launch the first product"][i]}${i ? " (optional)" : ""}" autocomplete="off" aria-label="Goal ${i + 1}">`).join("")}`;
   if (o.step === 5) body = `<div class="hero-art" style="max-width:180px">${ART.sprout}</div><span class="label">Step 5 · Habits</span><h1>Which daily habits carry you there?</h1><p class="muted small">Pick a few. Fewer, done daily, beats many, done sometimes.</p>
     <div class="presets">${HABIT_PRESETS.map(h => `<button type="button" data-act="oh" data-v="${esc(h)}" aria-pressed="${o.habits.includes(h)}">${esc(h)}</button>`).join("")}${o.habits.filter(h => !HABIT_PRESETS.includes(h)).map(h => `<button type="button" data-act="oh" data-v="${esc(h)}" aria-pressed="true">${esc(h)}</button>`).join("")}</div>
@@ -1758,6 +1832,7 @@ function onboardView(){
     ${remindersForm(o.reminders, "o")}<button type="button" class="btn" data-act="addRem" data-v="o">Add reminders to my iPhone Calendar</button>${remHelp}`; }
   if (o.step === 7) { const g = o.goals.filter(x => x.title.trim()); body = `<span class="label">Step 7 · Commit</span><h1>Make the promise.</h1><p class="muted">For the next 13 weeks I'll show up morning and evening for:</p>
     <div class="card" style="gap:8px">${g.map((x, i) => `<div class="row"><span class="goal-n">GOAL ${i + 1}</span><b>${esc(x.title)}</b></div>`).join("")}<div class="muted small">${o.habits.length} daily habit${o.habits.length === 1 ? "" : "s"} · starting ${esc(fmtDate(o.start, { weekday: "long", month: "long", day: "numeric" }))}</div></div>
+    <div class="field"><label class="label" for="oreward">When I hit my goals, I'll celebrate by…</label><input id="oreward" class="in box" value="${esc(o.reward || "")}" placeholder="A weekend away, new running shoes…" autocomplete="off"></div>
     <button class="commit" id="commitBtn" aria-label="Press and hold to commit"><svg viewBox="0 0 166 166" aria-hidden="true"><circle cx="83" cy="83" r="78"/></svg>Hold to<br>commit</button><p class="muted small" style="text-align:center">Press and hold</p>`; }
   return `<div class="gate"><div class="gate-card" id="ob${o.step}">${o.step ? `<div class="row" style="justify-content:space-between"><button class="btn icon ghost" data-act="oback" aria-label="Back">${ICON.left}</button><div style="flex:1">${steps}</div></div>` : ""}${body}
     ${S.onboardErr ? `<p class="err" role="alert">${esc(S.onboardErr)}</p>` : ""}
@@ -1765,7 +1840,7 @@ function onboardView(){
 }
 function captureOnboard(){
   const o = S.onboard; if (!o) return; setTimeout(() => ls.set("gm-onboard:" + Store.uid, S.onboard), 0);
-  const n = $("#onick"); if (n) o.nick = n.value; const s = $("#ostart"); if (s && s.value) o.start = s.value;
+  const n = $("#onick"); if (n) o.nick = n.value; const rw = $("#oreward"); if (rw) o.reward = rw.value; const s = $("#ostart"); if (s && s.value) o.start = s.value;
   document.querySelectorAll("[data-og]").forEach(el => { o.goals[+el.dataset.og].title = el.value; });
 }
 
@@ -1776,6 +1851,7 @@ function onInput(e){
   let v = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.num) v = +v;
   if (key.startsWith("journey-") && f === "start" && !v) return;
   if (f === "waterGoal") v = clamp(Math.round(+v || 8), 1, 20);
+  if (el.type === "range") { const o = document.getElementById(el.id + "-v"); if (o) o.textContent = +v ? v + "/10" : "–"; el.setAttribute("aria-valuetext", +v ? v + " out of 10" : "not set"); }
   setPath(doc, f, v); Store.touch(key);
   if (el.type === "checkbox") S.pop = el.id;
   if (el.type === "checkbox" || el.tagName === "SELECT") render();
@@ -1804,7 +1880,7 @@ async function onClick(e){
     case "toggleShare": { const p = profile(); p.share = !p.share; Store.touch("profile"); render(); Partner.publish(); toast(p.share ? "Sharing turned on" : "Sharing turned off"); break; }
     case "cheer": { const p = profile(); p.cheers = p.cheers || {}; p.cheers[t.dataset.id] = Date.now(); Store.touch("profile"); await Partner.publish(); toast("Cheer sent"); break; }
     case "sheet": S.sheet = t.dataset.v; render(); break;
-    case "close": case "closebg": if (S.sheet === "day") S.refocus = `[data-act=dayOpen][data-v="${S.sheetDate}"]`; S.sheet = null; render(); break;
+    case "close": case "closebg": if (S.sheet === "guide") markGuide(S.guideFor); if (S.sheet === "day") S.refocus = `[data-act=dayOpen][data-v="${S.sheetDate}"]`; S.sheet = null; render(); break;
     case "switchJ": profile().active = t.dataset.id; Store.touch("profile"); S.sheet = null; S.date = today(); S.week = null; render(); break;
     case "createJourney": { const start = $("#njs").value || nextMonday(); const nj = createJourney({ title: $("#njt").value.trim() || "Journey", start, goals: [], habits: j.habits.map(h => h.name) }); profile().active = nj.id; Store.touch("profile"); S.sheet = null; S.view = "goals"; render(); toast("New journey created. Set your goals."); break; }
     case "export": await doExport(); break;
@@ -1839,9 +1915,12 @@ async function onClick(e){
     case "dayInk": S.sheet = null; S.view = "ink"; S.date = t.dataset.v; render(); window.scrollTo(0, 0); break;
     case "weekOpen": S.view = "week"; S.week = +t.dataset.n; render(); window.scrollTo(0, 0); break;
     case "tipX": { const p = profile(); p.tips = p.tips || {}; p.tips[t.dataset.v] = 1; Store.touch("profile"); render(); break; }
-    case "tipsReset": { const p = profile(); p.tips = {}; Store.touch("profile"); toast("Tips will show again"); render(); break; }
-    case "tourStart": Tour.start(); break;
-    case "tourNext": if (S.tour.step < TOUR.length - 1) { S.tour.step++; Tour.paint(); } else { Tour.end(); } break;
+    case "tipsReset": { const p = profile(); p.tips = {}; p.guides = {}; Store.touch("profile"); toast("Tips will show again"); render(); break; }
+    case "tourStart": Tour.start(GUIDES.today.steps, "today"); break;
+    case "guide": S.guideFor = t.dataset.v; S.sheet = "guide"; S.sheetFocus = true; render(); break;
+    case "guideClose": markGuide(S.guideFor); S.sheet = null; render(); break;
+    case "guideTour": { const k = t.dataset.v; markGuide(k); S.sheet = null; render(); setTimeout(() => Tour.start(GUIDES[k].steps, k), 120); break; }
+    case "tourNext": if (S.tour.step < S.tour.steps.length - 1) { S.tour.step++; Tour.paint(); } else { Tour.end(); } break;
     case "tourSkip": Tour.end(); break;
     case "oauth": { const { error } = await sb.auth.signInWithOAuth({ provider: t.dataset.v, options: { redirectTo: location.href.split("#")[0] } }); if (error) { S.gate.err = supaErr(error); render(); } break; }
     case "pinvite": try { S.inviteCode = await PartnerSupa.invite(); render(); } catch (err) { toast("Couldn't make a code. Check your connection."); } break;
@@ -1932,6 +2011,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "ohnew") { e.preventDefault(); $('[data-act="ohadd"]').click(); }
   if (e.key === "Escape" && S.tour) { Tour.end(); return; }
   if (e.key === "Escape" && S.ritual) { closeRitual(); return; }
+  if (e.key === "Escape" && S.sheet === "guide") markGuide(S.guideFor);
   if (e.key === "Escape" && (S.sheet || S.cele || S.ritual)) { S.sheet = null; S.cele = null; S.ritual = null; render(); }
 });
 document.addEventListener("submit", async e => {
@@ -1949,7 +2029,7 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) { Ink
 
 function finishOnboard(){
   const o = S.onboard; if (!o) return;
-  const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits });
+  captureOnboard(); const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits }); if (o.reward) { jn.goals.forEach(g => { if (!g.reward) g.reward = o.reward; }); Store.touch("journey-" + jn.id); }
   Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {}, suite: o.suite, reminders: remindersOf(o), tz: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return ""; } })(), emails: { daily: true, weekly: true, journey: true } }; Store.touch("profile");
   S.onboard = null; ls.del("gm-onboard:" + Store.uid); S.view = "today"; S.date = today(); S.snap = snap(); S.pendingTour = !profile().toured;
   celebrate({ art: ART.mountain, title: "Your journey begins", sub: jn.start <= today() ? "Day 1 starts now. Your first morning ritual is waiting on Today." : `Day 1 is ${fmtDate(jn.start, { weekday: "long", month: "long", day: "numeric" })}. Everything's ready for you.` });
