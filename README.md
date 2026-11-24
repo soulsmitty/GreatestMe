@@ -34,6 +34,17 @@ opt-in Partner board for accountability.
 - **iPhone, iPhone Duo, iPad:** floating tab bar, safe areas, 16px inputs (no zoom), layouts for the Duo's folded and unfolded screens, Ink handwriting pages with Apple Pencil on iPad, offline Home Screen app that updates itself when online.
 - **Apple-only features** (notifications, Siri/App Intents, HealthKit, widgets, Watch) are kept out of the web app and specified in `docs/NATIVE_APP.md`.
 
+## Email recaps
+
+A GitHub Actions job (`.github/workflows/recaps.yml`, every 15 minutes) reads each journal from Supabase and sends themed emails from `hello@teamsolen.com` through Namecheap SMTP (`mail.privateemail.com:465`):
+
+- **Welcome** on sign-up and **Goals** once a journey's goals are set.
+- **Daily recap** each morning at the person's morning reminder time (their own time zone): yesterday's rings, wins, lesson, streak, plus a quote.
+- **Weekly recap** on their review day: days journaled, habit and target rates, wins, mood trend, next week's milestones.
+- **Finale** after Day 91: the full 13-week picture.
+
+Each person can turn daily, weekly and journey emails off in Settings → Reminders. `email_log` makes sure nothing is sent twice. Templates live in `scripts/email-templates.mjs`; the job in `scripts/recaps.mjs`. It needs two repository secrets: `SUPABASE_SECRET_KEY` and `SMTP_PASSWORD`. Until they're set, the job skips quietly.
+
 ## Accounts that work on every device (Supabase)
 
 The web version signs you in with email and password and syncs your journal live across every browser, Home Screen app and device. Until it's configured, it runs with on-device accounts.

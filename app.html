@@ -1115,6 +1115,7 @@ function prefsView(){
   <section class="card"><div class="card-h"><h2>Reminders</h2><span class="label">Your times</span></div>
     ${remindersForm(remindersOf(p), "p")}
     <div class="row"><button class="btn" data-act="addRem" data-v="p">Add to my iPhone Calendar</button></div>
+    ${Store.mode === "supa" ? `<div class="set-group"><span class="label" style="margin-top:6px">Email recaps to ${esc(Store.accountName)}</span>${[["daily", "Daily recap", "Each morning: yesterday's wins, rings and streak"], ["weekly", "Weekly recap", "On your review day: the week at a glance"], ["journey", "Journey moments", "Welcome, your goals, and the 13-week finale"]].map(([k, l, dsc]) => `<label class="set-row"><div><b>${l}</b><p class="muted small">${dsc}</p></div><input type="checkbox" class="switch" data-act="emailPref" data-v="${k}" ${((p.emails || {})[k] ?? true) ? "checked" : ""}></label>`).join("")}</div>` : ""}
     <p class="muted small">Calendar alerts work even when GreatestMe is closed. After changing times, add them again and delete the old GreatestMe events.</p>${remHelp}</section>
   <section class="card"><div class="card-h"><h2>Partner</h2><span class="label">${p.share ? "Sharing on" : "Sharing off"}</span></div>
     <p class="muted small">Cheer each other on. Your partner sees your streak, rates, goal progress and one win you choose. Never your journal.</p>
@@ -1823,6 +1824,7 @@ async function onClick(e){
     case "migrate": await migrate(); break;
     case "calMode": S.calMode = t.dataset.v; render(); break;
     case "calToggle": { let o = false; try { o = localStorage.getItem("gm-cal-open") === "1"; localStorage.setItem("gm-cal-open", o ? "0" : "1"); } catch {} S.calOpenMem = !o; buzz(6); render(); if (!o) setTimeout(() => { const el = document.getElementById("sec-calendar"); el && el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 60); break; }
+    case "emailPref": { const p = profile(); p.emails = { daily: true, weekly: true, journey: true, ...(p.emails || {}) }; p.emails[t.dataset.v] = t.checked; Store.touch("profile"); break; }
     case "schedPref": profile().schedule = t.checked; Store.touch("profile"); break;
     case "water": { const k = dayKey(S.date); const dd = Store.ensure(k, newDay); const goal = profile().waterGoal || 8; const before = dd.water || 0; dd.water = clamp(before + +t.dataset.n, 0, 30); Store.touch(k); buzz(8);
       Stack.sync(); render();
@@ -1948,7 +1950,7 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) { Ink
 function finishOnboard(){
   const o = S.onboard; if (!o) return;
   const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits });
-  Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {}, suite: o.suite, reminders: remindersOf(o) }; Store.touch("profile");
+  Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {}, suite: o.suite, reminders: remindersOf(o), tz: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return ""; } })(), emails: { daily: true, weekly: true, journey: true } }; Store.touch("profile");
   S.onboard = null; ls.del("gm-onboard:" + Store.uid); S.view = "today"; S.date = today(); S.snap = snap(); S.pendingTour = !profile().toured;
   celebrate({ art: ART.mountain, title: "Your journey begins", sub: jn.start <= today() ? "Day 1 starts now. Your first morning ritual is waiting on Today." : `Day 1 is ${fmtDate(jn.start, { weekday: "long", month: "long", day: "numeric" })}. Everything's ready for you.` });
 }
@@ -2134,6 +2136,7 @@ async function startSupa(user){
   Store.mode = "supa"; Store.uid = user.id; Store.accountName = user.email || ""; S.gate = null; ls.set("gm-known", 1);
   await SupaStore.loadAll(); Sync.start(); PartnerSupa.start(); S.starting = false; S.snap = snap();
   render(); routeHash(); updateBadge();
+  try { const tz = Intl.DateTimeFormat().resolvedOptions().timeZone; const p = profile(); if (p && tz && p.tz !== tz) { p.tz = tz; Store.touch("profile"); } } catch {}
 }
 async function loadProviders(){ try { const r = await fetch(CFG.supabaseUrl.replace(/\/+$/, "") + "/auth/v1/settings", { headers: { apikey: CFG.supabaseAnonKey } }); const j = await r.json(); S.providers = { apple: !!(j.external && j.external.apple), google: !!(j.external && j.external.google) }; if (S.gate && S.gate.supa) render(); } catch {} }
 async function bootSupa(){

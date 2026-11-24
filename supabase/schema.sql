@@ -97,3 +97,13 @@ grant select, insert, update, delete on public.docs    to authenticated;
 grant select, insert, update, delete on public.shares  to authenticated;
 grant select                         on public.partner_links to authenticated;
 grant select, insert, delete         on public.invites to authenticated;
+
+-- Email recaps: a log so each recap is sent once. Only the server job (secret key) touches it.
+create table if not exists public.email_log (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  kind    text not null,
+  ref     text not null,
+  sent_at timestamptz not null default now(),
+  primary key (user_id, kind, ref)
+);
+alter table public.email_log enable row level security;

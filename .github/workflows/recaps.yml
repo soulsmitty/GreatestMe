@@ -1,0 +1,31 @@
+name: Email recaps
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: recaps
+  cancel-in-progress: false
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-save nodemailer@6.9.16
+      - name: Send due recaps
+        env:
+          SUPABASE_URL: https://knbqmyrdrrmgxpnsuqhp.supabase.co
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SMTP_HOST: mail.privateemail.com
+          SMTP_PORT: "465"
+          SMTP_USER: hello@teamsolen.com
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: GreatestMe <hello@teamsolen.com>
+          APP_URL: https://soulsmitty.github.io/GreatestMe/
+        run: node scripts/recaps.mjs
