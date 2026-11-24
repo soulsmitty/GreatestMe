@@ -14,7 +14,7 @@ const PHONE = devices['iPhone 15 Pro'] || devices['iPhone 14 Pro'];
 async function page(b, opts, label, mode = 'local'){
   const ctx = await b.newContext({ ...opts, serviceWorkers: 'block' });
   await ctx.route(/config\.js$/, r => r.fulfill({ status: 200, contentType: 'text/javascript', body: mode === 'accounts' ? FAKE_CONFIG : EMPTY_CONFIG }));
-  await ctx.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
+  await ctx.route(/cdn\.jsdelivr\.net\/npm\/@supabase|vendor\/supabase-/, r => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
   await ctx.route(/fonts\.(googleapis|gstatic)\.com/, r => r.fulfill({ status: 200, body: '' }));
   const p = await ctx.newPage();
   p.on('pageerror', e => errs.push(label + ': ' + e.message));

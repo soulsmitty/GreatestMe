@@ -533,7 +533,7 @@ const Store = {
     Partner.publishSoon();
   },
   remove(key){ delete this.docs[key]; if (this.mode === "cloud") { this.dirty.set(key, true); this.touch(key); } else this.touch(key); },
-  setStatus(s, code){ this.status = s; const el = $("#savestate"); if (el) el.textContent = s === "saving" ? "Saving…" : s === "error" && this.mode === "supa" ? (S.offline ? "Offline · saved here, syncs later" : "Not synced yet, retrying") : s === "error" ? (code === "not_granted" ? "Read-only: ask the owner for Contributor access" : "Not saved, retrying") : (this.mode === "cloud" ? "Saved to your account" : this.mode === "supa" ? (S.offline ? "Offline · syncs when you're back" : "Synced to your account") : "Saved on this device"); if (s === "saved") updateBadge(); },
+  setStatus(s, code){ this.status = s; const el = $("#savestate"); if (el) el.textContent = s === "saving" ? "Saving…" : s === "error" && this.mode === "supa" ? (S.offline ? "Offline · saved here, syncs later" : S.syncErr === "42501" ? "Saved here · account setup unfinished" : "Not synced yet, retrying") : s === "error" ? (code === "not_granted" ? "Read-only: ask the owner for Contributor access" : "Not saved, retrying") : (this.mode === "cloud" ? "Saved to your account" : this.mode === "supa" ? (S.offline ? "Offline · syncs when you're back" : "Synced to your account") : "Saved on this device"); if (s === "saved") updateBadge(); },
 };
 
 /* local accounts */
@@ -1510,10 +1510,12 @@ const CFG = window.GM_CONFIG || {};
 const SUPA_WANTED = () => !window.claude && !!(CFG.supabaseUrl && CFG.supabaseAnonKey);
 const SUPA_ON = () => SUPA_WANTED() && !!(window.supabase && window.supabase.createClient);
 function loadSupa(){ return new Promise(res => { if (window.supabase && window.supabase.createClient) return res(true);
-  const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"; sc.async = true;
+  const sc = document.createElement("script"); sc.src = "vendor/supabase-2.118.0.js"; sc.async = true;
   const t = setTimeout(() => res(false), 9000); sc.onload = () => { clearTimeout(t); res(!!(window.supabase && window.supabase.createClient)); }; sc.onerror = () => { clearTimeout(t); res(false); }; document.head.appendChild(sc); }); }
 let sb = null;
 const mirrorKey = () => "gm:mirror:" + Store.uid;
+const pendingKey = () => "gm:pending:" + Store.uid;
+const Pending = { get(){ return ls.get(pendingKey()) || []; }, add(keys){ ls.set(pendingKey(), [...new Set(this.get().concat(keys))]); }, clear(keys){ const left = this.get().filter(k => !keys.includes(k)); left.length ? ls.set(pendingKey(), left) : ls.del(pendingKey()); } };
 async function sbAll(build){ const out = []; for (let from = 0; ; from += 1000) { const { data, error } = await build().range(from, from + 999); if (error) throw error; out.push(...data); if (data.length < 1000) return out; } }
 const Sync = {
   ch: null, last: null,
@@ -1544,20 +1546,23 @@ const SupaStore = {
     try {
       const rows = await sbAll(() => sb.from("docs").select("key,data,updated_at").eq("user_id", Store.uid).not("key", "like", "ink|%"));
       const out = {}; rows.forEach(r => { out[r.key] = r.data; }); Sync.note(rows);
+      const mirror = ls.get(mirrorKey()) || {}; const pend = Pending.get();
+      pend.forEach(k => { if (k in mirror) { out[k] = mirror[k]; Store.dirty.set(k, true); } else if (!(k in mirror) && out[k]) { delete out[k]; Store.dirty.set(k, true); } });
       Store.docs = out; ls.set(mirrorKey(), out); S.offline = false;
-    } catch (e) { Store.docs = ls.get(mirrorKey()) || {}; S.offline = true; }
+      if (Store.dirty.size) setTimeout(() => Store.flush(), 300);
+    } catch (e) { Store.docs = ls.get(mirrorKey()) || {}; S.offline = true; S.syncErr = e && (e.code || e.message); Pending.get().forEach(k => Store.dirty.set(k, true)); }
   },
   async flush(){
     const keys = [...Store.dirty.keys()].filter(k => !Store.writing.has(k)); if (!keys.length) return;
     keys.forEach(k => { Store.dirty.delete(k); Store.writing.add(k); });
-    ls.set(mirrorKey(), Store.docs);
+    ls.set(mirrorKey(), Store.docs); Pending.add(keys);
     try {
       const ups = keys.filter(k => Store.docs[k]).map(k => ({ user_id: Store.uid, key: k, data: JSON.parse(JSON.stringify(Store.docs[k])) }));
       const dels = keys.filter(k => !Store.docs[k]);
       if (ups.length) { const { error } = await sb.from("docs").upsert(ups); if (error) throw error; }
       if (dels.length) { const { error } = await sb.from("docs").delete().eq("user_id", Store.uid).in("key", dels); if (error) throw error; }
-      S.offline = false;
-    } catch (e) { keys.forEach(k => Store.dirty.set(k, true)); S.offline = !navigator.onLine; Store.setStatus("error"); }
+      S.offline = false; S.syncErr = null; Pending.clear(keys);
+    } catch (e) { keys.forEach(k => Store.dirty.set(k, true)); S.offline = !navigator.onLine; S.syncErr = e && (e.code || e.message); Store.setStatus("error"); }
     finally { keys.forEach(k => Store.writing.delete(k)); }
   },
   async inkLoad(dk){
