@@ -87,7 +87,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await A.click('.sheet [data-act=guideTour]'); await A.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }); ok(/goal/i.test(await A.locator('.tour-card').innerText()), 'Show me around spotlights the Goals page');
   await A.keyboard.press('Escape'); await go(A, 'today'); await go(A, 'goals'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 0, 'a page guide shows only once');
   await A.click('[data-act=guide][data-v=goals] >> visible=true'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 1, 'the ? button reopens the page guide'); await A.click('.sheet [data-act=guideClose] >> nth=-1');
-  await go(A, 'prefs'); await A.click('.main [data-act=nav][data-v=method]'); ok(await A.locator('.main section.card').count() === 9, 'Settings opens the nine-chapter GreatestMe Method');
+  await go(A, 'prefs'); await A.click('.main [data-act=nav][data-v=method]'); ok(await A.locator('.main section.card').count() === 10, 'Settings opens the ten-chapter GreatestMe Method');
   await go(A, 'today'); await openSec(A, 'evening'); await A.locator('#winDay').fill('8'); await A.waitForTimeout(800);
   ok(/8\/10/.test(await A.locator('#winDay-v').innerText()), 'Win the Day score saves on the evening page');
 

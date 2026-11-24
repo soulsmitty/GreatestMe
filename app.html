@@ -1460,14 +1460,14 @@ const GUIDES = {
       { sel: "#sec-calendar", title: "Your calendar", text: "This week at a glance. Tap a day to look back, or tap Calendar for the month and all 13 weeks." },
       { sel: "[data-act=nav][data-v=prefs]", title: "Settings and help", text: "Your look, reminders, partner, and the full GreatestMe Method guide." }] },
   week: { title: "Your week: plan it, then review it", why: "A week is where a big goal becomes a plan you can actually do.",
-    how: ["Plan: one target for each goal and your top three priorities.", "Check the milestones due this week and tick habits across all seven days.", "Review: wins, lessons, what got in the way, one change for next week. Then rate the week."],
+    how: ["Plan: one target for each goal, your top three priorities, and the key dates you can't miss.", "Check the milestones due this week and tick habits across all seven days.", "Review: wins, lessons, what got in the way, one change for next week. Then rate the week."],
     tip: `Plan on ${"$DAY1"}s; review the evening before.`,
     steps: [{ sel: ".strip", title: "Where you are", text: "Each bar is one of your 13 weeks. The bright one is now." },
       { sel: "#wk-plan", title: "Weekly plan", text: "One target per goal and three priorities. That's the whole plan." },
       { sel: "#wk-ms", title: "Milestones due", text: "The roadmap steps you set for this week. Check them off when they're done." },
       { sel: "#wk-review", title: "Weekly review", text: "Five minutes: wins, lessons, obstacles, one change, and a score. Your Win the Day average shows here too." }] },
   goals: { title: "Goals that actually happen", why: "Thirteen weeks is long enough to change something real and short enough to stay urgent.",
-    how: ["Make each goal SMART: specific, measurable, achievable, relevant, and done by Day 91.", "Write why it matters and the reward you'll give yourself.", "Break it into milestones and give each one a week."],
+    how: ["Make each goal SMART: specific, measurable, achievable, relevant, and done by Day 91.", "Write why it matters, the key actions that drive it, how you'll stay accountable, and your reward.", "Break it into milestones and give each one a week."],
     tip: "Three goals at most. Focus beats volume.",
     steps: [{ sel: ".goal", title: "One goal", text: "A clear finish line, your why, how you'll measure it, and your reward." },
       { sel: "[data-act=addMs],[data-act=seedMs]", title: "Your roadmap", text: "Milestones turn a 13-week goal into weekly steps. Give each one a week." }] },
@@ -1491,6 +1491,7 @@ const METHOD = [
   { t: "Close the evening", go: "today", b: "Write your wins, however small. Note one lesson and one thing you'll do better tomorrow. Then score the day: Win the Day (how well it went, 1–10) and Plan to Reality (how closely the day matched your plan, 1–10). Your scores show patterns your memory won't." },
   { t: "Plan and review every week", go: "week", b: "Once a week, set one target per goal and three priorities. At the end of the week, look back: biggest wins, lessons, what got in the way, and one change. Rate the week. Fifteen minutes here saves hours of drifting." },
   { t: "Build habits that carry you", go: "habits", b: "Choose a few daily non-negotiables that make everything else easier: water, movement, reading, sleep. Check them off daily and let the streaks and heatmap pull you forward." },
+  { t: "The 20-mile march", go: "today", b: "In Great by Choice, Jim Collins tells of two teams racing to the South Pole. One pushed hard on good days and rested on bad ones. The other marched about twenty miles every day, whatever the weather, and won. Your goals work the same way: a steady, doable amount every day beats bursts of effort. That's why one line still counts and why the rings ask for small things." },
   { t: "Missed a day?", go: "today", b: "Pick up where you left off. No guilt, no starting over. One line keeps the streak; one missed day is a blip, two is a pattern. Practice days before Day 1 are a free warm-up." },
   { t: "Finish strong: the quarterly review", go: "progress", b: "At the end of 13 weeks, score each goal, write your proudest moments and what you learned about yourself, decide what to keep, stop and start, and choose what the next 13 weeks are for." },
 ];
@@ -1504,7 +1505,7 @@ function guideSheet(){
 }
 function methodView(){
   return `<button class="back" data-act="nav" data-v="prefs">${ICON.left} Settings</button>
-  <div class="head"><div><span class="label">Your guide to the next 13 weeks</span><h1 class="title-bar" style="margin-top:4px">The GreatestMe Method</h1><p class="sub">Everything the journal is built on, in nine short reads.</p></div></div>
+  <div class="head"><div><span class="label">Your guide to the next 13 weeks</span><h1 class="title-bar" style="margin-top:4px">The GreatestMe Method</h1><p class="sub">Everything the journal is built on, in ten short reads.</p></div></div>
   ${METHOD.map((c, i) => `<section class="card"><div class="card-h"><h2><span class="goal-n" style="margin-right:8px">${String(i + 1).padStart(2, "0")}</span>${esc(c.t)}</h2></div><p>${esc(c.b)}</p><button class="btn sm" style="align-self:flex-start" data-act="nav" data-v="${c.go}">Open ${esc({ goals: "Goals", today: "Today", week: "Week", habits: "Habits", progress: "Progress" }[c.go])}</button></section>`).join("")}`;
 }
 function maybeGuide(){ // first visit to a page shows its guide once
@@ -1643,6 +1644,7 @@ function weekView(){
   <section class="card" id="wk-plan"><div class="card-h"><h2>Weekly plan</h2><span class="label">Plan on ${esc(fmtDate(J().start, { weekday: "long" }))}s, execute daily</span></div>
     ${j.goals.length ? j.goals.map((g, i) => `<div class="field"><label class="label" for="wf${i}">Goal ${i + 1} · ${esc(g.title)}: this week's target</label>${inp(`wf${i}`, key, `focus.${g.id}`, wd.focus[g.id] || "", "What gets done this week to move this goal?", "in box")}</div>`).join("") : `<p class="muted">Add goals to plan weekly targets against them.</p>`}
     <div class="field"><span class="label">Top priorities</span><div class="num-rows">${wd.priorities.map((p, i) => `<div class="num-row"><span class="n">${i + 1}</span>${inp(`wp${i}`, key, `priorities.${i}`, p, "")}</div>`).join("")}</div></div>
+    <div class="field"><label class="label" for="wkd">Key dates this week</label>${inp("wkd", key, "dates", wd.dates || "", "Deadlines, meetings, birthdays, errands", "in box")}</div>
   </section>
   <section class="card" id="wk-ms"><div class="card-h"><h2>Milestones due this week</h2><span class="label">From your roadmap</span></div>
     ${due.length ? due.map(({ g, gi, m }) => `<label class="row" style="gap:10px"><input type="checkbox" class="check" id="wm-${esc(m.id)}" data-act="ms" data-g="${esc(g.id)}" data-m="${esc(m.id)}" ${m.done ? "checked" : ""}><span class="${m.done ? "done-text" : ""}">${esc(m.text)}</span><span class="chip">Goal ${gi + 1}</span></label>`).join("") : `<p class="muted">Nothing scheduled for week ${w}. Assign milestones to weeks in Goals.</p>`}
@@ -1679,6 +1681,10 @@ function goalsView(){
       <div class="field"><label class="label" for="gw${gi}">Why it matters</label>${ta(`gw${gi}`, key, `goals.${gi}.why`, g.why, "Who benefits when you hit this?")}</div>
       <div class="field"><label class="label" for="gm${gi}">How I'll measure it</label>${ta(`gm${gi}`, key, `goals.${gi}.measure`, g.measure, "The number or proof that says done")}</div>
       <div class="field"><label class="label" for="gr${gi}">My reward</label>${ta(`gr${gi}`, key, `goals.${gi}.reward`, g.reward, "How you'll celebrate")}</div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label class="label" for="gd${gi}">Key actions that drive it</label>${ta(`gd${gi}`, key, `goals.${gi}.drivers`, g.drivers || "", "The repeatable moves that close the gap")}</div>
+      <div class="field"><label class="label" for="ga${gi}">How I'll stay accountable</label>${ta(`ga${gi}`, key, `goals.${gi}.accountable`, g.accountable || "", "Who checks in, or what keeps you honest")}</div>
     </div>
     <div class="field"><span class="label">Milestones</span>
       ${g.milestones.map((m, mi) => `<div class="ms"><input type="checkbox" class="check" aria-label="Milestone done" id="mc-${esc(m.id)}" data-act="ms" data-g="${esc(g.id)}" data-m="${esc(m.id)}" ${m.done ? "checked" : ""}>
