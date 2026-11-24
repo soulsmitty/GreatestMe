@@ -445,6 +445,9 @@ details.sched summary::-webkit-details-marker{display:none}
 .acc.is-done:not(.open){opacity:.85}
 @media (max-width:420px){.acc-h{gap:10px;padding:14px}.acc-in{padding:0 14px}.acc.open .acc-in{padding:0 14px 14px}}
 .cal-wrap{display:flex;flex-direction:column;gap:0;scroll-margin-top:16px}
+.more{display:flex;flex-direction:column;gap:18px}
+.more>summary{list-style:none;align-self:flex-start}.more>summary::-webkit-details-marker{display:none}
+.more-in{display:flex;flex-direction:column;gap:18px;margin-top:18px}
 /* daily highlights */
 .hl{display:flex;flex-direction:column;gap:8px;min-width:0}
 .hl-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}
@@ -1087,18 +1090,21 @@ function prefsView(){
     <p class="muted small">${esc(SUITES[cur].note)}</p>
     ${SUITES[cur].modes ? `<div class="set-row"><div><b>Appearance</b><p class="muted small">Auto follows your iPhone or iPad.</p></div><div class="toggle3" role="group" aria-label="Appearance">${["auto", "light", "dark"].map(t => `<button data-act="theme" data-v="${t}" aria-pressed="${Theme.get() === t}">${t}</button>`).join("")}</div></div>` : ""}
   </section>
-  <section class="card"><div class="card-h"><h2>Partner</h2><span class="label">${p.share ? "Sharing on" : "Sharing off"}</span></div>
-    <p class="muted small">Cheer each other on. Your partner sees your streak, rates, goal progress and one win you choose. Never your journal.</p>
-    <button class="btn" style="align-self:flex-start" data-act="nav" data-v="partner">${ICON.partner.replace("<svg", '<svg width="16" height="16"')} ${Store.mode === "supa" && !(S.links || []).length ? "Connect with your partner" : "Open Partner"}</button></section>
-  <section class="card"><div class="card-h"><h2>Feel</h2><span class="label">This phone only</span></div><div class="set-group">
-    <label class="set-row"><div><b>Sounds</b><p class="muted small">A soft chime when you close a loop. Off until you turn it on.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="sound" ${pr.sound ? "checked" : ""}></label>
-    <label class="set-row"><div><b>Celebrations</b><p class="muted small">Confetti for streaks, full pages and milestones.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="confetti" ${pr.confetti ? "checked" : ""}></label>
-    ${Device.iPad || Device.penSeen || window.innerWidth >= 700 ? `<div class="set-row"><div><b>Handwriting pages</b><p class="muted small">Auto shows Ink on iPad and wherever a stylus is used.</p></div><div class="toggle3" role="group" aria-label="Handwriting pages">${[["auto", "Auto"], ["on", "On"], ["off", "Off"]].map(([k, l]) => `<button data-act="inkPref" data-v="${k}" aria-pressed="${(p.ink || "auto") === k}">${l}</button>`).join("")}</div></div>` : ""}
-  </div></section>
   <section class="card"><div class="card-h"><h2>Reminders</h2><span class="label">Your times</span></div>
     ${remindersForm(remindersOf(p), "p")}
     <div class="row"><button class="btn" data-act="addRem" data-v="p">Add to my iPhone Calendar</button></div>
     <p class="muted small">Calendar alerts work even when GreatestMe is closed. After changing times, add them again and delete the old GreatestMe events.</p>${remHelp}</section>
+  <section class="card"><div class="card-h"><h2>Partner</h2><span class="label">${p.share ? "Sharing on" : "Sharing off"}</span></div>
+    <p class="muted small">Cheer each other on. Your partner sees your streak, rates, goal progress and one win you choose. Never your journal.</p>
+    <button class="btn" style="align-self:flex-start" data-act="nav" data-v="partner">${ICON.partner.replace("<svg", '<svg width="16" height="16"')} ${Store.mode === "supa" && !(S.links || []).length ? "Connect with your partner" : "Open Partner"}</button></section>
+  <section class="card"><div class="card-h"><h2>Help</h2></div><div class="row"><button class="btn" data-act="tourStart">Take the tour</button><button class="btn ghost" data-act="tipsReset">Show tips again</button></div></section>
+  <details class="more"><summary class="btn">More settings</summary><div class="more-in">
+  <section class="card"><div class="card-h"><h2>Feel</h2><span class="label">This phone only</span></div><div class="set-group">
+    <label class="set-row"><div><b>Time-block schedule</b><p class="muted small">Adds an hour-by-hour planner to Today.</p></div><input type="checkbox" class="switch" data-act="schedPref" ${p.schedule ? "checked" : ""}></label>
+    <label class="set-row"><div><b>Sounds</b><p class="muted small">A soft chime when you close a loop. Off until you turn it on.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="sound" ${pr.sound ? "checked" : ""}></label>
+    <label class="set-row"><div><b>Celebrations</b><p class="muted small">Confetti for streaks, full pages and milestones.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="confetti" ${pr.confetti ? "checked" : ""}></label>
+    ${Device.iPad || Device.penSeen || window.innerWidth >= 700 ? `<div class="set-row"><div><b>Handwriting pages</b><p class="muted small">Auto shows Ink on iPad and wherever a stylus is used.</p></div><div class="toggle3" role="group" aria-label="Handwriting pages">${[["auto", "Auto"], ["on", "On"], ["off", "Off"]].map(([k, l]) => `<button data-act="inkPref" data-v="${k}" aria-pressed="${(p.ink || "auto") === k}">${l}</button>`).join("")}</div></div>` : ""}
+  </div></section>
   <section class="card"><div class="card-h"><h2>Water</h2></div>
     <div class="set-row"><div><b>Daily water goal</b><p class="muted small">Glasses, for the water card on Today</p></div><input type="number" min="1" max="20" class="in box" id="waterGoal" value="${+(p.waterGoal || 8)}" style="width:80px" data-doc="profile" data-f="waterGoal" data-num="1" inputmode="numeric"></div></section>
   <section class="card"><div class="card-h"><h2>Siri & Shortcuts</h2></div>
@@ -1109,8 +1115,8 @@ function prefsView(){
     ${journeys.map(x => `<div class="set-row"><div><b>${esc(x.title)}</b><div class="muted mono small">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
     <div class="field"><label class="label" for="jstart">Day 1 of this journey</label><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"><span class="muted small">Careful: changing Day 1 moves every day number and streak in this journey.</span></div></section>
   <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "supa" ? "Your journal syncs to your account automatically. Save a copy if you want one of your own." : Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal is saved on this phone only, in the place you're using now. Move my journal gives you a code to carry it somewhere else, password included."}</p><div class="row"><button class="btn sm" data-act="export">${Store.mode === "local" ? "Move my journal" : "Save a copy"}</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
-  <section class="card"><div class="card-h"><h2>Help</h2></div><div class="row"><button class="btn" data-act="tourStart">Take the tour</button><button class="btn ghost" data-act="tipsReset">Show tips again</button></div></section>
   <section class="card"><div class="card-h"><h2>Ideas & requests</h2></div><p class="muted small">${window.claude ? "Want something changed or added? Leave a comment on this page and send it to Claude. Requests get built into the app for both of you." : "Have an idea or something bugging you? Text it to Dalton and it gets built in for both of you."}</p></section>
+  </div></details>
   ${Store.mode === "supa" && Accounts.list().length ? migrateCard() : ""}
   ${Store.mode === "supa" ? `<div class="row"><button class="btn" data-act="sheet" data-v="pass">Change password</button><button class="btn" data-act="signout">Sign out</button></div>` : Store.mode === "local" ? `<button class="btn" style="align-self:flex-start" data-act="signout">Sign out</button>` : ""}`;
 }
@@ -1445,7 +1451,6 @@ function todayView(){
   ${isToday ? `<div class="rituals">
     <button class="ritual-card ${mDone ? "done" : ""}" data-act="ritual" data-v="morning">${ART.sunrise.replace("<svg", '<svg class="art"')}<span class="st">${mDone ? "✓ Done" : "3 min · guided"}</span><h2>Morning ritual</h2><span class="small" style="max-width:60%">Breathe, gratitude, intention, targets</span></button>
     <button class="ritual-card ${eDone ? "done" : ""}" data-act="ritual" data-v="evening">${ART.night.replace("<svg", '<svg class="art"')}<span class="st">${eDone ? "✓ Done" : "3 min · guided"}</span><h2>Evening ritual</h2><span class="small" style="max-width:60%">Wins, lessons, tomorrow, check-in</span></button></div>` : ""}
-  ${isToday ? tip("today", "Tap a section header to open or fold it. Your calendar is at the bottom of this page.") : ""}
   ${highlights(d, j)}
   ${!inJ && n >= 1 ? `<div class="card"><p>This date is outside your current 13-week journey. Start a new journey in <b>Settings</b> when you're ready for the next one.</p></div>` : ""}
   ${(() => { const stt = todayStatus(dd, j), op = autoOpen(stt);
@@ -1467,7 +1472,7 @@ function todayView(){
       + section("targets", "Today's targets", stt.targets.sub, stt.targets, targets, op("targets"))
       + section("habits", "Habits", stt.habits.sub, stt.habits, `<div class="grid2" style="gap:10px">${habits}</div>`, op("habits"))
       + section("evening", "Evening", stt.evening.sub, stt.evening, evening, op("evening"))
-      + section("schedule", "Schedule", stt.schedule.sub, stt.schedule, sched, false)
+      + (profile().schedule ? section("schedule", "Schedule", stt.schedule.sub, stt.schedule, sched, false) : "")
       + (canInk() ? `<section class="card"><div class="row" style="justify-content:space-between"><div><h2>Handwriting page</h2><p class="muted small">A ruled page for this date, made for Apple Pencil.</p></div><button class="btn primary" data-act="nav" data-v="ink" data-keepdate="1">${ICON.ink.replace("<svg", '<svg width="16" height="16"')} Write by hand</button></div></section>` : "")
       + calendarSection();
   })()}`;
@@ -1768,6 +1773,7 @@ async function onClick(e){
     case "signout": await Store.flush(); if (Store.mode === "supa") { ls.del(mirrorKey()); try { await sb.auth.signOut(); } catch {} } ls.del("gm:session"); location.reload(); break;
     case "migrate": await migrate(); break;
     case "calMode": S.calMode = t.dataset.v; render(); break;
+    case "schedPref": profile().schedule = t.checked; Store.touch("profile"); break;
     case "water": { const k = dayKey(S.date); const dd = Store.ensure(k, newDay); const goal = profile().waterGoal || 8; const before = dd.water || 0; dd.water = Math.max(0, before + +t.dataset.n); Store.touch(k); buzz(8);
       const tr = document.getElementById("hlTrack"); const x = tr ? tr.scrollLeft : 0; render(); const tr2 = document.getElementById("hlTrack"); if (tr2) tr2.scrollLeft = x;
       if (dd.water === goal && before < goal) { const b = document.querySelector("[data-act=water][data-n='1']"); burstAt(b, false); toast("Water goal reached"); } break; }

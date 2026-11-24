@@ -75,7 +75,8 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   ok(/^2/.test((await A.locator('.hl-card:has([data-act=water]) .hl-big b').innerText()).trim()), 'water taps count up');
 
   // 2a. Accordion folds and unfolds; a badge was earned for the first page.
-  const wasOpen = await A.locator('#sec-schedule.open').count(); await A.click('#sec-schedule .acc-h'); ok(await A.locator('#sec-schedule.open').count() !== wasOpen, 'sections fold and unfold');
+  const wasOpen = await A.locator('#sec-targets.open').count(); await A.click('#sec-targets .acc-h'); ok(await A.locator('#sec-targets.open').count() !== wasOpen, 'sections fold and unfold');
+  ok(await A.locator('#sec-schedule').count() === 0, 'optional schedule stays out of the way until turned on');
   await A.click('[data-act=nav][data-v=progress] >> visible=true'); ok(await A.locator('.bd.earned').count() >= 1, 'first-page badge earned');
   await A.click('[data-act=nav][data-v=today] >> visible=true');
 
@@ -100,7 +101,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   ok(/no Lyllian account/i.test(msg) && /password is probably fine/i.test(msg), 'other place: explains where the account lives instead of blaming the password');
 
   // 4. Move the journal over with a transfer code; same passcode works; wrong passcode gets its own message.
-  await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('[data-act=export]'); const code = await A.inputValue('#xferOut');
+  await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('.more > summary'); await A.click('[data-act=export]'); const code = await A.inputValue('#xferOut');
   await B.click('[data-act=gmode][data-v=import] >> nth=0'); await B.fill('#gcode', code); await B.click('[data-act=gimport]'); await B.waitForTimeout(400);
   ok(await B.inputValue('#g0').catch(() => '') === 'My son', 'transfer code brings the journal over');
   await B.click('[data-act=nav][data-v=prefs] >> visible=true'); await B.click('[data-act=signout]'); await B.waitForTimeout(400);
