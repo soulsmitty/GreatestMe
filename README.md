@@ -34,10 +34,23 @@ opt-in Partner board for accountability.
 - **iPad + Apple Pencil:** Ink tab with college-ruled, wide-ruled, dot, graph or blank paper; pressure, palm rejection, highlighter, eraser, undo/redo, multiple pages. Scribble works in every text field.
 - **Siri & Shortcuts:** deep links (`#today`, `#morning`, `#evening`, `#habits`, `#week`, `#ink`, `#progress`, `#partner`, `#preferences`) for Open URLs shortcuts and time-of-day automations.
 
+## Accounts that work on every device (Supabase)
+
+The web version signs you in with email and password and syncs your journal live across every browser, Home Screen app and device. Until it's configured, it runs with on-device accounts.
+
+1. Create a free project at supabase.com (name it `greatestme`).
+2. **SQL Editor → New query**: paste all of `supabase/schema.sql`, then **Run**.
+3. **Authentication → URL Configuration**: set Site URL to `https://soulsmitty.github.io/GreatestMe/` and add it under Redirect URLs.
+4. **Project Settings → API**: copy the **Project URL** and the **anon public** key into `config.js`, then push. GitHub Pages redeploys on its own.
+
+Row Level Security limits every journal row to its owner; partners can read only the one summary row the other person chose to share, after both accepted an invite code.
+
 ## Files
 
 - `app.html` — the app (single file, no build step). This is what is published as the Claude artifact.
 - `build.sh` — wraps `app.html` into `index.html` for any static host.
+- `config.js` — the account service address and public key (empty = on-device accounts).
+- `supabase/schema.sql` — tables, access rules, partner invites and live-update setup.
 - `index.html`, `manifest.webmanifest`, `icon.svg` — standalone build, installable to a phone home screen.
 
 ## Deploy

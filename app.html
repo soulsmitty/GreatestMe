@@ -500,6 +500,7 @@ const HABIT_PRESETS = ["Morning routine","Drink 3L water","Move 30 min","Read 20
 const Store = {
   mode: "local", uid: null, docs: {}, col: null, db: null, accountName: "", dirty: new Map(), writing: new Set(), timer: null, status: "saved",
   async loadAll(){
+    if (this.mode === "supa") return SupaStore.loadAll();
     if (this.mode === "cloud") {
       const snap = await this.col.limit(1000).get();
       const out = {}; snap.docs.forEach(d => { if (d.exists) out[d.id] = d.data(); });
@@ -512,6 +513,7 @@ const Store = {
   ensure(key, def){ if (!this.docs[key]) this.docs[key] = typeof def === "function" ? def() : def; return this.docs[key]; },
   touch(key){ this.dirty.set(key, true); this.setStatus("saving"); clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 650); },
   async flush(){
+    if (this.mode === "supa") { await SupaStore.flush(); if (this.dirty.size) { clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 3000); } else this.setStatus("saved"); Partner.publishSoon(); return; }
     if (this.mode === "local") {
       this.dirty.clear();
       const ok = ls.set("gm:data:" + this.uid, this.docs);
@@ -529,7 +531,7 @@ const Store = {
     Partner.publishSoon();
   },
   remove(key){ delete this.docs[key]; if (this.mode === "cloud") { this.dirty.set(key, true); this.touch(key); } else this.touch(key); },
-  setStatus(s, code){ this.status = s; const el = $("#savestate"); if (el) el.textContent = s === "saving" ? "Saving…" : s === "error" ? (code === "not_granted" ? "Read-only: ask the owner for Contributor access" : "Not saved, retrying") : (this.mode === "cloud" ? "Saved to your account" : "Saved on this device"); if (s === "saved") updateBadge(); },
+  setStatus(s, code){ this.status = s; const el = $("#savestate"); if (el) el.textContent = s === "saving" ? "Saving…" : s === "error" && this.mode === "supa" ? (S.offline ? "Offline · saved here, syncs later" : "Not synced yet, retrying") : s === "error" ? (code === "not_granted" ? "Read-only: ask the owner for Contributor access" : "Not saved, retrying") : (this.mode === "cloud" ? "Saved to your account" : this.mode === "supa" ? (S.offline ? "Offline · syncs when you're back" : "Synced to your account") : "Saved on this device"); if (s === "saved") updateBadge(); },
 };
 
 /* local accounts */
@@ -626,13 +628,16 @@ const Partner = {
   async publish(){
     const s = this.summary(); const p = profile(); if (!p) return;
     try {
-      if (Store.mode === "cloud") { const ref = Store.db.doc("duo/" + Store.uid); if (s) await ref.set(s); else if (p.wasSharing) await ref.delete(); }
+      if (Store.mode === "supa") await PartnerSupa.publish(s, p.wasSharing);
+      else if (Store.mode === "cloud") { const ref = Store.db.doc("duo/" + Store.uid); if (s) await ref.set(s); else if (p.wasSharing) await ref.delete(); }
       else { const all = ls.get("gm:duo") || {}; if (s) all[Store.uid] = s; else delete all[Store.uid]; ls.set("gm:duo", all); this.readLocal(); }
       p.wasSharing = !!s;
     } catch {}
   },
   readLocal(){ const all = ls.get("gm:duo") || {}; S.partners = Object.entries(all).filter(([id]) => id !== Store.uid).map(([id, v]) => ({ id, ...v })); },
+  refresh(){ if (Store.mode === "supa") PartnerSupa.refresh(); },
   async start(){
+    if (Store.mode === "supa") return PartnerSupa.start();
     if (Store.mode === "cloud") {
       try {
         this.unsub = Store.db.collection("duo").limit(50).onSnapshot(async snap => {
@@ -701,6 +706,7 @@ const IDB = {
 const InkStore = {
   col(dk){ return Store.db.collection(`data/users/${Store.uid}/ink/${dk}`); },
   async load(dk){
+    if (Store.mode === "supa") return SupaStore.inkLoad(dk);
     if (Store.mode === "cloud") {
       const snap = await this.col(dk).limit(60).get(); const out = { meta: null, pages: [] };
       snap.docs.forEach(d => { if (!d.exists) return; const v = d.data(); if (d.id === "meta") out.meta = v; else if (/^p\d+$/.test(d.id)) out.pages[+d.id.slice(1)] = v.s || []; });
@@ -711,6 +717,7 @@ const InkStore = {
     return out;
   },
   async save(dk, key, val){
+    if (Store.mode === "supa") return SupaStore.inkSave(dk, key, val);
     if (Store.mode === "cloud") return this.col(dk).doc(key).set(val);
     return IDB.put(`${Store.uid}|${dk}|${key}`, key === "meta" ? val : val.s);
   },
@@ -959,7 +966,7 @@ function prefsView(){
   const pv = k => `<div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div>`;
   return `
   <div class="head"><div><span class="label">Make it yours</span><h1 class="title-bar" style="margin-top:4px">Settings</h1></div></div>
-  <section class="card"><div class="row" style="gap:14px;flex-wrap:nowrap"><div class="avatar">${esc((p.nick || "?").trim().charAt(0))}</div><div style="min-width:0;flex:1"><input id="nick" class="in" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" aria-label="Your name" style="font-weight:700;font-size:1.1rem"><p class="muted small">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you." : `On-device account: ${esc(Store.accountName)}. Entries stay in this browser.`}</p></div></div></section>
+  <section class="card"><div class="row" style="gap:14px;flex-wrap:nowrap"><div class="avatar">${esc((p.nick || "?").trim().charAt(0))}</div><div style="min-width:0;flex:1"><input id="nick" class="in" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" aria-label="Your name" style="font-weight:700;font-size:1.1rem"><p class="muted small">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you." : Store.mode === "supa" ? `Signed in as ${esc(Store.accountName)}. Your journal syncs to every device you sign in on.` : `On-device account: ${esc(Store.accountName)}. Entries stay in this browser.`}</p></div></div></section>
   <section class="card"><div class="card-h"><h2>Look</h2><span class="label">Follows your account</span></div>
     <div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="suite" data-v="${k}" aria-pressed="${cur === k}">${pv(k)}<span class="nm">${esc(SUITES[k].name)}${cur === k ? `<span class="chip good">On</span>` : ""}</span></button>`).join("")}</div>
     <p class="muted small">${esc(SUITES[cur].note)}</p>
@@ -977,9 +984,10 @@ function prefsView(){
   <section class="card"><div class="card-h"><h2>Journeys</h2><button class="btn sm" data-act="sheet" data-v="newJourney">+ New journey</button></div>
     ${journeys.map(x => `<div class="set-row"><div><b>${esc(x.title)}</b><div class="muted mono small">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
     <div class="field"><label class="label" for="jstart">Day 1 of this journey</label><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"></div></section>
-  <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal lives in this browser or Home Screen app only. Export gives you a transfer code to move it, passcode included."}</p><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
+  <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "supa" ? "Your journal syncs to your account. Export keeps a copy of your own." : Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal lives in this browser or Home Screen app only. Export gives you a transfer code to move it, passcode included."}</p><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
   <section class="card"><div class="card-h"><h2>Ideas & requests</h2></div><p class="muted small">${window.claude ? "Want something changed or added? Leave a comment on this page and send it to Claude. Requests get built into the app for both of you." : "Want something changed or added? Tell Dalton, or open an issue on the GreatestMe GitHub repo."}</p></section>
-  ${Store.mode === "local" ? `<button class="btn" style="align-self:flex-start" data-act="signout">Sign out</button>` : ""}`;
+  ${Store.mode === "supa" && Accounts.list().length ? migrateCard() : ""}
+  ${Store.mode === "supa" ? `<div class="row"><button class="btn" data-act="sheet" data-v="pass">Change password</button><button class="btn" data-act="signout">Sign out</button></div>` : Store.mode === "local" ? `<button class="btn" style="align-self:flex-start" data-act="signout">Sign out</button>` : ""}`;
 }
 
 /* ============================ rendering ============================ */
@@ -995,7 +1003,7 @@ function render(){
   const BD = `<div class="backdrop"><div class="sun"></div></div>`;
   const gk = S.gate ? "g" + S.gate.mode : (!profile() || !J()) ? "o" + (S.onboard ? S.onboard.step : 0) : ""; const gEnter = gk !== S.lastGate; S.lastGate = gk;
   const enterCard = h => gEnter ? h.replace('class="gate-card"', 'class="gate-card enter"') : h;
-  if (S.gate) { root.innerHTML = BD + enterCard(gateView()); return; }
+  if (S.gate) { root.innerHTML = BD + enterCard(S.gate.supa ? supaGateView() : gateView()); return; }
   if (!profile() || !J()) { root.innerHTML = BD + enterCard(onboardView()); return; }
   if (S.view === "ink" && !canInk()) S.view = "today";
   const entering = S.lastView !== S.view; S.lastView = S.view;
@@ -1226,20 +1234,26 @@ function partnerView(){
       ${(pt.goals || []).map((g, i) => `<div class="field"><div class="row" style="justify-content:space-between"><span><span class="goal-n">GOAL ${i + 1}</span> ${esc(g.title)}</span><span class="mono">${+g.pct || 0}%</span></div>${bar(+g.pct || 0, "good")}</div>`).join("")}
       ${pt.win ? `<div class="quote">${esc(pt.win)}<cite>Shared win</cite></div>` : ""}
       ${me ? `<button class="btn ${iCheered ? "" : "ember"}" style="align-self:flex-start" data-act="cheer" data-id="${esc(pt.id)}" ${iCheered ? "disabled" : ""}>${iCheered ? "Cheer sent" : "Send a cheer"}</button>` : ""}
-    </section>`; }).join("") : `<div class="empty">${Store.mode === "cloud" ? "When your partner opens GreatestMe and turns on sharing, their progress shows up here." : "On this device, partners appear here once a second account turns on sharing."}</div>`;
+    </section>`; }).join("") : `<div class="empty">${Store.mode === "cloud" ? "When your partner opens GreatestMe and turns on sharing, their progress shows up here." : Store.mode === "supa" ? "Link with your partner using an invite code above. Once they turn on sharing, their progress shows up here." : "On this device, partners appear here once a second account turns on sharing."}</div>`;
   return `
   <div class="head"><div><span class="label">Accountability, not access</span><h1 class="title-bar" style="margin-top:4px">Partner</h1><p class="sub">Your journal stays private. If you turn sharing on, your partner sees only your streak, habit and target rates, goal titles with progress, and the one win you choose to share.</p></div></div>
   <section class="card"><div class="row" style="justify-content:space-between"><div><h2>Share my progress</h2><p class="muted" style="font-size:.88rem">${p.share ? "Sharing is on." : "Sharing is off. Nothing leaves your journal."}</p></div>
     <button class="btn ${p.share ? "" : "primary"}" data-act="toggleShare">${p.share ? "Turn off" : "Turn on"}</button></div>
     ${p.share ? `<div class="field"><label class="label" for="swin">Win to share</label><input id="swin" class="in box" data-doc="profile" data-f="sharedWin" value="${esc(p.sharedWin || "")}" placeholder="Something you want them to see" maxlength="200" autocomplete="off"></div>` : ""}
   </section>
+  ${Store.mode === "supa" ? `<section class="card"><div class="card-h"><h2>Your partners</h2><span class="label">${(S.links || []).length} linked</span></div>
+    ${(S.links || []).map(id => { const pt = S.partners.find(x => x.id === id); return `<div class="set-row"><div><b>${esc((pt && pt.nick) || "Partner")}</b><p class="muted small">${pt ? "Sharing with you" : "Hasn't turned on sharing yet"}</p></div><button class="btn sm ghost" data-act="punlink" data-id="${esc(id)}">Remove</button></div>`; }).join("")}
+    <div class="grid2"><div class="field"><span class="label">Invite someone</span>${S.inviteCode ? `<div class="row"><span class="mono" style="font-size:1.6rem;letter-spacing:.2em">${esc(S.inviteCode)}</span><button class="btn sm" data-act="copyCode">Copy</button></div><p class="muted small">Send this code. It works for 7 days.</p>` : `<button class="btn primary sm" style="align-self:flex-start" data-act="pinvite">Make an invite code</button>`}</div>
+      <div class="field"><label class="label" for="pcode">Got a code?</label><div class="row" style="flex-wrap:nowrap"><input id="pcode" class="in box" placeholder="ABC123" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase"><button class="btn sm" data-act="paccept">Link</button></div>${S.inviteErr ? `<p class="err">${esc(S.inviteErr)}</p>` : ""}</div></div></section>` : ""}
   ${cards}`;
 }
 
 /* ---------- Sheets ---------- */
 function sheetView(){
   const p = profile(); const j = J(); let body = "";
-  if (S.sheet === "newJourney") {
+  if (S.sheet === "pass") {
+    body = `<div class="card-h"><h2>Change password</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div><input id="newPass" type="password" class="in box" autocomplete="new-password" placeholder="New password (8+ characters)"><button class="btn primary" data-act="chpass">Save password</button>`;
+  } else if (S.sheet === "newJourney") {
     body = `<div class="card-h"><h2>Start a new journey</h2><button class="btn icon ghost" aria-label="Close" data-act="close">${ICON.x}</button></div>
       <p class="muted">Your current journey is kept. Habits carry over; set fresh goals.</p>
       <div class="field"><label class="label" for="njt">Name</label><input id="njt" class="in box" value="${esc("Journey " + (Object.keys(Store.docs).filter(k => k.startsWith("journey-")).length + 1))}"></div>
@@ -1283,7 +1297,7 @@ function onboardView(){
   const o = S.onboard || (S.onboard = { step: 0, nick: Store.accountName || "", suite: Suite.current(), start: today(), goals: [{ title: "", why: "" }, { title: "", why: "" }, { title: "", why: "" }], habits: [] });
   const N = 7; const steps = o.step ? `<div class="steps">${Array.from({ length: N - 1 }, (_, i) => `<i class="${i < o.step ? "on" : ""}"></i>`).join("")}</div>` : "";
   let body = "", cta = "Continue";
-  if (o.step === 0) { body = `<div class="hero-art">${ART.welcome}</div><div class="gate-brand">Greatest<b>Me</b></div><h1>Thirteen weeks to the greatest version of you.</h1><p class="muted">Set three goals. Show up every morning and every evening. Watch what ninety-one days of follow-through can do.</p>`; cta = "Let's begin"; }
+  if (o.step === 0) { body = `<div class="hero-art">${ART.welcome}</div><div class="gate-brand">Greatest<b>Me</b></div><h1>Thirteen weeks to the greatest version of you.</h1><p class="muted">Set three goals. Show up every morning and every evening. Watch what ninety-one days of follow-through can do.</p>${Store.mode === "supa" ? migrateCard() : ""}`; cta = Store.mode === "supa" && Accounts.list().length ? "Start a new journal instead" : "Let's begin"; }
   if (o.step === 1) body = `<span class="label">Step 1 · You</span><h1>First, what should we call you?</h1><input id="onick" class="in box big-in" value="${esc(o.nick)}" autocomplete="given-name" placeholder="Your first name">`;
   if (o.step === 2) body = `<span class="label">Step 2 · Your look</span><h1>Pick your vibe${o.nick ? ", " + esc(o.nick.split(" ")[0]) : ""}.</h1><p class="muted small">You can change it any time in Settings.</p><div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="osuite" data-v="${k}" aria-pressed="${o.suite === k}"><div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div><span class="nm">${esc(SUITES[k].name)}</span></button>`).join("")}</div>`;
   if (o.step === 3) body = `<span class="label">Step 3 · Day 1</span><h1>When does your journey start?</h1><p class="muted">Thirteen weeks from Day 1. Starting today works. So does a fresh Monday.</p><input id="ostart" type="date" class="in box big-in" value="${esc(o.start)}"><div class="row"><button type="button" class="btn sm" data-act="ostart" data-v="${today()}">Today</button><button type="button" class="btn sm" data-act="ostart" data-v="${nextMonday()}">Next Monday</button></div>`;
@@ -1355,7 +1369,13 @@ async function onClick(e){
     case "inkRedo": Ink.step(Ink.redo, Ink.undo); break;
     case "inkAddPage": if (Ink.data) { Ink.data.pages.push([]); Ink.status = ""; Ink.queue(Ink.data.pages.length - 1); render(); setTimeout(() => { const pg = document.querySelectorAll(".ink-page"); pg[pg.length - 1]?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); } break;
     case "inkClear": if (Ink.data) { if (t.dataset.confirm === "1") { const i = Ink.data.pages.length - 1; Ink.snapshot(i); Ink.data.pages[i] = []; Ink.queue(i); render(); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to clear"; t.classList.add("ember"); } } break;
-    case "signout": await Store.flush(); ls.del("gm:session"); location.reload(); break;
+    case "signout": await Store.flush(); if (Store.mode === "supa") { ls.del(mirrorKey()); try { await sb.auth.signOut(); } catch {} } ls.del("gm:session"); location.reload(); break;
+    case "migrate": await migrate(); break;
+    case "pinvite": try { S.inviteCode = await PartnerSupa.invite(); render(); } catch (err) { toast("Couldn't make a code. Check your connection."); } break;
+    case "paccept": { const c = ($("#pcode").value || "").trim(); if (!c) break; try { await PartnerSupa.accept(c); S.inviteErr = ""; toast("You're linked. Cheer each other on."); } catch (err) { S.inviteErr = err.message; render(); } break; }
+    case "punlink": if (t.dataset.confirm === "1") { await PartnerSupa.unlink(t.dataset.id); toast("Partner removed"); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to remove"; } break;
+    case "copyCode": try { await navigator.clipboard.writeText(S.inviteCode); toast("Code copied"); } catch { toast("Code: " + S.inviteCode); } break;
+    case "chpass": { const v = $("#newPass").value; if (v.length < 8) { toast("Use at least 8 characters"); break; } const { error } = await sb.auth.updateUser({ password: v }); toast(error ? supaErr(error) : "Password updated"); if (!error) { S.sheet = null; render(); } break; }
     case "gmode": S.gate.mode = t.dataset.v; S.gate.err = ""; if (t.dataset.v !== "signin") S.gate.noacct = ""; render(); break;
     case "gimport": { const code = ($("#gcode") && $("#gcode").value.trim()) || S.gate.fileText || ""; if (!code) { S.gate.err = "Paste your transfer code or choose a file first."; render(); break; }
       try { const acct = await importToDevice(code); ls.set("gm:session", { id: acct.id }); S.gate = null; await startLocal(acct); toast(`Welcome back, ${acct.name.split(" ")[0]}`); } catch (err) { S.gate.err = err.message || "That code didn't work."; render(); } break; }
@@ -1460,6 +1480,159 @@ document.addEventListener("pointerdown", e => { const b = e.target.closest && e.
 ["pointerup", "pointercancel", "pointerleave"].forEach(ev => document.addEventListener(ev, e => { const b = document.getElementById("commitBtn"); if (b && b.classList.contains("holding") && holdT && (ev !== "pointerleave" || e.target === b)) { clearTimeout(holdT); holdT = null; b.classList.remove("holding"); } }, true));
 document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#commitBtn") && e.detail === 0) finishOnboard(); });
 
+/* ============================ accounts + sync (Supabase, standalone build) ============================ */
+const CFG = window.GM_CONFIG || {};
+const SUPA_ON = () => !window.claude && !!(CFG.supabaseUrl && CFG.supabaseAnonKey && window.supabase && window.supabase.createClient);
+let sb = null;
+const mirrorKey = () => "gm:mirror:" + Store.uid;
+async function sbAll(build){ const out = []; for (let from = 0; ; from += 1000) { const { data, error } = await build().range(from, from + 999); if (error) throw error; out.push(...data); if (data.length < 1000) return out; } }
+const Sync = {
+  ch: null, last: null,
+  note(rows){ rows.forEach(r => { if (r.updated_at && (!this.last || r.updated_at > this.last)) this.last = r.updated_at; }); },
+  apply(rows){
+    let changed = false;
+    rows.forEach(r => { if (!r || !r.key || r.key.startsWith("ink|") || Store.dirty.has(r.key) || Store.writing.has(r.key)) return;
+      if (JSON.stringify(Store.docs[r.key]) !== JSON.stringify(r.data)) { Store.docs[r.key] = r.data; changed = true; } });
+    this.note(rows);
+    if (changed) { ls.set(mirrorKey(), Store.docs); softRender(); }
+  },
+  async pull(){ try { const rows = await sbAll(() => { let q = sb.from("docs").select("key,data,updated_at").eq("user_id", Store.uid).not("key", "like", "ink|%"); if (this.last) q = q.gt("updated_at", this.last); return q; }); this.apply(rows); } catch {} },
+  start(){
+    try { this.ch = sb.channel("docs-" + Store.uid).on("postgres_changes", { event: "*", schema: "public", table: "docs", filter: "user_id=eq." + Store.uid }, p => {
+      if (p.eventType === "DELETE") { const k = p.old && p.old.key; if (k && Store.docs[k] && !Store.dirty.has(k)) { delete Store.docs[k]; softRender(); } return; }
+      if (p.new && p.new.key && p.new.key.startsWith("ink|")) { if (S.view === "ink" && Ink.dk && p.new.key.startsWith("ink|" + Ink.dk + "|") && !Ink.live && !Object.keys(Ink.timers).some(i => Ink.timers[i])) { Ink.dk = null; softRender(); } return; }
+      this.apply([p.new]); }).subscribe(); } catch {}
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && Store.mode === "supa") { this.pull(); Partner.refresh(); } });
+    window.addEventListener("online", () => { if (Store.mode === "supa") { Store.flush(); this.pull(); } });
+  },
+};
+/* re-render without yanking someone out of a field they're typing in */
+function softRender(){ const a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest("#root")) { S.needsRender = true; return; } render(); }
+document.addEventListener("focusout", () => setTimeout(() => { if (S.needsRender && !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { S.needsRender = false; render(); } }, 50));
+
+const SupaStore = {
+  async loadAll(){
+    try {
+      const rows = await sbAll(() => sb.from("docs").select("key,data,updated_at").eq("user_id", Store.uid).not("key", "like", "ink|%"));
+      const out = {}; rows.forEach(r => { out[r.key] = r.data; }); Sync.note(rows);
+      Store.docs = out; ls.set(mirrorKey(), out); S.offline = false;
+    } catch (e) { Store.docs = ls.get(mirrorKey()) || {}; S.offline = true; }
+  },
+  async flush(){
+    const keys = [...Store.dirty.keys()].filter(k => !Store.writing.has(k)); if (!keys.length) return;
+    keys.forEach(k => { Store.dirty.delete(k); Store.writing.add(k); });
+    ls.set(mirrorKey(), Store.docs);
+    try {
+      const ups = keys.filter(k => Store.docs[k]).map(k => ({ user_id: Store.uid, key: k, data: JSON.parse(JSON.stringify(Store.docs[k])) }));
+      const dels = keys.filter(k => !Store.docs[k]);
+      if (ups.length) { const { error } = await sb.from("docs").upsert(ups); if (error) throw error; }
+      if (dels.length) { const { error } = await sb.from("docs").delete().eq("user_id", Store.uid).in("key", dels); if (error) throw error; }
+      S.offline = false;
+    } catch (e) { keys.forEach(k => Store.dirty.set(k, true)); S.offline = !navigator.onLine; Store.setStatus("error"); }
+    finally { keys.forEach(k => Store.writing.delete(k)); }
+  },
+  async inkLoad(dk){
+    const { data, error } = await sb.from("docs").select("key,data").eq("user_id", Store.uid).like("key", `ink|${dk}|%`); if (error) throw error;
+    const out = { meta: null, pages: [] }; data.forEach(r => { const part = r.key.split("|")[2]; if (part === "meta") out.meta = r.data; else if (/^p\d+$/.test(part)) out.pages[+part.slice(1)] = (r.data && r.data.s) || []; });
+    return out;
+  },
+  async inkSave(dk, key, val){ const { error } = await sb.from("docs").upsert({ user_id: Store.uid, key: `ink|${dk}|${key}`, data: key === "meta" ? val : { s: val.s } }); if (error) throw error; },
+};
+
+/* Partner over Supabase: invite codes link two accounts; each shares one summary row */
+const PartnerSupa = {
+  ch: null,
+  async refresh(){
+    if (Store.mode !== "supa") return;
+    try {
+      const [{ data: links }, { data: shares }] = await Promise.all([sb.from("partner_links").select("partner_id").eq("user_id", Store.uid), sb.from("shares").select("user_id,summary,updated_at")]);
+      S.links = (links || []).map(l => l.partner_id);
+      S.partners = (shares || []).filter(r => r.user_id !== Store.uid).map(r => ({ id: r.user_id, ...r.summary }));
+      if (S.view === "partner") softRender();
+    } catch {}
+  },
+  start(){ this.refresh(); try { this.ch = sb.channel("shares-" + Store.uid).on("postgres_changes", { event: "*", schema: "public", table: "shares" }, () => this.refresh()).subscribe(); } catch {} },
+  async publish(s, wasSharing){ if (s) { const { error } = await sb.from("shares").upsert({ user_id: Store.uid, summary: s }); if (error) throw error; } else if (wasSharing) await sb.from("shares").delete().eq("user_id", Store.uid); },
+  async invite(){ const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; const code = Array.from(crypto.getRandomValues(new Uint8Array(6)), b => A[b % A.length]).join("");
+    const { error } = await sb.from("invites").insert({ code, owner_id: Store.uid }); if (error) throw error; return code; },
+  async accept(code){ const { error } = await sb.rpc("accept_invite", { invite_code: code }); if (error) throw new Error(error.message || "That code didn't work."); await this.refresh(); },
+  async unlink(id){ await sb.rpc("unlink_partner", { other: id }); await this.refresh(); },
+};
+
+/* email + password sign-in */
+function supaGateView(){
+  const g = S.gate; const nice = { signin: "Welcome back.", create: "Create your account.", forgot: "Reset your password.", newpass: "Choose a new password.", check: "Check your email." }[g.mode];
+  if (g.mode === "check") return `<div class="gate"><div class="gate-card"><div class="hero-art" style="max-width:200px">${ART.welcome}</div><h1>${nice}</h1><p class="muted">We sent a link to <b>${esc(g.email || "your email")}</b>. ${g.reset ? "Tap it to set a new password." : "Tap it to confirm your account, then sign in here."}</p><button class="btn primary lg" data-act="gmode" data-v="signin">Back to sign in</button></div></div>`;
+  return `<div class="gate"><form class="gate-card" id="supaForm" novalidate>
+    <div class="hero-art" style="max-width:190px">${ART.welcome}</div><div><div class="gate-brand">Greatest<b>Me</b></div><p class="muted" style="margin-top:8px">${nice} One account for every device.</p></div>
+    ${g.mode === "signin" || g.mode === "create" ? `<div class="seg"><button type="button" data-act="gmode" data-v="signin" aria-pressed="${g.mode === "signin"}">Sign in</button><button type="button" data-act="gmode" data-v="create" aria-pressed="${g.mode === "create"}">Create account</button></div>` : ""}
+    ${g.mode !== "newpass" ? `<div class="field"><label class="label" for="semail">Email</label><input id="semail" type="email" class="in box" value="${esc(g.email || "")}" autocomplete="username" autocapitalize="off" spellcheck="false" inputmode="email" required></div>` : ""}
+    ${g.mode !== "forgot" ? `<div class="field"><label class="label" for="spass">${g.mode === "newpass" ? "New password" : "Password"}</label><input id="spass" type="password" class="in box" autocomplete="${g.mode === "signin" ? "current-password" : "new-password"}" required minlength="8"></div>` : ""}
+    ${g.mode === "create" || g.mode === "newpass" ? `<div class="field"><label class="label" for="spass2">Confirm password</label><input id="spass2" type="password" class="in box" autocomplete="new-password"></div>` : ""}
+    ${g.err ? `<p class="err" role="alert">${esc(g.err)}</p>` : ""}${g.ok ? `<p class="small" style="color:var(--good)" role="status">${esc(g.ok)}</p>` : ""}
+    <button class="btn primary lg" type="submit" ${g.busy ? "disabled" : ""}>${g.busy ? "One moment…" : { signin: "Sign in", create: "Create my account", forgot: "Email me a reset link", newpass: "Save new password" }[g.mode]}</button>
+    ${g.mode === "signin" ? `<button type="button" class="btn ghost sm" data-act="gmode" data-v="forgot">Forgot your password?</button>` : g.mode === "forgot" ? `<button type="button" class="btn ghost sm" data-act="gmode" data-v="signin">Back to sign in</button>` : ""}
+    <p class="muted small">Sign in once in each browser or Home Screen app and it stays signed in. Your journal is the same everywhere.</p>
+  </form></div>`;
+}
+function supaErr(e){ const m = (e && e.message) || "";
+  if (/invalid login/i.test(m)) return "That email and password don't match. Passwords are case-sensitive.";
+  if (/not confirmed/i.test(m)) return "Confirm your email first. Check your inbox for the link, then sign in.";
+  if (/already registered|already exists/i.test(m)) return "There's already an account with that email. Sign in instead.";
+  if (/rate limit|too many/i.test(m)) return "Too many tries. Wait a minute, then try again.";
+  if (/fetch|network/i.test(m)) return "Can't reach the server. Check your connection and try again.";
+  return m || "Something went wrong. Try again."; }
+async function supaSubmit(){
+  const g = S.gate; const email = ($("#semail") ? $("#semail").value : g.email || "").trim(); const pass = $("#spass") ? $("#spass").value : ""; const pass2 = $("#spass2") ? $("#spass2").value : "";
+  g.email = email; g.err = ""; g.ok = "";
+  if (g.mode !== "newpass" && !/^\S+@\S+\.\S+$/.test(email)) { g.err = "Enter the email you use for GreatestMe."; return render(); }
+  if (g.mode !== "forgot" && g.mode !== "signin" && pass.length < 8) { g.err = "Use at least 8 characters for your password."; return render(); }
+  if ((g.mode === "create" || g.mode === "newpass") && pass !== pass2) { g.err = "Those passwords don't match."; return render(); }
+  g.busy = true; render(); const here = location.href.split("#")[0];
+  try {
+    if (g.mode === "signin") { const { data, error } = await sb.auth.signInWithPassword({ email, password: pass }); if (error) throw error; g.busy = false; await startSupa(data.user); return; }
+    if (g.mode === "create") { const { data, error } = await sb.auth.signUp({ email, password: pass, options: { emailRedirectTo: here } }); if (error) throw error;
+      if (data.session) { g.busy = false; await startSupa(data.user); return; } S.gate = { supa: true, mode: "check", email }; return render(); }
+    if (g.mode === "forgot") { const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: here }); if (error) throw error; S.gate = { supa: true, mode: "check", email, reset: true }; return render(); }
+    if (g.mode === "newpass") { const { data, error } = await sb.auth.updateUser({ password: pass }); if (error) throw error; g.busy = false; try { history.replaceState(null, "", location.pathname); } catch {} toast("Password updated"); await startSupa(data.user); return; }
+  } catch (e) { g.busy = false; g.err = supaErr(e); render(); }
+}
+document.addEventListener("submit", e => { if (e.target.id === "supaForm") { e.preventDefault(); supaSubmit(); } });
+
+/* move a journal saved in this browser into the account */
+function migrateCard(){
+  const accts = Accounts.list(); if (!accts.length) return "";
+  return `<div class="card" style="gap:10px"><b>Bring in the journal saved in this browser</b><p class="muted small">You have an on-device journal here${accts.length > 1 ? "s" : ""}. Enter its passcode to move it into your account so it follows you everywhere.</p>
+    ${accts.length > 1 ? `<select id="mAcct" class="in" aria-label="Which journal">${accts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join("")}</select>` : `<input type="hidden" id="mAcct" value="${esc(accts[0].id)}"><span class="chip" style="align-self:flex-start">${esc(accts[0].name)}</span>`}
+    <input id="mPass" type="password" class="in box" placeholder="On-device passcode" autocomplete="current-password">
+    ${S.migrateErr ? `<p class="err" role="alert">${esc(S.migrateErr)}</p>` : ""}<button class="btn primary sm" style="align-self:flex-start" data-act="migrate">Move it into my account</button></div>`;
+}
+async function migrate(){
+  const id = $("#mAcct").value, pass = $("#mPass").value; const a = Accounts.list().find(x => x.id === id); S.migrateErr = "";
+  if (!a || a.hash !== await hashPass(a.salt, pass)) { S.migrateErr = "That passcode doesn't match this journal."; return render(); }
+  const docs = ls.get("gm:data:" + a.id) || {}; Object.entries(docs).forEach(([k, v]) => { if (DOC_KEY.test(k) && v && typeof v === "object") { Store.docs[k] = v; Store.dirty.set(k, true); } });
+  try { const ink = await IDB.all(a.id + "|"); for (const [k, v] of Object.entries(ink)) { const [dk, part] = k.split("|"); await SupaStore.inkSave(dk, part, part === "meta" ? v : { s: v }); } } catch {}
+  await Store.flush(); S.onboard = null; S.sheet = null; S.snap = snap(); render(); celebrate({ art: ART.mountain, title: "Journal moved", sub: "It's in your account now, on every device you sign in to." });
+}
+async function startSupa(user){
+  if (S.starting || (Store.mode === "supa" && Store.uid === user.id)) return; S.starting = true;
+  Store.mode = "supa"; Store.uid = user.id; Store.accountName = user.email || ""; S.gate = null;
+  await SupaStore.loadAll(); Sync.start(); PartnerSupa.start(); S.starting = false; S.snap = snap();
+  render(); routeHash(); updateBadge();
+}
+async function bootSupa(){
+  sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "gm-auth" } });
+  const recovering = /type=recovery/.test(location.hash);
+  sb.auth.onAuthStateChange((ev, session) => {
+    if (ev === "PASSWORD_RECOVERY" || (recovering && session)) { S.gate = { supa: true, mode: "newpass" }; render(); return; }
+    if ((ev === "SIGNED_IN" || ev === "INITIAL_SESSION") && session && session.user && Store.mode !== "supa" && !(S.gate && S.gate.mode === "newpass")) setTimeout(() => startSupa(session.user), 0);
+  });
+  const { data } = await sb.auth.getSession();
+  if (recovering) { S.gate = { supa: true, mode: "newpass" }; render(); return; }
+  if (data && data.session) await startSupa(data.session.user);
+  else if (!S.gate) { S.gate = { supa: true, mode: Accounts.list().length ? "create" : "signin" }; render(); }
+}
+
 /* ============================ boot ============================ */
 async function startLocal(acct){
   Store.mode = "local"; Store.uid = acct.id; Store.accountName = acct.name; S.gate = null;
@@ -1474,6 +1647,7 @@ async function bootLocal(){
 window.addEventListener("hashchange", routeHash);
 async function boot(){
   Theme.apply();
+  if (SUPA_ON()) { try { return await bootSupa(); } catch (e) { console.warn("Account service unavailable, using on-device mode", e); } }
   if (!(window.claude && typeof window.claude.use === "function")) return bootLocal();
   try {
     const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
