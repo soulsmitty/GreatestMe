@@ -199,7 +199,7 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     await go(C, 'prefs'); await C.waitForTimeout(300); if (!(await C.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG C:', (await C.evaluate(() => document.body.innerText)).slice(0, 700)); await C.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Cdebug.png' }); } await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
     ok((await C.locator('.partner h2').allInnerTexts()).includes('Jordan'), 'accounts: partner invite code links two phones');
     await C.click('[data-act=toggleShare]'); await C.waitForTimeout(400); await C.fill('input[id^=note-]', 'Proud of you, keep going'); await C.click('[data-act=noteSend]'); await C.click('[data-act=react][data-v="🔥"]'); await C.waitForTimeout(3000);
-    await L.reload(); await L.waitForSelector('.hero'); await L.waitForTimeout(2500);
+    await L.reload(); await L.waitForTimeout(1500); await go(L, 'today'); await L.waitForSelector('.hero'); await L.waitForTimeout(2000);
     ok(/Proud of you, keep going/.test(await L.locator('.pnote').innerText().catch(() => '')), 'a partner note shows on Today with their name');
     await L.click('.pnote [data-act=noteSeen]'); ok(await L.locator('.pnote').count() === 0, 'dismissing the note clears it');
     await go(L, 'today'); await L.context().setOffline(true); await L.route(/127\.0\.0\.1:8612/, r => r.abort()); await openSec(L, 'morning'); await L.fill('#intent', 'Patient'); await L.waitForTimeout(2500);
