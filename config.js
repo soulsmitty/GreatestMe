@@ -1,6 +1,5 @@
-/* GreatestMe account service. Fill these two values from Supabase → Project Settings → API.
-   The anon key is designed to be public; Row Level Security in supabase/schema.sql protects the data.
-   Leave them empty to run with on-device accounts only. */
+/* GreatestMe account service (Supabase). Empty = on-device accounts.
+   The publishable key is meant to be public; row-level security in supabase/schema.sql protects every journal. */
 window.GM_CONFIG = {
   supabaseUrl: "",
   supabaseAnonKey: ""

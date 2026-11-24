@@ -196,6 +196,8 @@ select.in{border:1px solid var(--line);border-radius:var(--r-sm);padding:8px;bac
 .btn.primary{background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 70%,var(--acc2)));border-color:transparent;color:var(--on-acc);box-shadow:0 8px 22px var(--glow-a)}
 :root[data-suite="martin"] .btn.primary{background:var(--acc);border-color:#151515;box-shadow:var(--btn-shadow)}
 :root[data-suite="synthwave"] .btn.primary{box-shadow:0 0 18px rgb(255 46 151 / .55)}
+.btn.oauth{background:#FFFFFF;color:#1F1F1F;border:1px solid #DADCE0;box-shadow:none}
+.btn.oauth.apple{background:#000;color:#FFF;border-color:#000}
 .btn.ember{background:var(--acc2);border-color:var(--acc2);color:#fff}
 .btn.ghost{border-color:transparent;background:transparent;box-shadow:none}
 .btn.sm{padding:6px 11px;font-size:.84rem}
@@ -370,7 +372,7 @@ details.sched summary::-webkit-details-marker{display:none}
 
 /* settings */
 .set-group{display:flex;flex-direction:column;gap:0;padding:4px 0}
-.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);min-width:0}
+.set-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);min-width:0}
 .set-row:last-child{border-bottom:0}
 .set-row>div{min-width:0}
 .switch{appearance:none;-webkit-appearance:none;width:50px;height:30px;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:background .2s;flex:none;margin:0}
@@ -396,7 +398,7 @@ details.sched summary::-webkit-details-marker{display:none}
 .pv .c b{width:14px;height:14px;border-radius:4px;background:var(--acc);flex:none}
 .pv .p{align-self:flex-start;background:var(--acc);color:var(--on-acc);border-radius:99px;padding:2px 9px;font-size:.62rem;font-weight:700}
 .toggle3{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--solid)}
-.toggle3 button{all:unset;cursor:pointer;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:7px 12px;border-radius:999px;color:var(--muted)}
+.toggle3 button{all:unset;cursor:pointer;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:7px 12px;border-radius:999px;color:var(--muted)}
 .toggle3 button[aria-pressed="true"]{background:var(--ink);color:var(--canvas)}
 .linkrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:9px 0}
 .linkrow code{font-family:var(--f-mono);font-size:.76rem;overflow-wrap:anywhere;color:var(--muted)}
@@ -548,7 +550,7 @@ const Accounts = {
   save(a){ ls.set("gm:accounts", a); },
   async create(name, pass){
     name = name.trim(); if (name.length < 2) throw new Error("Use at least 2 characters for your name.");
-    if (pass.length < 4) throw new Error("Use a passcode of at least 4 characters.");
+    if (pass.length < 8) throw new Error("Use a password of at least 8 characters.");
     const all = this.list(); if (all.some(a => a.name.toLowerCase() === name.toLowerCase())) throw new Error("That name already has an account on this device. Sign in instead.");
     const salt = uid(); const acct = { id: "u" + uid(), name, salt, hash: await hashPass(salt, pass), created: Date.now() };
     all.push(acct); if (!this.save(all) && !ls.get("gm:accounts")) throw new Error("This browser is blocking storage, so an account can't be saved here.");
@@ -557,7 +559,7 @@ const Accounts = {
   async signIn(name, pass){
     const a = this.list().find(x => x.name.toLowerCase() === name.trim().toLowerCase());
     if (!a) { const e = new Error("noacct"); e.noacct = true; throw e; }
-    if (a.hash !== await hashPass(a.salt, pass)) throw new Error(`That passcode doesn't match ${a.name}'s account here. Passcodes are case-sensitive.`);
+    if (a.hash !== await hashPass(a.salt, pass) && a.hash !== await hashPass(a.salt, pass.trim())) throw new Error(`That password doesn't match ${a.name}'s account here. Passwords are case-sensitive, so check capital letters.`);
     return a;
   },
 };
@@ -845,7 +847,7 @@ const Suite = {
 };
 function applyAccent(){ Suite.apply(); }
 const Prefs = {
-  get(){ return Object.assign({ sound: true, confetti: true }, ls.get("gm-prefs") || {}); },
+  get(){ return Object.assign({ sound: false, confetti: true }, ls.get("gm-prefs") || {}); },
   set(k, v){ const p = this.get(); p[k] = v; ls.set("gm-prefs", p); },
 };
 const reduced = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -918,12 +920,13 @@ function rings(parts, center, sub){
 const STREAK_MARKS = [3, 7, 14, 21, 30, 45, 60, 75, 91];
 function snap(){ const j = J(); if (!j) return null; const dd = Store.get(dayKey(today())); const st = stats(j);
   return { score: dayScore(dd), habits: dd ? j.habits.filter(h => dd.habits[h.id]).length : 0, hTotal: j.habits.length, streak: st.streak, tDone: dd ? dd.targets.filter(t => t.t.trim() && t.done).length : 0, ms: j.goals.reduce((a, g) => a + g.milestones.filter(m => m.done).length, 0) }; }
+function once(kind){ const k = dayKey(today()); const dd = Store.ensure(k, newDay); dd.cele = dd.cele || {}; if (dd.cele[kind]) return false; dd.cele[kind] = 1; Store.touch(k); return true; }
 function checkWins(el){
   const prev = S.snap, cur = snap(); S.snap = cur; if (!prev || !cur) return;
   if (cur.ms > prev.ms) { burstAt(el, true); toast("Milestone reached. That's real progress."); return; }
-  if (cur.streak > prev.streak && STREAK_MARKS.includes(cur.streak) && !S.ritual) return celebrate({ art: ART.flameBig, num: cur.streak, title: `${cur.streak}-day streak`, sub: cur.streak >= 30 ? "This is who you are now." : "Momentum is building. Protect it tomorrow." });
-  if (cur.score === 100 && prev.score < 100 && !S.ritual) return celebrate({ art: ART.trophy, title: "Page complete", sub: "Morning, targets and evening, all closed. Rest easy tonight." });
-  if (cur.hTotal && cur.habits === cur.hTotal && prev.habits < cur.hTotal) { burstAt(el, true); toast("Every habit done today"); return; }
+  if (cur.streak > prev.streak && STREAK_MARKS.includes(cur.streak) && !S.ritual && once("streak" + cur.streak)) return celebrate({ art: ART.flameBig, num: cur.streak, title: `${cur.streak}-day streak`, sub: cur.streak >= 30 ? "This is who you are now." : "Momentum is building. Protect it tomorrow." });
+  if (cur.score === 100 && prev.score < 100 && !S.ritual && once("page")) return celebrate({ art: ART.trophy, title: "Page complete", sub: "Morning, targets and evening, all closed. Rest easy tonight." });
+  if (cur.hTotal && cur.habits === cur.hTotal && prev.habits < cur.hTotal) { if (once("habits")) { burstAt(el, true); toast("Every habit done today"); } else burstAt(el, false); return; }
   if (cur.habits > prev.habits || cur.tDone > prev.tDone) burstAt(el, false);
 }
 
@@ -967,13 +970,13 @@ function prefsView(){
   return `
   <div class="head"><div><span class="label">Make it yours</span><h1 class="title-bar" style="margin-top:4px">Settings</h1></div></div>
   <section class="card"><div class="row" style="gap:14px;flex-wrap:nowrap"><div class="avatar">${esc((p.nick || "?").trim().charAt(0))}</div><div style="min-width:0;flex:1"><input id="nick" class="in" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" aria-label="Your name" style="font-weight:700;font-size:1.1rem"><p class="muted small">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you." : Store.mode === "supa" ? `Signed in as ${esc(Store.accountName)}. Your journal syncs to every device you sign in on.` : `On-device account: ${esc(Store.accountName)}. Entries stay in this browser.`}</p></div></div></section>
-  <section class="card"><div class="card-h"><h2>Look</h2><span class="label">Follows your account</span></div>
+  <section class="card"><div class="card-h"><h2>Look</h2><span class="label">Saved to you</span></div>
     <div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="suite" data-v="${k}" aria-pressed="${cur === k}">${pv(k)}<span class="nm">${esc(SUITES[k].name)}${cur === k ? `<span class="chip good">On</span>` : ""}</span></button>`).join("")}</div>
     <p class="muted small">${esc(SUITES[cur].note)}</p>
     ${SUITES[cur].modes ? `<div class="set-row"><div><b>Appearance</b><p class="muted small">Auto follows your iPhone or iPad.</p></div><div class="toggle3" role="group" aria-label="Appearance">${["auto", "light", "dark"].map(t => `<button data-act="theme" data-v="${t}" aria-pressed="${Theme.get() === t}">${t}</button>`).join("")}</div></div>` : ""}
   </section>
-  <section class="card"><div class="card-h"><h2>Feel</h2><span class="label">This device</span></div><div class="set-group">
-    <label class="set-row"><div><b>Sounds</b><p class="muted small">A soft chime when you close a loop.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="sound" ${pr.sound ? "checked" : ""}></label>
+  <section class="card"><div class="card-h"><h2>Feel</h2><span class="label">This phone only</span></div><div class="set-group">
+    <label class="set-row"><div><b>Sounds</b><p class="muted small">A soft chime when you close a loop. Off until you turn it on.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="sound" ${pr.sound ? "checked" : ""}></label>
     <label class="set-row"><div><b>Celebrations</b><p class="muted small">Confetti for streaks, full pages and milestones.</p></div><input type="checkbox" class="switch" data-act="pref" data-v="confetti" ${pr.confetti ? "checked" : ""}></label>
     ${Device.iPad || Device.penSeen || window.innerWidth >= 700 ? `<div class="set-row"><div><b>Handwriting pages</b><p class="muted small">Auto shows Ink on iPad and wherever a stylus is used.</p></div><div class="toggle3" role="group" aria-label="Handwriting pages">${[["auto", "Auto"], ["on", "On"], ["off", "Off"]].map(([k, l]) => `<button data-act="inkPref" data-v="${k}" aria-pressed="${(p.ink || "auto") === k}">${l}</button>`).join("")}</div></div>` : ""}
   </div></section>
@@ -983,9 +986,9 @@ function prefsView(){
   </section>
   <section class="card"><div class="card-h"><h2>Journeys</h2><button class="btn sm" data-act="sheet" data-v="newJourney">+ New journey</button></div>
     ${journeys.map(x => `<div class="set-row"><div><b>${esc(x.title)}</b><div class="muted mono small">${esc(x.start)} → ${esc(endDate(x))}</div></div>${x.id === p.active ? `<span class="chip good">Active</span>` : `<button class="btn sm" data-act="switchJ" data-id="${esc(x.id)}">Open</button>`}</div>`).join("")}
-    <div class="field"><label class="label" for="jstart">Day 1 of this journey</label><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"></div></section>
-  <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "supa" ? "Your journal syncs to your account. Export keeps a copy of your own." : Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal lives in this browser or Home Screen app only. Export gives you a transfer code to move it, passcode included."}</p><div class="row"><button class="btn sm" data-act="export">Export my data</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
-  <section class="card"><div class="card-h"><h2>Ideas & requests</h2></div><p class="muted small">${window.claude ? "Want something changed or added? Leave a comment on this page and send it to Claude. Requests get built into the app for both of you." : "Want something changed or added? Tell Dalton, or open an issue on the GreatestMe GitHub repo."}</p></section>
+    <div class="field"><label class="label" for="jstart">Day 1 of this journey</label><input id="jstart" type="date" class="in box" data-doc="journey-${esc(j.id)}" data-f="start" value="${esc(j.start)}"><span class="muted small">Careful: changing Day 1 moves every day number and streak in this journey.</span></div></section>
+  <section class="card"><div class="card-h"><h2>Backup & move</h2></div><p class="muted small">${Store.mode === "supa" ? "Your journal syncs to your account automatically. Save a copy if you want one of your own." : Store.mode === "cloud" ? "Your journal syncs with your Claude account. Export keeps a copy of your own." : "Your journal is saved on this phone only, in the place you're using now. Move my journal gives you a code to carry it somewhere else, password included."}</p><div class="row"><button class="btn sm" data-act="export">${Store.mode === "local" ? "Move my journal" : "Save a copy"}</button><label class="btn sm" for="importFile">Import a backup</label><input id="importFile" type="file" accept="application/json,.json" hidden></div><div id="exportOut"></div></section>
+  <section class="card"><div class="card-h"><h2>Ideas & requests</h2></div><p class="muted small">${window.claude ? "Want something changed or added? Leave a comment on this page and send it to Claude. Requests get built into the app for both of you." : "Have an idea or something bugging you? Text it to Dalton and it gets built in for both of you."}</p></section>
   ${Store.mode === "supa" && Accounts.list().length ? migrateCard() : ""}
   ${Store.mode === "supa" ? `<div class="row"><button class="btn" data-act="sheet" data-v="pass">Change password</button><button class="btn" data-act="signout">Sign out</button></div>` : Store.mode === "local" ? `<button class="btn" style="align-self:flex-start" data-act="signout">Sign out</button>` : ""}`;
 }
@@ -998,7 +1001,8 @@ const navItems = () => canInk() ? NAV.slice(0, 1).concat([["ink","Ink"]], NAV.sl
 function render(){
   const root = $("#root");
   const scrollY = window.scrollY;
-  const active = document.activeElement && document.activeElement.id;
+  const ae = document.activeElement; const active = ae && ae.id; let caret = null;
+  try { if (ae && /^(INPUT|TEXTAREA)$/.test(ae.tagName) && typeof ae.selectionStart === "number") caret = [ae.selectionStart, ae.selectionEnd]; } catch {}
   Suite.apply();
   const BD = `<div class="backdrop"><div class="sun"></div></div>`;
   const gk = S.gate ? "g" + S.gate.mode : (!profile() || !J()) ? "o" + (S.onboard ? S.onboard.step : 0) : ""; const gEnter = gk !== S.lastGate; S.lastGate = gk;
@@ -1019,17 +1023,21 @@ function render(){
       ${v}
     </div></main>
     <nav class="tabs" style="--tabs:${items.length}">${nav()}</nav>
-  </div>${S.ritual ? ritualView() : ""}${S.cele ? celeView() : ""}${S.sheet ? sheetView() : ""}${S.toast ? `<div class="toast ${S.anim && S.anim.toast ? "anim" : ""}" role="status">${esc(S.toast)}</div>` : ""}`;
+  </div>${S.ritual ? ritualView() : ""}${S.cele ? celeView() : ""}${S.sheet ? sheetView() : ""}`;
   S.anim = {};
   if (S.pop) { const el = document.getElementById(S.pop); if (el) el.classList.add("pop"); S.pop = null; }
   if (S.ritual && RITUALS[S.ritual.kind].steps[S.ritual.step] === "breathe") breathLoop();
   Store.setStatus(Store.status);
   if (S.view === "ink") Ink.mount();
-  if (active) { const el = document.getElementById(active); if (el) el.focus({ preventScroll: true }); }
+  if (active) { const el = document.getElementById(active); if (el) { el.focus({ preventScroll: true }); if (caret) try { el.setSelectionRange(caret[0], caret[1]); } catch {} } }
   window.scrollTo(0, scrollY);
 }
 function celeView(){ const c = S.cele; return `<div class="cele ${S.anim && S.anim.cele ? "anim" : ""}" data-act="celeClose"><div class="cele-card" role="dialog" aria-modal="true" aria-label="${esc(c.title)}">${c.art || ""}${c.num != null ? `<div class="num">${+c.num}</div>` : ""}<h1>${esc(c.title)}</h1><p class="muted">${esc(c.sub || "")}</p><button class="btn primary lg" data-act="celeClose" style="width:100%">Keep going</button></div></div>`; }
-function toast(msg){ S.toast = msg; S.anim = Object.assign(S.anim || {}, { toast: true }); render(); clearTimeout(toast.t); toast.t = setTimeout(() => { S.toast = null; render(); }, 2200); }
+function toast(msg){
+  let el = document.getElementById("toastHost"); if (!el) { el = document.createElement("div"); el.id = "toastHost"; el.className = "toast"; el.setAttribute("role", "status"); el.setAttribute("aria-live", "polite"); document.body.appendChild(el); }
+  el.textContent = msg; el.hidden = false; el.classList.remove("anim"); void el.offsetWidth; el.classList.add("anim");
+  clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 2400);
+}
 
 const bind = (key, path, extra = "") => `data-doc="${esc(key)}" data-f="${esc(path)}" ${extra}`;
 const inp = (id, key, path, val, ph, cls = "in") => `<input id="${id}" class="${cls}" ${bind(key, path)} value="${esc(val)}" placeholder="${esc(ph)}" autocomplete="off">`;
@@ -1234,7 +1242,7 @@ function partnerView(){
       ${(pt.goals || []).map((g, i) => `<div class="field"><div class="row" style="justify-content:space-between"><span><span class="goal-n">GOAL ${i + 1}</span> ${esc(g.title)}</span><span class="mono">${+g.pct || 0}%</span></div>${bar(+g.pct || 0, "good")}</div>`).join("")}
       ${pt.win ? `<div class="quote">${esc(pt.win)}<cite>Shared win</cite></div>` : ""}
       ${me ? `<button class="btn ${iCheered ? "" : "ember"}" style="align-self:flex-start" data-act="cheer" data-id="${esc(pt.id)}" ${iCheered ? "disabled" : ""}>${iCheered ? "Cheer sent" : "Send a cheer"}</button>` : ""}
-    </section>`; }).join("") : `<div class="empty">${Store.mode === "cloud" ? "When your partner opens GreatestMe and turns on sharing, their progress shows up here." : Store.mode === "supa" ? "Link with your partner using an invite code above. Once they turn on sharing, their progress shows up here." : "On this device, partners appear here once a second account turns on sharing."}</div>`;
+    </section>`; }).join("") : `<div class="empty">${Store.mode === "cloud" ? "When your partner opens GreatestMe and turns on sharing, their progress shows up here." : Store.mode === "supa" ? "Link with your partner using an invite code above. Once they turn on sharing, their progress shows up here." : "Partner works once your accounts sync between phones. For now your journal stays on this phone only."}</div>`;
   return `
   <div class="head"><div><span class="label">Accountability, not access</span><h1 class="title-bar" style="margin-top:4px">Partner</h1><p class="sub">Your journal stays private. If you turn sharing on, your partner sees only your streak, habit and target rates, goal titles with progress, and the one win you choose to share.</p></div></div>
   <section class="card"><div class="row" style="justify-content:space-between"><div><h2>Share my progress</h2><p class="muted" style="font-size:.88rem">${p.share ? "Sharing is on." : "Sharing is off. Nothing leaves your journal."}</p></div>
@@ -1265,14 +1273,29 @@ function sheetView(){
 function nextMonday(){ const d = new Date(); const dow = d.getDay(); if (dow !== 1) d.setDate(d.getDate() + ((8 - dow) % 7)); return iso(d); }
 
 /* ---------- Gate (local sign-in) ---------- */
+function placeName(){ const ua = navigator.userAgent; const dev = Device.iPad ? "iPad" : /iPhone/.test(ua) ? "iPhone" : "device";
+  if (Device.standalone) return `the GreatestMe app on your ${dev === "device" ? "Home Screen" : dev + " Home Screen"}`;
+  const b = /CriOS/.test(ua) ? "Chrome" : /FxiOS/.test(ua) ? "Firefox" : /EdgiOS/.test(ua) ? "Edge" : Device.iOS ? "Safari" : "this browser";
+  return b === "this browser" ? "this browser" : `${b} on this ${dev}`; }
+function installHelp(){ const chrome = /CriOS/.test(navigator.userAgent);
+  return `<ol class="small" style="margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px">${chrome
+    ? `<li>Tap the <b>Share</b> button at the top right of the address bar.</li><li>Choose <b>Add to Home Screen</b>, then <b>Add</b>.</li>`
+    : `<li>Tap the <b>Share</b> button (the square with an arrow).</li><li>Scroll and choose <b>Add to Home Screen</b>, then <b>Add</b>.</li>`}<li>Open <b>GreatestMe</b> from your Home Screen and create your account there.</li></ol>`; }
 function gateView(){
   const g = S.gate; const accts = Accounts.list();
-  const where = Device.standalone ? "this Home Screen app" : "this browser";
+  const where = placeName();
+  if (g.mode === "create" && Device.iOS && !Device.standalone && !g.ackHere) return `<div class="gate"><div class="gate-card">
+    <div class="hero-art" style="max-width:170px">${ART.sprout}</div>
+    <span class="label">Before you create your account</span><h1>Put GreatestMe on your Home Screen first.</h1>
+    <p class="muted">Right now your account and journal are kept in one place: wherever you create them. If you make your account here in ${esc(where)}, the Home Screen icon and other browsers won't know about it.</p>
+    <div class="card" style="gap:8px"><b>Add it to your Home Screen</b>${installHelp()}</div>
+    <button class="btn primary lg" data-act="gmode" data-v="signin">Done, I'll open it from my Home Screen</button>
+    <button class="btn ghost sm" data-act="ackHere">Create my account in ${esc(where)} instead</button></div></div>`;
   if (g.mode === "import") return `<div class="gate"><div class="gate-card">
     <div class="row" style="justify-content:space-between"><button class="btn icon ghost" data-act="gmode" data-v="signin" aria-label="Back">${ICON.left}</button><span class="label">Bring my journal here</span><span></span></div>
     <h1>Move your journal into ${where}.</h1>
-    <p class="muted small">On iPhone, Safari, Chrome and the Home Screen app each keep their own separate copy. In the place where your journal lives now, open <b>Settings → Backup → Export my data</b> and copy the transfer code. Then paste it here.</p>
-    <div class="field"><label class="label" for="gcode">Transfer code</label><textarea id="gcode" class="in" placeholder="Paste your transfer code" style="min-height:110px;font-family:var(--f-mono);font-size:13px"></textarea></div>
+    <p class="muted small">On iPhone, Safari, Chrome and the Home Screen app each keep their own separate copy. In the place where your journal lives now, open <b>Settings → Move my journal</b> and copy the move code. Then paste it here.</p>
+    <div class="field"><label class="label" for="gcode">Move code</label><textarea id="gcode" class="in" placeholder="Paste your move code" style="min-height:110px;font-family:var(--f-mono);font-size:13px"></textarea></div>
     <div class="row"><span class="muted small">Or use a saved file:</span><label class="btn sm" for="gfile">Choose file</label><input id="gfile" type="file" accept="application/json,.json,text/plain" hidden></div>
     ${g.err ? `<p class="err" role="alert">${esc(g.err)}</p>` : ""}
     <button class="btn primary lg" data-act="gimport">Bring it over</button>
@@ -1282,13 +1305,13 @@ function gateView(){
     <div class="seg"><button type="button" data-act="gmode" data-v="signin" aria-pressed="${g.mode === "signin"}">Sign in</button><button type="button" data-act="gmode" data-v="create" aria-pressed="${g.mode === "create"}">Create account</button></div>
     ${g.mode === "signin" && accts.length ? `<div class="presets">${accts.map(a => `<button type="button" data-act="pickAcct" data-v="${esc(a.name)}" aria-pressed="${g.name === a.name}">${esc(a.name)}</button>`).join("")}</div>` : ""}
     <div class="field"><label class="label" for="gname">Your name</label><input id="gname" class="in box" value="${esc(g.name || "")}" autocomplete="username" autocapitalize="words" required></div>
-    <div class="field"><label class="label" for="gpass">Passcode</label><input id="gpass" type="password" class="in box" autocomplete="${g.mode === "create" ? "new-password" : "current-password"}" required></div>
-    ${g.mode === "create" ? `<div class="field"><label class="label" for="gpass2">Confirm passcode</label><input id="gpass2" type="password" class="in box" autocomplete="new-password"></div>` : ""}
-    ${g.noacct ? `<div class="card" role="alert" style="gap:10px"><b>No account named ${esc(g.noacct)} in ${where} yet.</b><p class="muted small">On iPhone, Safari, Chrome and the Home Screen app each keep a separate copy of GreatestMe. If you made your account somewhere else, bring it over and your passcode will work here too.</p><div class="row"><button type="button" class="btn primary sm" data-act="gmode" data-v="import">Bring my journal here</button><button type="button" class="btn sm" data-act="gmode" data-v="create">Start fresh here</button></div></div>` : ""}
+    <div class="field"><label class="label" for="gpass">Password</label><input id="gpass" type="password" class="in box" autocomplete="${g.mode === "create" ? "new-password" : "current-password"}" required></div>
+    ${g.mode === "create" ? `<div class="field"><label class="label" for="gpass2">Confirm password</label><input id="gpass2" type="password" class="in box" autocomplete="new-password"></div>` : ""}
+    ${g.noacct ? `<div class="card" role="alert" style="gap:10px"><b>There's no ${esc(g.noacct)} account in ${esc(where)}.</b><p class="muted small">Your password is probably fine. On iPhone, Safari, Chrome and the Home Screen icon each keep their own separate copy of GreatestMe, so your account is in whichever one you used to sign up. Open GreatestMe there, or bring your journal over here.</p><div class="row"><button type="button" class="btn primary sm" data-act="gmode" data-v="import">Bring my journal here</button><button type="button" class="btn sm" data-act="gmode" data-v="create">Start fresh here</button></div></div>` : ""}
     ${g.err ? `<p class="err" role="alert">${esc(g.err)}</p>` : ""}
     <button class="btn primary lg" type="submit">${g.mode === "create" ? "Create my account" : "Sign in"}</button>
     ${g.mode === "signin" && !g.noacct ? `<button type="button" class="btn ghost sm" data-act="gmode" data-v="import">Moving from another browser or device? Bring my journal here</button>` : ""}
-    <p class="muted small">Your journal is saved in ${where}. Use Settings → Backup to move it, or open GreatestMe in Claude to sync across devices.</p>
+    <p class="muted small">${g.mode === "create" ? `Your account will live in <b>${esc(where)}</b>. Always open GreatestMe from the same place.` : `Signing in to the journal kept in <b>${esc(where)}</b>.`}</p>
   </form></div>`;
 }
 
@@ -1297,7 +1320,7 @@ function onboardView(){
   const o = S.onboard || (S.onboard = { step: 0, nick: Store.accountName || "", suite: Suite.current(), start: today(), goals: [{ title: "", why: "" }, { title: "", why: "" }, { title: "", why: "" }], habits: [] });
   const N = 7; const steps = o.step ? `<div class="steps">${Array.from({ length: N - 1 }, (_, i) => `<i class="${i < o.step ? "on" : ""}"></i>`).join("")}</div>` : "";
   let body = "", cta = "Continue";
-  if (o.step === 0) { body = `<div class="hero-art">${ART.welcome}</div><div class="gate-brand">Greatest<b>Me</b></div><h1>Thirteen weeks to the greatest version of you.</h1><p class="muted">Set three goals. Show up every morning and every evening. Watch what ninety-one days of follow-through can do.</p>${Store.mode === "supa" ? migrateCard() : ""}`; cta = Store.mode === "supa" && Accounts.list().length ? "Start a new journal instead" : "Let's begin"; }
+  if (o.step === 0) { body = `<div class="hero-art">${ART.welcome}</div><div class="gate-brand">Greatest<b>Me</b></div><h1>Thirteen weeks to the greatest version of you.</h1><p class="muted">Set three goals. Show up every morning and every evening. Watch what ninety-one days of follow-through can do.</p>${Store.mode === "supa" ? (Accounts.list().length ? migrateCard() : `<p class="muted small">Already wrote in GreatestMe somewhere else on this phone, like Safari? Sign in there with this same account and it will offer to bring that journal in.</p>`) : ""}`; cta = Store.mode === "supa" && Accounts.list().length ? "Start a new journal instead" : "Let's begin"; }
   if (o.step === 1) body = `<span class="label">Step 1 · You</span><h1>First, what should we call you?</h1><input id="onick" class="in box big-in" value="${esc(o.nick)}" autocomplete="given-name" placeholder="Your first name">`;
   if (o.step === 2) body = `<span class="label">Step 2 · Your look</span><h1>Pick your vibe${o.nick ? ", " + esc(o.nick.split(" ")[0]) : ""}.</h1><p class="muted small">You can change it any time in Settings.</p><div class="suites">${Object.keys(SUITES).map(k => `<button class="suite" data-act="osuite" data-v="${k}" aria-pressed="${o.suite === k}"><div class="pv" data-suite="${k}"><span class="t">${esc(SUITES[k].name)}</span><div class="c"><b></b><i></i></div><div class="c"><b style="background:var(--acc2)"></b><i></i></div><span class="p">Today</span></div><span class="nm">${esc(SUITES[k].name)}</span></button>`).join("")}</div>`;
   if (o.step === 3) body = `<span class="label">Step 3 · Day 1</span><h1>When does your journey start?</h1><p class="muted">Thirteen weeks from Day 1. Starting today works. So does a fresh Monday.</p><input id="ostart" type="date" class="in box big-in" value="${esc(o.start)}"><div class="row"><button type="button" class="btn sm" data-act="ostart" data-v="${today()}">Today</button><button type="button" class="btn sm" data-act="ostart" data-v="${nextMonday()}">Next Monday</button></div>`;
@@ -1371,15 +1394,17 @@ async function onClick(e){
     case "inkClear": if (Ink.data) { if (t.dataset.confirm === "1") { const i = Ink.data.pages.length - 1; Ink.snapshot(i); Ink.data.pages[i] = []; Ink.queue(i); render(); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to clear"; t.classList.add("ember"); } } break;
     case "signout": await Store.flush(); if (Store.mode === "supa") { ls.del(mirrorKey()); try { await sb.auth.signOut(); } catch {} } ls.del("gm:session"); location.reload(); break;
     case "migrate": await migrate(); break;
+    case "oauth": { const { error } = await sb.auth.signInWithOAuth({ provider: t.dataset.v, options: { redirectTo: location.href.split("#")[0] } }); if (error) { S.gate.err = supaErr(error); render(); } break; }
     case "pinvite": try { S.inviteCode = await PartnerSupa.invite(); render(); } catch (err) { toast("Couldn't make a code. Check your connection."); } break;
     case "paccept": { const c = ($("#pcode").value || "").trim(); if (!c) break; try { await PartnerSupa.accept(c); S.inviteErr = ""; toast("You're linked. Cheer each other on."); } catch (err) { S.inviteErr = err.message; render(); } break; }
     case "punlink": if (t.dataset.confirm === "1") { await PartnerSupa.unlink(t.dataset.id); toast("Partner removed"); } else { t.dataset.confirm = "1"; t.textContent = "Tap again to remove"; } break;
     case "copyCode": try { await navigator.clipboard.writeText(S.inviteCode); toast("Code copied"); } catch { toast("Code: " + S.inviteCode); } break;
     case "chpass": { const v = $("#newPass").value; if (v.length < 8) { toast("Use at least 8 characters"); break; } const { error } = await sb.auth.updateUser({ password: v }); toast(error ? supaErr(error) : "Password updated"); if (!error) { S.sheet = null; render(); } break; }
+    case "ackHere": S.gate.ackHere = true; render(); break;
     case "gmode": S.gate.mode = t.dataset.v; S.gate.err = ""; if (t.dataset.v !== "signin") S.gate.noacct = ""; render(); break;
-    case "gimport": { const code = ($("#gcode") && $("#gcode").value.trim()) || S.gate.fileText || ""; if (!code) { S.gate.err = "Paste your transfer code or choose a file first."; render(); break; }
+    case "gimport": { const code = ($("#gcode") && $("#gcode").value.trim()) || S.gate.fileText || ""; if (!code) { S.gate.err = "Paste your move code or choose a file first."; render(); break; }
       try { const acct = await importToDevice(code); ls.set("gm:session", { id: acct.id }); S.gate = null; await startLocal(acct); toast(`Welcome back, ${acct.name.split(" ")[0]}`); } catch (err) { S.gate.err = err.message || "That code didn't work."; render(); } break; }
-    case "copyXfer": { const ta = $("#xferOut"); try { await navigator.clipboard.writeText(ta.value); toast("Transfer code copied"); } catch { ta.focus(); ta.select(); toast("Code selected. Tap Copy."); } break; }
+    case "copyXfer": { const ta = $("#xferOut"); try { await navigator.clipboard.writeText(ta.value); toast("Move code copied"); } catch { ta.focus(); ta.select(); toast("Code selected. Tap Copy."); } break; }
     case "saveXfer": { const ta = $("#xferOut"); toast(saveFile(ta.value, `greatestme-${today()}.json`) ? "Saved to your downloads" : "Couldn't save a file here. Copy the code instead."); break; }
     case "pickAcct": S.gate.name = t.dataset.v; render(); $("#gpass").focus(); break;
     case "ostart": $("#ostart").value = t.dataset.v; break;
@@ -1391,7 +1416,7 @@ async function onClick(e){
     case "pref": Prefs.set(t.dataset.v, t.checked); if (t.checked) { t.dataset.v === "sound" ? chime(false) : confetti(undefined, undefined, false); } break;
     case "ritual": S.ritual = { kind: t.dataset.v, step: 0 }; S.snap = snap(); S.anim = { ritual: true, step: true }; render(); break;
     case "rnext": { const R = RITUALS[S.ritual.kind]; S.ritual.step = Math.min(R.steps.length - 1, S.ritual.step + 1); S.anim = { step: true }; render(); const f = document.querySelector(".r-step input,.r-step textarea"); if (f && !Device.iOS) f.focus({ preventScroll: true });
-      if (R.steps[S.ritual.step] === "done") { setTimeout(() => { confetti(undefined, undefined, true); chime(true); buzz(30); }, 250); } break; }
+      if (R.steps[S.ritual.step] === "done" && once("ritual-" + S.ritual.kind)) { setTimeout(() => { confetti(undefined, undefined, true); chime(true); buzz(30); }, 250); } break; }
     case "rback": S.ritual.step = Math.max(0, S.ritual.step - 1); S.anim = { step: true }; render(); break;
     case "rclose": S.ritual = null; clearInterval(breathT); S.view = "today"; S.date = today(); render(); checkWins(); break;
     case "rword": { const k = dayKey(today()); const dd = Store.ensure(k, newDay); dd.intention = t.dataset.v; Store.touch(k); render(); break; }
@@ -1419,10 +1444,10 @@ async function doExport(){
     if (dl) { await dl.save({ filename: name, data }); toast("Backup ready"); return; }
   } catch (e) { if (e && e.code && e.code !== "unavailable") { toast("Backup cancelled"); return; } }
   const out = $("#exportOut");
-  if (out) out.innerHTML = `<p class="muted small">Your transfer code. Copy it, open GreatestMe where you want your journal (another browser, the Home Screen app, another device), choose <b>Bring my journal here</b> on the sign-in screen and paste it.</p><textarea id="xferOut" class="in" readonly style="min-height:96px;font-family:var(--f-mono);font-size:12px">${esc(data)}</textarea><div class="row"><button class="btn sm primary" data-act="copyXfer">Copy transfer code</button>${window.claude ? "" : `<button class="btn sm" data-act="saveXfer">Save as a file</button>`}</div>`;
+  if (out) out.innerHTML = `<p class="muted small">Your move code. Copy it, open GreatestMe where you want your journal (another browser, the Home Screen app, another device), choose <b>Bring my journal here</b> on the sign-in screen and paste it.</p><textarea id="xferOut" class="in" readonly style="min-height:96px;font-family:var(--f-mono);font-size:12px">${esc(data)}</textarea><div class="row"><button class="btn sm primary" data-act="copyXfer">Copy move code</button>${window.claude ? "" : `<button class="btn sm" data-act="saveXfer">Save as a file</button>`}</div>`;
 }
 function saveFile(data, name){ try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); return true; } catch { return false; } }
-function parseBackup(text){ const obj = JSON.parse(text); if (!obj || obj.app !== "GreatestMe" || !obj.docs || typeof obj.docs !== "object") throw new Error("That isn't a GreatestMe transfer code or backup file."); return obj; }
+function parseBackup(text){ const obj = JSON.parse(text); if (!obj || obj.app !== "GreatestMe" || !obj.docs || typeof obj.docs !== "object") throw new Error("That isn't a GreatestMe move code or saved copy."); return obj; }
 const DOC_KEY = /^(profile|journey-[\w-]+|day-[\w-]+|week-[\w-]+)$/;
 async function doImport(file){
   try {
@@ -1459,7 +1484,7 @@ document.addEventListener("submit", async e => {
   const g = S.gate; const name = $("#gname").value, pass = $("#gpass").value; g.name = name;
   try {
     let acct;
-    if (g.mode === "create") { if (pass !== ($("#gpass2").value)) throw new Error("Passcodes don't match."); acct = await Accounts.create(name, pass); }
+    if (g.mode === "create") { if (pass !== ($("#gpass2").value)) throw new Error("Those passwords don't match."); acct = await Accounts.create(name, pass); }
     else acct = await Accounts.signIn(name, pass);
     ls.set("gm:session", { id: acct.id }); await startLocal(acct);
   } catch (err) { if (err.noacct) { g.noacct = name.trim(); g.err = ""; } else { g.noacct = ""; g.err = err.message || "Something went wrong."; } render(); }
@@ -1472,17 +1497,21 @@ function finishOnboard(){
   const jn = createJourney({ title: "Journey 1", start: o.start, goals: o.goals, habits: o.habits });
   Store.docs.profile = { nick: o.nick.trim(), active: jn.id, created: Date.now(), share: false, cheers: {}, suite: o.suite }; Store.touch("profile");
   S.onboard = null; S.view = "today"; S.date = today(); S.snap = snap();
-  celebrate({ art: ART.mountain, title: "Your journey begins", sub: `Day 1 is ${fmtDate(jn.start, { weekday: "long", month: "long", day: "numeric" })}. See you tomorrow morning.` });
+  celebrate({ art: ART.mountain, title: "Your journey begins", sub: jn.start <= today() ? "Day 1 starts now. Your first morning ritual is waiting on Today." : `Day 1 is ${fmtDate(jn.start, { weekday: "long", month: "long", day: "numeric" })}. Everything's ready for you.` });
 }
 let holdT = null;
 document.addEventListener("pointerdown", e => { const b = e.target.closest && e.target.closest("#commitBtn"); if (!b) return; e.preventDefault(); b.classList.add("holding"); buzz(10);
   clearTimeout(holdT); holdT = setTimeout(() => { b.classList.remove("holding"); finishOnboard(); }, 1500); });
-["pointerup", "pointercancel", "pointerleave"].forEach(ev => document.addEventListener(ev, e => { const b = document.getElementById("commitBtn"); if (b && b.classList.contains("holding") && holdT && (ev !== "pointerleave" || e.target === b)) { clearTimeout(holdT); holdT = null; b.classList.remove("holding"); } }, true));
+["pointerup", "pointercancel", "pointerleave"].forEach(ev => document.addEventListener(ev, e => { const b = document.getElementById("commitBtn"); if (b && b.classList.contains("holding") && holdT && (ev !== "pointerleave" || e.target === b)) { clearTimeout(holdT); holdT = null; b.classList.remove("holding"); toast("Keep holding until the ring fills"); } }, true));
 document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#commitBtn") && e.detail === 0) finishOnboard(); });
 
 /* ============================ accounts + sync (Supabase, standalone build) ============================ */
 const CFG = window.GM_CONFIG || {};
-const SUPA_ON = () => !window.claude && !!(CFG.supabaseUrl && CFG.supabaseAnonKey && window.supabase && window.supabase.createClient);
+const SUPA_WANTED = () => !window.claude && !!(CFG.supabaseUrl && CFG.supabaseAnonKey);
+const SUPA_ON = () => SUPA_WANTED() && !!(window.supabase && window.supabase.createClient);
+function loadSupa(){ return new Promise(res => { if (window.supabase && window.supabase.createClient) return res(true);
+  const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"; sc.async = true;
+  const t = setTimeout(() => res(false), 9000); sc.onload = () => { clearTimeout(t); res(!!(window.supabase && window.supabase.createClient)); }; sc.onerror = () => { clearTimeout(t); res(false); }; document.head.appendChild(sc); }); }
 let sb = null;
 const mirrorKey = () => "gm:mirror:" + Store.uid;
 async function sbAll(build){ const out = []; for (let from = 0; ; from += 1000) { const { data, error } = await build().range(from, from + 999); if (error) throw error; out.push(...data); if (data.length < 1000) return out; } }
@@ -1562,9 +1591,13 @@ const PartnerSupa = {
 /* email + password sign-in */
 function supaGateView(){
   const g = S.gate; const nice = { signin: "Welcome back.", create: "Create your account.", forgot: "Reset your password.", newpass: "Choose a new password.", check: "Check your email." }[g.mode];
-  if (g.mode === "check") return `<div class="gate"><div class="gate-card"><div class="hero-art" style="max-width:200px">${ART.welcome}</div><h1>${nice}</h1><p class="muted">We sent a link to <b>${esc(g.email || "your email")}</b>. ${g.reset ? "Tap it to set a new password." : "Tap it to confirm your account, then sign in here."}</p><button class="btn primary lg" data-act="gmode" data-v="signin">Back to sign in</button></div></div>`;
+  if (g.mode === "check") return `<div class="gate"><div class="gate-card"><div class="hero-art" style="max-width:200px">${ART.welcome}</div><h1>${nice}</h1><p class="muted">We sent a link to <b>${esc(g.email || "your email")}</b>. ${g.reset ? "Tap it to set a new password." : "Tap it to confirm your account. If the link opens in Safari, come back to GreatestMe from your Home Screen and sign in here."}</p><button class="btn primary lg" data-act="gmode" data-v="signin">Back to sign in</button></div></div>`;
   return `<div class="gate"><form class="gate-card" id="supaForm" novalidate>
     <div class="hero-art" style="max-width:190px">${ART.welcome}</div><div><div class="gate-brand">Greatest<b>Me</b></div><p class="muted" style="margin-top:8px">${nice} One account for every device.</p></div>
+    ${(g.mode === "signin" || g.mode === "create") && S.providers && (S.providers.apple || S.providers.google) ? `<div style="display:flex;flex-direction:column;gap:10px">
+      ${S.providers.apple ? `<button type="button" class="btn lg oauth apple" data-act="oauth" data-v="apple"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8C6.9 7.3 5.5 8.2 4.7 9.6c-1.6 2.8-.4 6.9 1.2 9.2.8 1.1 1.7 2.3 2.9 2.3 1.2-.1 1.6-.8 3-.8s1.8.8 3 .7c1.3 0 2-1.1 2.8-2.2.9-1.3 1.2-2.5 1.2-2.6 0 0-2.4-.9-2.4-3.6zM14.1 5.6c.6-.8 1.1-1.8 1-2.9-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.8 1 .1 2.1-.5 2.7-1.3z"/></svg>Continue with Apple</button>` : ""}
+      ${S.providers.google ? `<button type="button" class="btn lg oauth" data-act="oauth" data-v="google"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5a5.6 5.6 0 0 1-2.4 3.7v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.9-3c-1.1.7-2.4 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9h-4v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.4 14.4a7.2 7.2 0 0 1 0-4.6V6.7h-4a12 12 0 0 0 0 10.8z"/><path fill="#EA4335" d="M12 4.8c1.7 0 3.3.6 4.5 1.8l3.4-3.4A12 12 0 0 0 1.4 6.7l4 3.1C6.3 6.9 8.9 4.8 12 4.8z"/></svg>Continue with Google</button>` : ""}
+      <div class="row" style="gap:10px;flex-wrap:nowrap"><span style="flex:1;height:1px;background:var(--line)"></span><span class="label">or use email</span><span style="flex:1;height:1px;background:var(--line)"></span></div></div>` : ""}
     ${g.mode === "signin" || g.mode === "create" ? `<div class="seg"><button type="button" data-act="gmode" data-v="signin" aria-pressed="${g.mode === "signin"}">Sign in</button><button type="button" data-act="gmode" data-v="create" aria-pressed="${g.mode === "create"}">Create account</button></div>` : ""}
     ${g.mode !== "newpass" ? `<div class="field"><label class="label" for="semail">Email</label><input id="semail" type="email" class="in box" value="${esc(g.email || "")}" autocomplete="username" autocapitalize="off" spellcheck="false" inputmode="email" required></div>` : ""}
     ${g.mode !== "forgot" ? `<div class="field"><label class="label" for="spass">${g.mode === "newpass" ? "New password" : "Password"}</label><input id="spass" type="password" class="in box" autocomplete="${g.mode === "signin" ? "current-password" : "new-password"}" required minlength="8"></div>` : ""}
@@ -1583,7 +1616,7 @@ function supaErr(e){ const m = (e && e.message) || "";
   if (/fetch|network/i.test(m)) return "Can't reach the server. Check your connection and try again.";
   return m || "Something went wrong. Try again."; }
 async function supaSubmit(){
-  const g = S.gate; const email = ($("#semail") ? $("#semail").value : g.email || "").trim(); const pass = $("#spass") ? $("#spass").value : ""; const pass2 = $("#spass2") ? $("#spass2").value : "";
+  const g = S.gate; const email = ($("#semail") ? $("#semail").value : g.email || "").trim(); const pass = $("#spass") ? $("#spass").value.trim() : ""; const pass2 = $("#spass2") ? $("#spass2").value.trim() : "";
   g.email = email; g.err = ""; g.ok = "";
   if (g.mode !== "newpass" && !/^\S+@\S+\.\S+$/.test(email)) { g.err = "Enter the email you use for GreatestMe."; return render(); }
   if (g.mode !== "forgot" && g.mode !== "signin" && pass.length < 8) { g.err = "Use at least 8 characters for your password."; return render(); }
@@ -1595,7 +1628,7 @@ async function supaSubmit(){
       if (data.session) { g.busy = false; await startSupa(data.user); return; } S.gate = { supa: true, mode: "check", email }; return render(); }
     if (g.mode === "forgot") { const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: here }); if (error) throw error; S.gate = { supa: true, mode: "check", email, reset: true }; return render(); }
     if (g.mode === "newpass") { const { data, error } = await sb.auth.updateUser({ password: pass }); if (error) throw error; g.busy = false; try { history.replaceState(null, "", location.pathname); } catch {} toast("Password updated"); await startSupa(data.user); return; }
-  } catch (e) { g.busy = false; g.err = supaErr(e); render(); }
+  } catch (e) { g.busy = false; g.err = supaErr(e); if (/already registered|already exists/i.test((e && e.message) || "")) g.mode = "signin"; render(); }
 }
 document.addEventListener("submit", e => { if (e.target.id === "supaForm") { e.preventDefault(); supaSubmit(); } });
 
@@ -1616,11 +1649,13 @@ async function migrate(){
 }
 async function startSupa(user){
   if (S.starting || (Store.mode === "supa" && Store.uid === user.id)) return; S.starting = true;
-  Store.mode = "supa"; Store.uid = user.id; Store.accountName = user.email || ""; S.gate = null;
+  Store.mode = "supa"; Store.uid = user.id; Store.accountName = user.email || ""; S.gate = null; ls.set("gm-known", 1);
   await SupaStore.loadAll(); Sync.start(); PartnerSupa.start(); S.starting = false; S.snap = snap();
   render(); routeHash(); updateBadge();
 }
+async function loadProviders(){ try { const r = await fetch(CFG.supabaseUrl.replace(/\/+$/, "") + "/auth/v1/settings", { headers: { apikey: CFG.supabaseAnonKey } }); const j = await r.json(); S.providers = { apple: !!(j.external && j.external.apple), google: !!(j.external && j.external.google) }; if (S.gate && S.gate.supa) render(); } catch {} }
 async function bootSupa(){
+  loadProviders();
   sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "gm-auth" } });
   const recovering = /type=recovery/.test(location.hash);
   sb.auth.onAuthStateChange((ev, session) => {
@@ -1630,7 +1665,7 @@ async function bootSupa(){
   const { data } = await sb.auth.getSession();
   if (recovering) { S.gate = { supa: true, mode: "newpass" }; render(); return; }
   if (data && data.session) await startSupa(data.session.user);
-  else if (!S.gate) { S.gate = { supa: true, mode: Accounts.list().length ? "create" : "signin" }; render(); }
+  else if (!S.gate) { S.gate = { supa: true, mode: ls.get("gm-known") ? "signin" : "create" }; render(); }
 }
 
 /* ============================ boot ============================ */
@@ -1645,9 +1680,14 @@ async function bootLocal(){
   if (acct) await startLocal(acct); else showGate();
 }
 window.addEventListener("hashchange", routeHash);
+if (!window.claude && "serviceWorker" in navigator && /^https?:$/.test(location.protocol)) { try { navigator.serviceWorker.register("sw.js").catch(() => {}); } catch {} }
 async function boot(){
   Theme.apply();
-  if (SUPA_ON()) { try { return await bootSupa(); } catch (e) { console.warn("Account service unavailable, using on-device mode", e); } }
+  if (SUPA_WANTED()) {
+    if (await loadSupa()) { try { return await bootSupa(); } catch (e) { console.warn("Account service unavailable", e); } }
+    $("#root").innerHTML = `<div class="backdrop"><div class="sun"></div></div><div class="gate"><div class="gate-card"><div class="gate-brand">Greatest<b>Me</b></div><h1>Can't reach your account.</h1><p class="muted">Check your connection, then try again. Your journal is safe in your account.</p><button class="btn primary lg" onclick="location.reload()">Try again</button></div></div>`;
+    return;
+  }
   if (!(window.claude && typeof window.claude.use === "function")) return bootLocal();
   try {
     const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);

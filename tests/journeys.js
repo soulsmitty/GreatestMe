@@ -1,0 +1,114 @@
+// Real-user journeys that must pass before GreatestMe deploys.
+// Run: node tests/journeys.js   (after ./build.sh). Exits non-zero on any failure.
+const { chromium, devices } = require('playwright');
+const path = require('path'); const fs = require('fs'); const http = require('http'); const { spawn } = require('child_process');
+const ROOT = path.resolve(__dirname, '..'); const PORT = 8611, FAKE = 8612; const URL = `http://127.0.0.1:${PORT}/index.html`;
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const server = http.createServer((q, r) => { const f = path.join(ROOT, decodeURIComponent(q.url.split('?')[0])); if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.statusCode = 404; return r.end(); } r.setHeader('content-type', TYPES[path.extname(f)] || 'application/octet-stream'); fs.createReadStream(f).pipe(r); }).listen(PORT, '127.0.0.1');
+const EMPTY_CONFIG = 'window.GM_CONFIG = { supabaseUrl: "", supabaseAnonKey: "" };';
+const FAKE_CONFIG = `window.__FAKE_PORT=${FAKE};` + fs.readFileSync(path.join(__dirname, 'fake-supabase-client.js'), 'utf8');
+const fails = []; const errs = [];
+const ok = (cond, msg) => { console.log((cond ? 'PASS ' : 'FAIL ') + msg); if (!cond) fails.push(msg); };
+const PHONE = devices['iPhone 15 Pro'] || devices['iPhone 14 Pro'];
+
+async function page(b, opts, label, mode = 'local'){
+  const ctx = await b.newContext({ ...opts, serviceWorkers: 'block' });
+  await ctx.route(/config\.js$/, r => r.fulfill({ status: 200, contentType: 'text/javascript', body: mode === 'accounts' ? FAKE_CONFIG : EMPTY_CONFIG }));
+  await ctx.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
+  await ctx.route(/fonts\.(googleapis|gstatic)\.com/, r => r.fulfill({ status: 200, body: '' }));
+  const p = await ctx.newPage();
+  p.on('pageerror', e => errs.push(label + ': ' + e.message));
+  await p.goto(URL); await p.waitForTimeout(300); return p;
+}
+async function createAccount(p, name, pass){
+  await p.click('[data-act=gmode][data-v=create]').catch(() => {});
+  if (await p.locator('[data-act=ackHere]').count()) await p.click('[data-act=ackHere]');
+  await p.fill('#gname', name); await p.fill('#gpass', pass); await p.fill('#gpass2', pass); await p.click('button[type=submit]');
+}
+async function onboard(p, nick){
+  await p.waitForSelector('#ob0'); await p.click('[data-act=onext]'); await p.fill('#onick', nick);
+  for (let i = 0; i < 3; i++) await p.click('[data-act=onext]');
+  await p.fill('#og0', 'Run a sub-25 5K by March'); await p.click('[data-act=onext]');
+  await p.click('[data-v="Move 30 min"]'); await p.click('[data-act=onext]');
+  await p.evaluate(() => document.getElementById('commitBtn').click()); await p.waitForSelector('.cele'); await p.click('.cele button');
+}
+const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
+  document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.backdrop,svg,canvas,.fx')) return;
+    if (r.right > W + 1 || r.left < -1) bad.push(el.id || el.className || el.tagName); });
+  return document.documentElement.scrollWidth > W || bad.length ? bad.slice(0, 4).join(', ') || 'page scrolls sideways' : ''; });
+
+(async () => {
+  const b = await chromium.launch(); const PASS = 'Xk9#mQ2v!Lp7';
+
+  // 1. First visit in an iPhone browser: steer to the Home Screen before creating a local account.
+  const A = await page(b, { ...PHONE }, 'safari');
+  ok(await A.locator('[data-act=ackHere]').count() === 1, 'iPhone browser: Home Screen guidance shows before account creation');
+  await createAccount(A, 'Lyllian', PASS); await onboard(A, 'Lyllian');
+  ok(await A.locator('.hero').count() === 1, 'onboarding ends on Today');
+
+  // 2. Daily use: morning ritual, habit check, evening ritual.
+  await A.click('[data-act=ritual][data-v=morning]'); await A.click('[data-act=rnext]'); await A.fill('#rg0', 'My son');
+  for (let i = 0; i < 3; i++) await A.click('[data-act=rnext]'); await A.click('[data-act=rclose]');
+  ok(await A.inputValue('#g0') === 'My son', 'morning ritual saves to Today');
+  const habit = await A.$eval('input.check[id^=h-]', e => e.id); await A.check('#' + habit); await A.waitForTimeout(300);
+  ok(await A.isChecked('#' + habit), 'habit check sticks');
+  await A.click('[data-act=ritual][data-v=evening]'); await A.fill('#rw0', 'Finished the run'); for (let i = 0; i < 4; i++) await A.click('[data-act=rnext]'); await A.click('[data-act=rclose]');
+  ok(await A.inputValue('#w0') === 'Finished the run', 'evening ritual saves to Today');
+  await A.waitForTimeout(900);
+
+  // 3. Same person opens GreatestMe from a different place (separate storage): clear message, not a password error.
+  const B = await page(b, { ...PHONE }, 'homescreen');
+  await B.click('[data-act=gmode][data-v=signin]'); await B.fill('#gname', 'Lyllian'); await B.fill('#gpass', PASS); await B.click('button[type=submit]');
+  const msg = await B.locator('[role=alert]').first().innerText();
+  ok(/no Lyllian account/i.test(msg) && /password is probably fine/i.test(msg), 'other place: explains where the account lives instead of blaming the password');
+
+  // 4. Move the journal over with a transfer code; same passcode works; wrong passcode gets its own message.
+  await A.click('[data-act=nav][data-v=prefs] >> visible=true'); await A.click('[data-act=export]'); const code = await A.inputValue('#xferOut');
+  await B.click('[data-act=gmode][data-v=import] >> nth=0'); await B.fill('#gcode', code); await B.click('[data-act=gimport]'); await B.waitForTimeout(400);
+  ok(await B.inputValue('#g0').catch(() => '') === 'My son', 'transfer code brings the journal over');
+  await B.click('[data-act=nav][data-v=prefs] >> visible=true'); await B.click('[data-act=signout]'); await B.waitForTimeout(400);
+  await B.fill('#gname', 'Lyllian'); await B.fill('#gpass', 'nope'); await B.click('button[type=submit]');
+  ok(/doesn't match/i.test(await B.locator('.err').innerText()), 'wrong passcode gets a clear message');
+  await B.fill('#gpass', PASS); await B.click('button[type=submit]'); await B.waitForTimeout(300);
+  ok(await B.locator('.hero').count() === 1, 'same passcode signs in after the move');
+
+  // 5. Layout: folded, phone, unfolded, iPad × every theme × every screen.
+  for (const [w, h, label] of [[360, 760, 'fold closed'], [393, 852, 'iPhone'], [744, 860, 'fold open'], [834, 1194, 'iPad']]) {
+    for (const suite of ['greatestme', 'synthwave', 'martin', 'studio']) {
+      const p = await page(b, { viewport: { width: w, height: h }, hasTouch: true, isMobile: w < 800, userAgent: PHONE.userAgent }, label + ' ' + suite);
+      await p.evaluate(s => localStorage.setItem('gm-suite', JSON.stringify(s)), suite); await p.reload();
+      await createAccount(p, 'Tester', 'Tester#2026');
+      for (let st = 0; st < 6; st++) { if (st === 1) await p.fill('#onick', 'Tester'); if (st === 4) await p.fill('#og0', 'A goal'); await p.waitForTimeout(60); const o = await overflow(p); ok(!o, `${label} ${suite} onboarding ${st} fits${o ? ' (' + o + ')' : ''}`); await p.click('[data-act=onext]'); }
+      await p.evaluate(() => document.getElementById('commitBtn').click()); await p.click('.cele button');
+      for (const v of ['today', 'week', 'goals', 'habits', 'progress', 'partner', 'prefs']) { await p.click(`[data-act=nav][data-v=${v}] >> visible=true`); await p.waitForTimeout(60); const o = await overflow(p); if (o) ok(false, `${label} ${suite} ${v} fits (${o})`); }
+      await p.context().close();
+    }
+  }
+  // 6. Account mode (email sign-in, sync across places, partner invites) against a stand-in for Supabase.
+  const fake = spawn(process.execPath, [path.join(__dirname, 'fake-supabase-server.js'), String(FAKE)], { stdio: 'ignore' }); await new Promise(r => setTimeout(r, 600));
+  try {
+    const signup = async (p, email, pw) => { await p.click('[data-act=gmode][data-v=create]').catch(() => {}); await p.fill('#semail', email); await p.fill('#spass', pw); await p.fill('#spass2', pw); await p.click('#supaForm button[type=submit]'); await p.waitForTimeout(500); };
+    const signin = async (p, email, pw) => { await p.click('[data-act=gmode][data-v=signin]').catch(() => {}); await p.fill('#semail', email); await p.fill('#spass', pw); await p.click('#supaForm button[type=submit]'); await p.waitForTimeout(700); };
+    const C = await page(b, { ...PHONE }, 'acct-chrome', 'accounts');
+    ok(await C.locator('#supaForm').count() === 1, 'accounts: email sign-in screen shows (no on-device form)');
+    await signup(C, 'd@example.com', PASS + ' '); await onboard(C, 'Dalton'); await C.fill('#g0', 'My son'); await C.locator('#g0').blur(); await C.waitForTimeout(1200);
+    const H = await page(b, { ...PHONE }, 'acct-homescreen', 'accounts');
+    await signin(H, 'd@example.com', 'wrong-password'); ok(/don't match/i.test(await H.locator('.err').innerText()), 'accounts: wrong password gets a clear message');
+    await signin(H, 'd@example.com', PASS); ok(await H.inputValue('#g0').catch(() => '') === 'My son', 'accounts: signing in somewhere else shows the same journal (pasted trailing space ignored)');
+    await H.fill('#w0', 'Hit the gym'); await H.locator('#w0').blur(); await C.waitForTimeout(2600);
+    ok(await C.inputValue('#w0') === 'Hit the gym', 'accounts: changes sync live to the other place');
+    await C.reload(); await C.waitForTimeout(900); ok(await C.locator('.hero').count() === 1, 'accounts: stays signed in after reopening');
+    await C.fill('#g1', 'Health'); await C.evaluate(() => { const e = document.getElementById('g1'); e.setSelectionRange(2, 2); });
+    await C.evaluate(() => window.dispatchEvent(new Event('x'))); await C.keyboard.type('XX'); ok(await C.inputValue('#g1') === 'HeXXalth', 'typing stays in order where the cursor is');
+    const L = await page(b, { ...PHONE }, 'acct-lyllian', 'accounts'); await signup(L, 'l@example.com', 'Purple#2026xx'); await onboard(L, 'Lyllian');
+    await L.click('[data-act=nav][data-v=partner] >> visible=true'); await L.click('[data-act=pinvite]'); await L.waitForTimeout(300);
+    const code = (await L.locator('.mono[style*="letter-spacing"]').innerText()).trim(); await L.click('[data-act=toggleShare]'); await L.waitForTimeout(3000);
+    await C.click('[data-act=nav][data-v=partner] >> visible=true'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
+    ok((await C.locator('.partner h2').allInnerTexts()).includes('Lyllian'), 'accounts: partner invite code links two phones');
+  } finally { fake.kill(); }
+
+  ok(errs.length === 0, 'no script errors' + (errs.length ? ': ' + errs.slice(0, 3).join(' | ') : ''));
+  await b.close(); server.close();
+  console.log(fails.length ? `\n${fails.length} journey check(s) failed.` : '\nAll journeys pass.');
+  process.exit(fails.length ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(1); });

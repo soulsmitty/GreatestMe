@@ -89,3 +89,11 @@ do $$ begin
   begin alter publication supabase_realtime add table public.docs; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.shares; exception when duplicate_object then null; end;
 end $$;
+
+-- Newer Supabase projects don't expose new tables automatically. Signed-in users get exactly
+-- these table permissions; the row-level policies above still decide which rows they can touch.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.docs    to authenticated;
+grant select, insert, update, delete on public.shares  to authenticated;
+grant select                         on public.partner_links to authenticated;
+grant select, insert, delete         on public.invites to authenticated;
