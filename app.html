@@ -109,9 +109,9 @@ body{overflow-wrap:break-word}
 .rail{position:sticky;top:0;height:100vh;height:100dvh;padding:24px 14px calc(18px + env(safe-area-inset-bottom,0px));border-right:var(--border-w) solid var(--line);display:flex;flex-direction:column;gap:22px;background:var(--surface);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
 .brand{font-family:var(--f-display);font-weight:800;font-size:1.3rem;padding:0 10px;letter-spacing:-.02em;text-transform:none;display:flex;align-items:center;gap:8px}
 .brand b{color:var(--acc)}
-.brand .orb{width:26px;height:26px;border-radius:9px;background:conic-gradient(from 210deg,var(--acc),var(--acc2),var(--acc));box-shadow:0 0 18px var(--glow-a)}
+.brand .orb{width:30px;height:30px;border-radius:8px;display:block;flex:none;box-shadow:0 0 18px var(--glow-a)}.brand .orb svg{width:100%;height:100%;display:block}
 :root[data-suite="martin"] .brand{font-weight:400;font-size:1.1rem}
-:root[data-suite="martin"] .brand .orb{border:3px solid #151515;box-shadow:2px 2px 0 #151515;border-radius:8px}
+:root[data-suite="martin"] .brand .orb{box-shadow:2px 2px 0 #151515}
 .nav{display:flex;flex-direction:column;gap:3px}
 .nav button,.tabs button{all:unset;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .nav button{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r-sm);font-weight:600;color:var(--muted);transition:background .2s,color .2s}
@@ -977,14 +977,41 @@ const SUITES = {
   martin:     { name: "Martin",     note: "'90s sitcom colour, loud and proud.", color: "#7B2CBF", modes: false },
   studio:     { name: "Studio",     note: "Quiet and minimal. Light & dark.", color: "#4F46E5", modes: true },
 };
+/*MARK*/
+const MARKS = { // the GM monogram, one look per theme
+  greatestme: { bg: ["#7C3AED", "#5B9CFF"], ink: "#FFFFFF" },
+  synthwave:  { bg: ["#03131D", "#0A2A3A"], ink: ["#2EF2D8", "#FF3EA5"], glow: "#2EF2D8" },
+  martin:     { bg: ["#7B2CBF", "#7B2CBF"], ink: "#FFB703", edge: "#151515" },
+  studio:     { bg: ["#4F46E5", "#0EA5E9"], ink: "#FFFFFF" },
+};
+let markN = 0;
+function markSvg(suite, full){ // full = square, edge to edge (home screen icons get rounded by the phone)
+  const m = MARKS[suite] || MARKS.greatestme, id = "gm" + (++markN), r = full ? 0 : 24;
+  const ink = Array.isArray(m.ink) ? `url(#${id}i)` : m.ink;
+  const letters = `M43 38A17 17 0 1 0 48 50H35M56 67V33L69 52L82 33V67`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="${id}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${m.bg[0]}"/><stop offset="1" stop-color="${m.bg[1]}"/></linearGradient>${Array.isArray(m.ink) ? `<linearGradient id="${id}i" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${m.ink[0]}"/><stop offset="1" stop-color="${m.ink[1]}"/></linearGradient>` : ""}${m.glow ? `<filter id="${id}g" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.4"/></filter>` : ""}</defs>`
+    + `<rect width="100" height="100" rx="${r}" fill="url(#${id}b)"/>`
+    + (m.edge && !full ? `<rect x="3" y="3" width="94" height="94" rx="${r - 2}" fill="none" stroke="${m.edge}" stroke-width="6"/>` : "")
+    + `<g transform="translate(2 0)" fill="none" stroke-linecap="round" stroke-linejoin="round">`
+    + (m.edge ? `<path d="${letters}" stroke="${m.edge}" stroke-width="15"/>` : "")
+    + (m.glow ? `<path d="${letters}" stroke="${m.glow}" stroke-width="10" opacity=".7" filter="url(#${id}g)"/>` : "")
+    + `<path d="${letters}" stroke="${ink}" stroke-width="9"/></g></svg>`;
+}
+/*/MARK*/
 const Suite = {
   current(){ const p = profile(); return (p && SUITES[p.suite] && p.suite) || ls.get("gm-suite") || "greatestme"; },
   apply(name = this.current()){
     if (!SUITES[name]) name = "greatestme";
     document.documentElement.setAttribute("data-suite", name); ls.set("gm-suite", name);
     const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", name === "synthwave" ? "#03131D" : name === "martin" ? "#FFF1D6" : name === "studio" ? "#F2F4F7" : "#0D0820");
+    setIcons(name);
   },
 };
+function setIcons(name){ // the tab icon and the home screen icon follow the theme
+  const head = document.head, link = (rel, attrs) => { let el = head.querySelector(`link[rel="${rel}"]`); if (!el) { el = document.createElement("link"); el.rel = rel; head.appendChild(el); } Object.assign(el, attrs); return el; };
+  link("icon", { type: "image/svg+xml", href: "data:image/svg+xml," + encodeURIComponent(markSvg(name)) });
+  if (location.protocol.startsWith("http")) { link("apple-touch-icon", { href: `icon-180-${name}.png` }); link("manifest", { href: `manifest-${name}.webmanifest` }); }
+}
 function applyAccent(){ Suite.apply(); }
 const Prefs = {
   get(){ return Object.assign({ sound: false, confetti: true }, ls.get("gm-prefs") || {}); },
@@ -1508,11 +1535,11 @@ function render(){
   const items = navItems(); const nav = () => items.map(([k, l]) => `<button data-act="nav" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${ICON[k]}<span>${l}</span></button>`).join("");
   const p = profile();
   root.innerHTML = `${BD}<div class="app">
-    <aside class="rail"><button class="brand" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button><nav class="nav">${nav()}</nav>
+    <aside class="rail"><button class="brand" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true">${markSvg(Suite.current())}</span><span>Greatest<b>Me</b></span></button><nav class="nav">${nav()}</nav>
       <div class="rail-foot">${GUIDES[S.view] ? `<button class="btn sm ghost" style="justify-content:flex-start" data-act="guide" data-v="${S.view}"><span class="qdot">?</span> How this page works</button>` : ""}<div id="savestate" class="save" style="padding:0 8px"></div>
       <button class="me" data-act="nav" data-v="prefs" aria-label="Settings" ${S.view === "prefs" ? 'aria-current="page"' : ""}><span class="avatar sm">${esc((p.nick || "?").trim().charAt(0))}</span><span style="flex:1;min-width:0"><b style="display:block">${esc(p.nick || "")}</b><span class="muted small">Settings</span></span>${ICON.gear.replace("<svg", '<svg width="18" height="18"')}</button></div></aside>
     <main class="main"><div class="col ${entering ? "enter" : ""}">
-      <div class="mtop"><button class="brand" style="padding:0" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true"></span><span>Greatest<b>Me</b></span></button>${GUIDES[S.view] ? `<button class="btn icon ghost qbtn" aria-label="How this page works" data-act="guide" data-v="${S.view}">?</button>` : ""}<button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear.replace("<svg", '<svg width="22" height="22"')}</button></div>
+      <div class="mtop"><button class="brand" style="padding:0" data-act="nav" data-v="today" aria-label="GreatestMe, go to Today"><span class="orb" aria-hidden="true">${markSvg(Suite.current())}</span><span>Greatest<b>Me</b></span></button>${GUIDES[S.view] ? `<button class="btn icon ghost qbtn" aria-label="How this page works" data-act="guide" data-v="${S.view}">?</button>` : ""}<button class="btn icon ghost" aria-label="Settings" data-act="nav" data-v="prefs">${ICON.gear.replace("<svg", '<svg width="22" height="22"')}</button></div>
       ${v}
     </div></main>
     <nav class="tabs" style="--tabs:${items.length}">${nav()}</nav>
