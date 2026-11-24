@@ -23,20 +23,16 @@ opt-in Partner board for accountability.
 
 ## Experience
 
-- **Onboarding:** welcome, your name, pick your look, Day 1, goals, habits, then press-and-hold to commit.
-- **Calendar:** month view with mini progress rings, mood and habits per day, Day 1 and Day 91 markers, swipe between months; a 13-week heat map with milestone flags (overdue in amber) and weekly scores; tap any day for its summary.
-- **Settings:** look, Partner, sounds and celebrations, handwriting, Siri and Shortcuts, journeys, backup, Help (replay the tour, show tips again).
-- **First-run tour** (five steps, replayable) and dismissible tips. Tap the logo to return to Today.
-- **Sync:** edits from two devices at the same moment are merged field by field, never overwritten.
-- **Today:** time-of-day greeting and scene, three progress rings (morning, targets, evening), streak flame, this week's check-ins.
-- **Guided rituals:** Morning (one-minute breathing, gratitude, intention, three targets) and Evening (wins, lessons, tomorrow, mood and energy), one prompt per screen.
-- **Celebrations:** confetti and a soft chime for targets, all habits done, a full page, milestones and streaks (3, 7, 14, 21, 30, 45, 60, 75, 91 days). Both can be turned off in Settings.
-- **Theme suites (Settings → Look, follows your account):** GreatestMe (house purple, light/dark), Synthwave (neon grid), Martin ('90s sitcom colour-blocking), Studio (minimal, light/dark).
-- **iPhone:** floating tab bar, 16px inputs (no iOS zoom), safe areas, Home Screen badge.
-- **iPhone Duo (foldable):** fluid layouts for the folded outer screen and the near-square inner screen, two-column cards when unfolded, rows that re-flow per card width, Ink available on the inner screen.
-- **iOS Safari hardening:** date fields that stay in their box, no inner shadows, no sticky hover after a tap, overlays animate once.
-- **iPad + Apple Pencil:** Ink tab with college-ruled, wide-ruled, dot, graph or blank paper; pressure, palm rejection, highlighter, eraser, undo/redo, multiple pages. Scribble works in every text field.
-- **Siri & Shortcuts:** deep links (`#today`, `#morning`, `#evening`, `#habits`, `#week`, `#ink`, `#progress`, `#partner`, `#preferences`) for Open URLs shortcuts and time-of-day automations.
+- **Onboarding:** welcome, your name, pick your look, Day 1 (Today / Next Monday / any date), goals, habits, reminder times (added to your iPhone Calendar as real alerts), then press-and-hold to commit. A five-step tour follows; replay it from Settings → Help.
+- **Today, top to bottom:** greeting with three progress rings (morning, targets, evening) and your streak; the Morning and Evening guided rituals; a **Smart Stack** of highlights (quote, streak, habits left, water, a past win, mindful minutes; swipe up/down, turns every 8 seconds, pauses while you touch it); collapsible **Morning, Targets, Habits, Evening** sections that show done / partly done / not started and open the next thing you need; the **Calendar**, folded to this week (tap a day to see it) and unfolding to Month and 13-week views.
+- **Guided rituals:** one prompt per screen. Morning: one-minute breathing (saved as mindful minutes), gratitude, intention, three targets. Evening: wins, lessons, tomorrow, mood and energy.
+- **Celebrations and badges:** confetti for checked targets and habits; full-screen moments for a complete day (all three rings closed), streak milestones and the journey start, once each per day; 13 badges arrive as a small banner. Sound is off until you turn it on.
+- **Week, Goals, Habits, Progress:** weekly plan and review, goals with milestones by week, habit streaks and heatmaps, journey stats, badges, mindful minutes, quarterly review.
+- **Settings:** profile, Look (four themes), Reminders, Partner, Help, and More settings (feel, water goal, Siri & Shortcuts links, journeys, backup and move, ideas).
+- **Themes (follow your account):** GreatestMe (house purple, light/dark), Synthwave (electric teal and neon pink over the grid), Martin ('90s sitcom colour-blocking), Studio (minimal, light/dark).
+- **Accounts and sync:** email or Google sign-in (Supabase). Live sync across devices; saves only overwrite the version they last saw, otherwise the other device's changes are merged in field by field. Unsynced edits survive reloads and offline use.
+- **iPhone, iPhone Duo, iPad:** floating tab bar, safe areas, 16px inputs (no zoom), layouts for the Duo's folded and unfolded screens, Ink handwriting pages with Apple Pencil on iPad, offline Home Screen app that updates itself when online.
+- **Apple-only features** (notifications, Siri/App Intents, HealthKit, widgets, Watch) are kept out of the web app and specified in `docs/NATIVE_APP.md`.
 
 ## Accounts that work on every device (Supabase)
 
