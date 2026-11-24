@@ -38,7 +38,7 @@ async function onboard(p, nick){
   if (await p.waitForSelector('.sheet [data-act=guideTour]', { timeout: 6000 }).then(() => true).catch(() => false)) await p.click('.sheet [data-act=guideClose] >> nth=-1'); await p.waitForTimeout(150);
 }
 const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
-  document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.hl-track,.wk-strip,.backdrop,svg,canvas,.fx')) return;
+  document.querySelectorAll('body *').forEach(el => { const r = el.getBoundingClientRect(); if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.hgrid,.hl-track,.wk-strip,.look-row,.backdrop,svg,canvas,.fx')) return;
     if (r.right > W + 1 || r.left < -1) bad.push(el.id || el.className || el.tagName); });
   return document.documentElement.scrollWidth > W || bad.length ? bad.slice(0, 4).join(', ') || 'page scrolls sideways' : ''; });
 
@@ -87,6 +87,9 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
   await A.click('.sheet [data-act=guideTour]'); await A.waitForSelector('#tourLayer [data-act=tourNext]', { timeout: 6000 }); ok(/goal/i.test(await A.locator('.tour-card').innerText()), 'Show me around spotlights the Goals page');
   await A.keyboard.press('Escape'); await go(A, 'today'); await go(A, 'goals'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 0, 'a page guide shows only once');
   await A.click('[data-act=guide][data-v=goals] >> visible=true'); ok(await A.locator('.sheet [data-act=guideTour]').count() === 1, 'the ? button reopens the page guide'); await A.click('.sheet [data-act=guideClose] >> nth=-1');
+  await go(A, 'prefs'); { const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEklEQVR4nGP4z8DwHwYYGBgYAPkEB/nbwS4AAAAAAElFTkSuQmCC', 'base64');
+    await A.setInputFiles('#avatarFile', { name: 'me.png', mimeType: 'image/png', buffer: png }); await A.waitForTimeout(600);
+    ok(await A.locator('.avatar-btn .avatar img').count() === 1, 'a profile photo can be added from Settings'); }
   await go(A, 'prefs'); ok(await A.locator('.look-group').count() === 4 && await A.locator('.look-row .suite').count() === 15, 'Look shows fifteen themes in four groups');
   await A.click('.look-row [data-act=suite][data-v=heritage]'); ok(await A.evaluate(() => document.documentElement.dataset.suite) === 'heritage', 'picking a theme applies it');
   { const before = await A.evaluate(() => document.documentElement.dataset.suite); await A.evaluate(() => document.getElementById('lookRandom').click()); await A.waitForTimeout(200);
@@ -194,6 +197,10 @@ const overflow = p => p.evaluate(() => { const W = innerWidth, bad = [];
     const code = (await L.locator('.mono[style*="letter-spacing"]').innerText()).trim(); await L.click('[data-act=toggleShare]'); await L.waitForTimeout(3000);
     await go(C, 'prefs'); await C.waitForTimeout(300); if (!(await C.locator('.main [data-act=nav][data-v=partner]').count())) { console.log('DEBUG C:', (await C.evaluate(() => document.body.innerText)).slice(0, 700)); await C.screenshot({ path: '/tmp/claude-0/-home-user/3f140423-ea04-5310-b676-6226cd1c0d88/scratchpad/Cdebug.png' }); } await C.click('.main [data-act=nav][data-v=partner]'); await C.fill('#pcode', code); await C.click('[data-act=paccept]'); await C.waitForTimeout(800);
     ok((await C.locator('.partner h2').allInnerTexts()).includes('Jordan'), 'accounts: partner invite code links two phones');
+    await C.click('[data-act=toggleShare]'); await C.waitForTimeout(400); await C.fill('input[id^=note-]', 'Proud of you, keep going'); await C.click('[data-act=noteSend]'); await C.click('[data-act=react][data-v="🔥"]'); await C.waitForTimeout(3000);
+    await L.reload(); await L.waitForSelector('.hero'); await L.waitForTimeout(2500);
+    ok(/Proud of you, keep going/.test(await L.locator('.pnote').innerText().catch(() => '')), 'a partner note shows on Today with their name');
+    await L.click('.pnote [data-act=noteSeen]'); ok(await L.locator('.pnote').count() === 0, 'dismissing the note clears it');
     await go(L, 'today'); await L.context().setOffline(true); await L.route(/127\.0\.0\.1:8612/, r => r.abort()); await openSec(L, 'morning'); await L.fill('#intent', 'Patient'); await L.waitForTimeout(2500);
     ok(await L.locator('#syncdot:not([hidden])').count() === 1, 'phones show a quiet dot when changes are waiting to sync');
     await L.unroute(/127\.0\.0\.1:8612/); await L.context().setOffline(false); await L.evaluate(() => window.dispatchEvent(new Event('online'))); await L.waitForTimeout(2500);

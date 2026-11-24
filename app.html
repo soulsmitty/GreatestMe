@@ -407,6 +407,17 @@ details.sched summary::-webkit-details-marker{display:none}
 .partner{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
 .avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--on-acc);font-size:1.15rem;flex:none;text-transform:uppercase}
 .avatar.sm{width:34px;height:34px;font-size:.9rem}
+.avatar{overflow:hidden;position:relative}.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar-btn{all:unset;cursor:pointer;position:relative;border-radius:50%;flex:none}.avatar-btn:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.avatar-btn .cam{position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--solid);border:var(--border-w) solid var(--line);font-size:.7rem;box-shadow:var(--shadow-card)}
+.avatar.lg{width:64px;height:64px;font-size:1.5rem}
+.p-ring{--p:0%;padding:3px;border-radius:50%;background:conic-gradient(var(--good) var(--p),var(--line) 0);flex:none}.p-ring .avatar{border:2px solid var(--solid)}
+.pnote{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 14px}
+.pnote .txt{min-width:0}.pnote .txt b{display:block;font-size:.85rem}.pnote .txt p{margin:2px 0 0;overflow-wrap:anywhere}
+.pnote .acts{display:flex;gap:6px;align-items:center}
+.react-row{display:flex;gap:8px;flex-wrap:wrap}.react-row button{all:unset;cursor:pointer;min-width:44px;min-height:40px;display:grid;place-items:center;border-radius:12px;border:var(--border-w) solid var(--line);background:var(--raised);font-size:1.2rem}
+.react-row button[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft)}
+.note-from{border-left:3px solid var(--acc2);padding:6px 0 6px 12px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--canvas);padding:10px 18px;border-radius:14px;font-weight:700;z-index:60;font-size:.9rem;box-shadow:var(--shadow-lift)}
 .syncdot{border:0;background:none;min-width:36px;min-height:44px;display:grid;place-items:center;cursor:pointer;margin-left:auto}.syncdot i{width:9px;height:9px;border-radius:50%;background:var(--muted)}.syncdot.warn i{background:#F59E0B}.syncdot[hidden]{display:none}
 .toast.anim{animation:toast .35s cubic-bezier(.3,1.4,.5,1)}
@@ -924,6 +935,22 @@ function createJourney({ title, start, goals, habits }){
 }
 
 /* ============================ Partner (opt-in accountability sharing) ============================ */
+const avatarHtml = (src, name, cls = "") => `<div class="avatar ${cls}" aria-hidden="true">${src && /^data:image\/(jpeg|png|webp);base64,/.test(src) ? `<img src="${src}" alt="">` : esc(((name || "?").trim().charAt(0) || "?").toUpperCase())}</div>`;
+async function makeAvatar(file){ // square, 256px, small JPEG kept in the profile so it syncs and can be shared
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); });
+  const sz = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement("canvas"); c.width = c.height = 256;
+  c.getContext("2d").drawImage(img, (img.naturalWidth - sz) / 2, (img.naturalHeight - sz) / 2, sz, sz, 0, 0, 256, 256); URL.revokeObjectURL(img.src);
+  return c.toDataURL("image/jpeg", .82);
+}
+const REACTS = ["🔥", "👏", "💜", "💪"];
+function partnerNotes(){ // notes and reactions partners left for me that I haven't dismissed
+  const seen = ls.get("gm-notes-seen") || {};
+  return (S.partners || []).map(pt => ({ pt, n: pt.notes && pt.notes[Store.uid] })).filter(x => x.n && x.n.at && x.n.at > (seen[x.pt.id] || 0) && Date.now() - x.n.at < 864e5 * 7);
+}
+function noteBanner(){
+  return partnerNotes().map(({ pt, n }) => `<section class="card pnote" role="status">${avatarHtml(pt.avatar, pt.nick, "sm")}<div class="txt"><b>${esc(pt.nick || "Your partner")}${n.r && !n.t ? ` reacted ${esc(n.r)}` : ""}</b>${n.t ? `<p>${esc(n.t)}${n.r ? " " + esc(n.r) : ""}</p>` : ""}</div>
+    <div class="acts"><button class="btn sm" data-act="noteReply" data-id="${esc(pt.id)}">Reply</button><button class="btn icon ghost" aria-label="Dismiss" data-act="noteSeen" data-id="${esc(pt.id)}">${ICON.x}</button></div></section>`).join("");
+}
 const Partner = {
   t: null, unsub: null,
   publishSoon(){ clearTimeout(this.t); this.t = setTimeout(() => this.publish(), 2500); },
@@ -933,7 +960,7 @@ const Partner = {
     return { nick: p.nick || "", day: st.day, streak: st.streak, habitPct: st.habitPct, targetPct: st.targetPct,
       todayScore: dayScore(dd), habitsToday: dd ? j.habits.filter(h => dd.habits[h.id]).length : 0, habitsTotal: j.habits.length,
       win: (p.sharedWin || "").slice(0, 200), goals: j.goals.map(g => ({ title: g.title.slice(0, 80), pct: g.milestones.length ? Math.round(g.milestones.filter(m => m.done).length / g.milestones.length * 100) : 0 })),
-      cheers: p.cheers || {}, updated: Date.now() };
+      cheers: p.cheers || {}, avatar: p.avatar || "", notes: p.notes || {}, updated: Date.now() };
   },
   async publish(){
     const s = this.summary(); const p = profile(); if (!p) return;
@@ -1356,7 +1383,7 @@ function prefsView(){
   return `
   <div class="head"><div><span class="label">Make it yours</span><h1 class="title-bar" style="margin-top:4px">Settings</h1></div></div>
   ${Store.mode === "supa" ? tip("settings", "Your look follows your account to every device. Sounds and celebrations are set per phone.") : ""}
-  <section class="card"><div class="row" style="gap:14px;flex-wrap:nowrap"><div class="avatar">${esc((p.nick || "?").trim().charAt(0))}</div><div style="min-width:0;flex:1"><input id="nick" class="in" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" aria-label="Your name" style="font-weight:700;font-size:1.1rem"><p class="muted small">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you." : Store.mode === "supa" ? `Signed in as ${esc(Store.accountName)}. Your journal syncs to every device you sign in on.` : `On-device account: ${esc(Store.accountName)}. Entries stay in this browser.`}</p></div></div></section>
+  <section class="card"><div class="row" style="gap:14px;flex-wrap:nowrap"><button class="avatar-btn" data-act="avatarPick" aria-label="${p.avatar ? "Change your photo" : "Add a photo"}">${avatarHtml(p.avatar, p.nick, "lg")}<span class="cam" aria-hidden="true">📷</span></button><input type="file" id="avatarFile" accept="image/*" hidden><div style="min-width:0;flex:1"><input id="nick" class="in" data-doc="profile" data-f="nick" value="${esc(p.nick || "")}" aria-label="Your name" style="font-weight:700;font-size:1.1rem"><p class="muted small">${Store.mode === "cloud" ? "Signed in with your Claude account. Your journal is private to you." : Store.mode === "supa" ? `Signed in as ${esc(Store.accountName)}. Your journal syncs to every device you sign in on.` : `On-device account: ${esc(Store.accountName)}. Entries stay in this browser.`}</p>${p.avatar ? `<button class="btn sm ghost" style="padding-left:0" data-act="avatarRemove">Remove photo</button>` : ""}</div></div></section>
   <section class="card"><div class="card-h"><h2>Look</h2><span class="label">Saved to you</span></div>
     ${lookPicker(p.suiteRandom ? "" : cur, "suite")}
     <p class="muted small">${p.suiteRandom ? `Now showing <b>${esc(SUITES[cur].name)}</b>. ` : ""}${esc(SUITES[cur].note)}</p>
@@ -1859,6 +1886,7 @@ function todayView(){
   ${isToday ? `<div class="rituals">
     <button class="ritual-card ${mDone ? "done" : ""}" data-act="ritual" data-v="morning">${ART.sunrise.replace("<svg", '<svg class="art"')}<span class="st">${mDone ? "✓ Done" : "3 min · guided"}</span><h2>Morning ritual</h2><span class="small" style="max-width:60%">Breathe, gratitude, intention, targets</span></button>
     <button class="ritual-card ${eDone ? "done" : ""}" data-act="ritual" data-v="evening">${ART.night.replace("<svg", '<svg class="art"')}<span class="st">${eDone ? "✓ Done" : "3 min · guided"}</span><h2>Evening ritual</h2><span class="small" style="max-width:60%">Wins, lessons, tomorrow, check-in</span></button></div>` : ""}
+  ${isToday ? noteBanner() : ""}
   ${highlights(d, j)}
   ${!inJ && n >= 1 ? `<div class="card"><p>This date is outside your current 13-week journey. Start a new journey in <b>Settings</b> when you're ready for the next one.</p></div>` : ""}
   ${(() => { const stt = todayStatus(dd, j), op = autoOpen(stt);
@@ -2025,13 +2053,16 @@ function partnerView(){
   const p = profile(); const me = Partner.summary();
   const partnerName = pt => (S.profiles[pt.id] && S.profiles[pt.id].name) || pt.nick || "Your partner";
   const cards = S.partners.length ? S.partners.map(pt => { const name = partnerName(pt); const cheeredMe = pt.cheers && pt.cheers[Store.uid] && Date.now() - pt.cheers[Store.uid] < 864e5 * 2; const iCheered = p.cheers && p.cheers[pt.id] && Date.now() - p.cheers[pt.id] < 6e4 * 60 * 12; return `
-    <section class="card"><div class="partner"><div class="avatar" aria-hidden="true">${esc(name.trim().charAt(0).toUpperCase() || "?")}</div>
+    <section class="card"><div class="partner"><div class="p-ring" style="--p:${Math.max(0, Math.min(100, +pt.todayScore || 0))}%" title="Today's page ${+pt.todayScore || 0}%">${avatarHtml(pt.avatar, name, "lg")}</div>
       <div><h2>${esc(name)}</h2><p class="muted" style="font-size:.85rem">Day ${+pt.day || 0} of ${TOTAL_DAYS} · updated ${esc(new Date(pt.updated || 0).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }))}</p></div></div>
       ${cheeredMe ? `<span class="chip ember" style="align-self:flex-start">${esc(name)} cheered you on</span>` : ""}
       <div class="grid3"><div class="stat"><span class="label">Streak</span><span class="v">${+pt.streak || 0}</span></div><div class="stat"><span class="label">Habits today</span><span class="v">${+pt.habitsToday || 0}<small>/${+pt.habitsTotal || 0}</small></span></div><div class="stat"><span class="label">Today's page</span><span class="v">${+pt.todayScore || 0}<small>%</small></span></div></div>
       ${(pt.goals || []).map((g, i) => `<div class="field"><div class="row" style="justify-content:space-between"><span><span class="goal-n">GOAL ${i + 1}</span> ${esc(g.title)}</span><span class="mono">${+g.pct || 0}%</span></div>${bar(+g.pct || 0, "good")}</div>`).join("")}
+      ${pt.notes && pt.notes[Store.uid] && (pt.notes[Store.uid].t || pt.notes[Store.uid].r) ? `<div class="note-from"><span class="label">${esc(name)} to you</span><p style="margin:4px 0 0">${esc(pt.notes[Store.uid].t || "")} ${esc(pt.notes[Store.uid].r || "")}</p></div>` : ""}
       ${pt.win ? `<div class="quote">${esc(pt.win)}<cite>Shared win</cite></div>` : ""}
-      ${me ? `<button class="btn ${iCheered ? "" : "ember"}" style="align-self:flex-start" data-act="cheer" data-id="${esc(pt.id)}" ${iCheered ? "disabled" : ""}>${iCheered ? "Cheer sent" : "Send a cheer"}</button>` : ""}
+      ${me ? `<div class="field"><span class="label">React${pt.win ? " to their win" : ""}</span><div class="react-row">${REACTS.map(r => `<button data-act="react" data-id="${esc(pt.id)}" data-v="${r}" aria-pressed="${!!(p.notes && p.notes[pt.id] && p.notes[pt.id].r === r)}" aria-label="React ${r}">${r}</button>`).join("")}</div></div>
+      <div class="field"><label class="label" for="note-${esc(pt.id)}">Leave ${esc(name)} a note</label><div class="row" style="flex-wrap:nowrap"><input id="note-${esc(pt.id)}" class="in box" maxlength="140" placeholder="Proud of you. Keep going." autocomplete="off" value="${esc((p.notes && p.notes[pt.id] && p.notes[pt.id].t) || "")}"><button class="btn sm primary" data-act="noteSend" data-id="${esc(pt.id)}">Send</button></div><p class="muted small">They'll see it on their Today page. One note at a time; a new one replaces the last.</p></div>
+      <button class="btn ${iCheered ? "" : "ember"}" style="align-self:flex-start" data-act="cheer" data-id="${esc(pt.id)}" ${iCheered ? "disabled" : ""}>${iCheered ? "Cheer sent" : "Send a cheer"}</button>` : `<p class="muted small">Turn on sharing above to send notes, reactions and cheers.</p>`}
     </section>`; }).join("") : `<div class="empty">${Store.mode === "cloud" ? "When your partner opens GreatestMe and turns on sharing, their progress shows up here." : Store.mode === "supa" ? "Link with your partner using an invite code above. Once they turn on sharing, their progress shows up here." : "Partner works once your accounts sync between phones. For now your journal stays on this phone only."}</div>`;
   return `
   <button class="back" data-act="nav" data-v="prefs">${ICON.left} Settings</button>
@@ -2175,6 +2206,12 @@ async function onClick(e){
     case "presetHabit": addHabit(t.dataset.v); break;
     case "delHabit": { const i = j.habits.findIndex(h => h.id === t.dataset.h); if (i >= 0) removeWithUndo(j.habits, i, "journey-" + j.id, "Habit"); break; }
     case "toggleShare": { const p = profile(); p.share = !p.share; Store.touch("profile"); render(); Partner.publish(); toast(p.share ? "Sharing turned on" : "Sharing turned off"); break; }
+    case "avatarPick": { const f = document.getElementById("avatarFile"); f && f.click(); break; }
+    case "avatarRemove": { const p = profile(); delete p.avatar; Store.touch("profile"); Partner.publishSoon(); render(); toast("Photo removed"); break; }
+    case "react": { const p = profile(); p.notes = p.notes || {}; const cur = p.notes[t.dataset.id] || {}; const r = cur.r === t.dataset.v ? "" : t.dataset.v; p.notes[t.dataset.id] = { t: cur.t || "", r, at: Date.now() }; Store.touch("profile"); await Partner.publish(); buzz(8); render(); if (r) toast(`Sent ${r}`); break; }
+    case "noteSend": { const el = document.getElementById("note-" + t.dataset.id); const txt = (el && el.value || "").trim().slice(0, 140); const p = profile(); p.notes = p.notes || {}; const cur = p.notes[t.dataset.id] || {}; p.notes[t.dataset.id] = { t: txt, r: cur.r || "", at: Date.now() }; Store.touch("profile"); await Partner.publish(); chime(false); render(); toast(txt ? "Note sent" : "Note cleared"); break; }
+    case "noteSeen": { const seen = ls.get("gm-notes-seen") || {}; seen[t.dataset.id] = Date.now(); ls.set("gm-notes-seen", seen); render(); break; }
+    case "noteReply": { const seen = ls.get("gm-notes-seen") || {}; seen[t.dataset.id] = Date.now(); ls.set("gm-notes-seen", seen); S.view = "partner"; try { history.replaceState(null, "", "#partner"); } catch {} window.scrollTo(0, 0); render(); setTimeout(() => { const el = document.getElementById("note-" + t.dataset.id); el && el.focus(); }, 80); break; }
     case "cheer": { const p = profile(); p.cheers = p.cheers || {}; p.cheers[t.dataset.id] = Date.now(); Store.touch("profile"); await Partner.publish(); toast("Cheer sent"); break; }
     case "sheet": S.sheet = t.dataset.v; render(); break;
     case "close": case "closebg": if (S.sheet === "guide") markGuide(S.guideFor); if (S.sheet === "day") S.refocus = `[data-act=dayOpen][data-v="${S.sheetDate}"]`; S.sheet = null; render(); break;
@@ -2303,6 +2340,7 @@ async function importToDevice(text){
 }
 
 document.addEventListener("input", onInput);
+document.addEventListener("change", async e => { if (e.target.id !== "avatarFile" || !e.target.files[0]) return; try { const p = profile(); p.avatar = await makeAvatar(e.target.files[0]); Store.touch("profile"); Partner.publishSoon(); render(); toast("Photo updated"); } catch { toast("Couldn't use that photo. Try another."); } });
 document.addEventListener("change", e => { if (e.target.type === "date") { if (e.target.id === "ostart") { captureOnboard(); } render(); return; } });
 document.addEventListener("toggle", e => { if (e.target.classList && e.target.classList.contains("more")) S.moreOpen = e.target.open; }, true);
 document.addEventListener("change", e => { if (e.target.dataset && e.target.dataset.doc && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== "checkbox" && !S.ritual) { checkWins(e.target); if (S.view === "today") softRender(); } });
